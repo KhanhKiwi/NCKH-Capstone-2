@@ -1,9 +1,10 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import styles from "./Screen1.module.css";
 import { useGameState } from "./useGameState";
 import FarmerNPC from "./FarmerNPC";
 import SpeechBubble from "./SpeechBubble";
 import SedgePlant from "./SedgePlant";
+import Phase3Plant from "./Phase3Plant";
 import HUD from "./HUD";
 import HintPanel from "./HintPanel";
 import ScorePop from "./ScorePop";
@@ -40,97 +41,184 @@ export default function Screen1() {
     resetGame,
   } = useGameState();
 
+  // Sickle position tracking with useRef (not state)
+  const sicklePosRef = useRef({ x: 0, y: 0 });
+  const sickleElRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number>(0);
+
+  // Phase 3 drag state
   const [draggingId, setDraggingId] = useState<string | null>(null);
-  const [dragPos, setDragPos] = useState({ x: 0, y: 0 });
-  const [isSickleHeld, setIsSickleHeld] = useState(false);
-  const [sicklePos, setSicklePos] = useState({ x: 0, y: 0 });
-  const [hoveredPlantId, setHoveredPlantId] = useState<string | null>(null);
+  const [isDragOverRope, setIsDragOverRope] = useState(false);
+  const [isDragWrong, setIsDragWrong] = useState(false);
+  const ghostRef = useRef<HTMLDivElement>(null);
+  const draggingIdRef = useRef<string | null>(null);
+
+  // Only use useState for display state (showing/hiding)
+  const [sickleHeld, setSickleHeld] = useState(false);
+
+  // Global mousemove and mouseup handlers for sickle drag
+  useEffect(() => {
+    if (!sickleHeld) return;
+
+    const handleMove = (e: MouseEvent) => {
+      // Update sickle position via DOM directly (no setState)
+      sicklePosRef.current = { x: e.clientX, y: e.clientY };
+      if (sickleElRef.current) {
+        sickleElRef.current.style.left = e.clientX - 25 + "px";
+        sickleElRef.current.style.top = e.clientY - 55 + "px";
+      }
+
+      // Throttle plant overlap check with requestAnimationFrame
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(() => {
+        const plantEls = document.querySelectorAll("[data-plant-id]");
+        let found: string | null = null;
+        plantEls.forEach((el) => {
+          // Only check standing plants
+          const plant = el as HTMLElement;
+          // Skip if it's a cut plant (fixed position)
+          if (plant.style.pointerEvents === "none") return;
+
+          const r = el.getBoundingClientRect();
+          const cx = r.left + r.width / 2;
+          const cy = r.top + r.height / 2;
+          const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
+          if (dist < 35) found = el.getAttribute("data-plant-id");
+        });
+
+        if (found) {
+          // Highlight the plant
+          const plantEl = document.querySelector(`[data-plant-id="${found}"]`);
+          if (plantEl) {
+            plantEl.classList.add("hover-highlight");
+          }
+        } else {
+          // Remove highlights
+          document.querySelectorAll("[data-plant-id]").forEach((el) => {
+            el.classList.remove("hover-highlight");
+          });
+        }
+      });
+    };
+
+    const handleUp = (e: MouseEvent) => {
+      cancelAnimationFrame(rafRef.current);
+
+      // Check for cut on plant
+      const plantEls = document.querySelectorAll("[data-plant-id]");
+      let found: string | null = null;
+      plantEls.forEach((el) => {
+        const r = el.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
+        if (dist < 35) found = el.getAttribute("data-plant-id");
+      });
+
+      setSickleHeld(false);
+      if (found) {
+        cutPlant(found, e.clientX, e.clientY);
+      }
+
+      // Clean up highlights
+      document.querySelectorAll("[data-plant-id]").forEach((el) => {
+        el.classList.remove("hover-highlight");
+      });
+    };
+
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleUp);
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, [sickleHeld, cutPlant]);
 
   const handleDragStart = useCallback(
-    (id: string, e: React.MouseEvent<HTMLDivElement>) => {
-      if (state.phase !== 3) return;
+    (id: string, startX: number, startY: number) => {
+      draggingIdRef.current = id;
       setDraggingId(id);
-      setDragPos({ x: e.clientX, y: e.clientY });
+      if (ghostRef.current) {
+        ghostRef.current.style.display = "block";
+        ghostRef.current.style.left = startX - 22 + "px";
+        ghostRef.current.style.top = startY - 22 + "px";
+      }
     },
-    [state.phase],
+    [],
   );
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!draggingId && !isSickleHeld) return;
-      if (draggingId) setDragPos({ x: e.clientX, y: e.clientY });
-      if (isSickleHeld) {
-        setSicklePos({ x: e.clientX, y: e.clientY });
-        // Check for plant collisions
-        let hoveredId: string | null = null;
-        state.plants.forEach((plant) => {
-          if (plant.state === "standing" && state.phase === 2) {
-            const plantEl = document.getElementById(`plant-${plant.id}`);
-            if (plantEl) {
-              const rect = plantEl.getBoundingClientRect();
-              const sickleX = e.clientX;
-              const sickleY = e.clientY;
-              // Check if sickle is within plant bounds (with some tolerance)
-              if (
-                sickleX >= rect.left - 30 &&
-                sickleX <= rect.right + 30 &&
-                sickleY >= rect.top - 30 &&
-                sickleY <= rect.bottom + 30
-              ) {
-                hoveredId = plant.id;
-              }
-            }
-          }
-        });
-        setHoveredPlantId(hoveredId);
-      }
-    },
-    [draggingId, isSickleHeld, state],
-  );
+  // Drag event listeners for phase 3
+  useEffect(() => {
+    if (!draggingId) return;
 
-  const handleMouseUp = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (draggingId) {
-        const basket = document.getElementById("basket-drop-zone");
-        if (basket) {
-          const r = basket.getBoundingClientRect();
-          if (
-            e.clientX >= r.left &&
-            e.clientX <= r.right &&
-            e.clientY >= r.top &&
-            e.clientY <= r.bottom
-          ) {
-            collectPlant(draggingId, e.clientX, e.clientY);
-          }
-        }
-        setDraggingId(null);
+    const onMove = (e: MouseEvent) => {
+      // Move ghost via DOM directly (no setState = no jitter)
+      if (ghostRef.current) {
+        ghostRef.current.style.left = e.clientX - 22 + "px";
+        ghostRef.current.style.top = e.clientY - 22 + "px";
       }
-      if (isSickleHeld) {
-        setIsSickleHeld(false);
-        setSicklePos({ x: 0, y: 0 });
-        // Cut the hovered plant if any
-        if (hoveredPlantId) {
-          cutPlant(hoveredPlantId, sicklePos.x, sicklePos.y);
-        }
-        setHoveredPlantId(null);
+      // Check basket overlap with hit area
+      const basketEl = document.getElementById("basket-drop-zone");
+      if (basketEl) {
+        const r = basketEl.getBoundingClientRect();
+        // Basket is on RIGHT side: centered hit area with buffer
+        const over =
+          e.clientX >= r.left - 30 &&
+          e.clientX <= r.right + 30 &&
+          e.clientY >= r.top - 30 &&
+          e.clientY <= r.bottom + 30;
+        setIsDragOverRope(over);
+
+        const plant = state.plants.find((p) => p.id === draggingIdRef.current);
+        const wrong =
+          !plant ||
+          plant.type !== "mature" ||
+          !!plant.isWrong ||
+          plant.state !== "cut";
+        setIsDragWrong(wrong);
       }
-    },
-    [
-      draggingId,
-      isSickleHeld,
-      hoveredPlantId,
-      sicklePos,
-      collectPlant,
-      cutPlant,
-    ],
-  );
+    };
+
+    const onUp = (e: MouseEvent) => {
+      // Hide ghost
+      if (ghostRef.current) {
+        ghostRef.current.style.display = "none";
+      }
+      // Check drop on basket
+      const basketEl = document.getElementById("basket-drop-zone");
+      if (basketEl && draggingIdRef.current) {
+        const r = basketEl.getBoundingClientRect();
+        // Basket is on RIGHT side: centered hit area
+        const over =
+          e.clientX >= r.left - 30 &&
+          e.clientX <= r.right + 30 &&
+          e.clientY >= r.top - 30 &&
+          e.clientY <= r.bottom + 30;
+        if (over) {
+          collectPlant(draggingIdRef.current, e.clientX, e.clientY);
+        }
+      }
+      draggingIdRef.current = null;
+      setDraggingId(null);
+      setIsDragOverRope(false);
+      setIsDragWrong(false);
+    };
+
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, [draggingId, state.plants, collectPlant]);
 
   const handleSickleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (state.phase !== 2) return;
       e.preventDefault();
-      setIsSickleHeld(true);
-      setSicklePos({ x: e.clientX, y: e.clientY });
+      setSickleHeld(true);
     },
     [state.phase],
   );
@@ -142,18 +230,13 @@ export default function Screen1() {
     score,
     selectedIds,
     cutIds,
-    collectedCount,
     farmerMood,
     bubbleText,
     showHint,
   } = state;
 
   return (
-    <div
-      className={styles.root}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-    >
+    <div className={styles.root}>
       {/* Background */}
       <img
         key={`bg${phase}`}
@@ -221,19 +304,68 @@ export default function Screen1() {
       {phase === 2 && (
         <div className={styles.scene}>
           <FarmerNPC mood={farmerMood} />
-          <SpeechBubble text={bubbleText} visible />
+          <SpeechBubble
+            text="Hold my sickle and drag to the glowing plants! 🌾 Cut the marked ones!"
+            visible
+          />
 
-          {/* SICKLE */}
-          <div
-            className={styles.sickleContainer}
-            onMouseDown={handleSickleMouseDown}
-          >
-            <svg
-              className={styles.sickleSVG}
-              width="90"
-              height="90"
-              viewBox="0 0 90 90"
+          {/* SICKLE at rest (when NOT held) */}
+          {!sickleHeld && (
+            <div
+              className={styles.sickleContainer}
+              onMouseDown={handleSickleMouseDown}
             >
+              <svg
+                className={styles.sickleSVG}
+                width="90"
+                height="90"
+                viewBox="0 0 90 90"
+              >
+                {/* Handle */}
+                <rect
+                  x="38"
+                  y="40"
+                  width="14"
+                  height="48"
+                  rx="6"
+                  fill="#8D6E63"
+                  stroke="#5D4037"
+                  strokeWidth="2"
+                />
+                {/* Blade */}
+                <path
+                  d="M45,42 Q78,20 80,5 Q60,15 38,38"
+                  fill="#CFD8DC"
+                  stroke="#546E7A"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                {/* Blade shine */}
+                <path
+                  d="M48,38 Q72,22 74,10"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="1"
+                  opacity="0.6"
+                />
+              </svg>
+              <div className={styles.sickleLabel}>Hold & drag to cut!</div>
+            </div>
+          )}
+
+          {/* Sickle at cursor when HELD - always in DOM but hidden */}
+          <div
+            ref={sickleElRef}
+            style={{
+              display: sickleHeld ? "block" : "none",
+              position: "fixed",
+              pointerEvents: "none",
+              zIndex: 200,
+              left: sickleHeld ? sicklePosRef.current.x - 25 + "px" : "0px",
+              top: sickleHeld ? sicklePosRef.current.y - 55 + "px" : "0px",
+            }}
+          >
+            <svg width="90" height="90" viewBox="0 0 90 90">
               {/* Handle */}
               <rect
                 x="38"
@@ -262,63 +394,16 @@ export default function Screen1() {
                 opacity="0.6"
               />
             </svg>
-            <div className={styles.sickleLabel}>Hold to cut!</div>
           </div>
 
-          {/* Sickle ghost when held */}
-          {isSickleHeld && (
-            <svg
-              className={styles.sickleGhost}
-              width="90"
-              height="90"
-              viewBox="0 0 90 90"
-              style={{
-                top: sicklePos.y - 45,
-                left: sicklePos.x - 45,
-              }}
-            >
-              {/* Handle */}
-              <rect
-                x="38"
-                y="40"
-                width="14"
-                height="48"
-                rx="6"
-                fill="#8D6E63"
-                stroke="#5D4037"
-                strokeWidth="2"
-                opacity="0.7"
-              />
-              {/* Blade */}
-              <path
-                d="M45,42 Q78,20 80,5 Q60,15 38,38"
-                fill="#CFD8DC"
-                stroke="#546E7A"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                opacity="0.7"
-              />
-              {/* Blade shine */}
-              <path
-                d="M48,38 Q72,22 74,10"
-                fill="none"
-                stroke="white"
-                strokeWidth="1"
-                opacity="0.4"
-              />
-            </svg>
-          )}
-
-          <div className={styles.sickleHint}>
-            ✂️ Select the mature ✓ plants first, then cut them!
-          </div>
+          {/* All plants in phase 2 */}
           {plants.map((p) =>
             p.state !== "collected" ? (
               <SedgePlant
                 key={p.id}
                 plant={p}
                 phase={phase}
-                onClick={cutPlant}
+                onClick={selectPlant}
               />
             ) : null,
           )}
@@ -341,25 +426,40 @@ export default function Screen1() {
         <div className={styles.scene}>
           <FarmerNPC mood={farmerMood} />
           <SpeechBubble text={bubbleText} visible />
-          {plants
-            .filter((p) => p.state === "cut")
+
+          {/* ALL cut plants lying on ground */}
+          {state.plants
+            .filter(
+              (p) =>
+                p.state === "cut" ||
+                p.state === "standing" ||
+                p.state === "selected",
+            )
             .map((p) => (
-              <SedgePlant
+              <Phase3Plant
                 key={p.id}
                 plant={p}
-                phase={phase}
                 onDragStart={handleDragStart}
+                isDragging={draggingId === p.id}
               />
             ))}
-          <Basket count={collectedCount} isHighlight={!!draggingId} />
+
+          {/* Basket drop zone */}
+          <Basket
+            count={state.collectedCount}
+            isDragOver={isDragOverRope}
+            isDragOverWrong={isDragWrong}
+          />
+
+          {/* Progress */}
           <div className={styles.progressWrap}>
             <div className={styles.progressLabel}>
-              Collected: {collectedCount}/5 🧺
+              Bundle: {state.collectedCount}/5 🌾
             </div>
             <div className={styles.progressTrack}>
               <div
                 className={styles.progressFill}
-                style={{ width: `${(collectedCount / 5) * 100}%` }}
+                style={{ width: `${(state.collectedCount / 5) * 100}%` }}
               />
             </div>
           </div>
@@ -451,25 +551,26 @@ export default function Screen1() {
         </div>
       )}
 
-      {/* Drag ghost */}
-      {draggingId && (
-        <div
-          style={{
-            position: "fixed",
-            left: dragPos.x - 16,
-            top: dragPos.y - 32,
-            pointerEvents: "none",
-            zIndex: 300,
-            fontSize: 32,
-            transform: "rotate(-20deg) scale(1.15)",
-          }}
-        >
-          🌿
-        </div>
-      )}
-
       {/* Score pops */}
       <ScorePop pops={state.scorePops} />
+
+      {/* Drag ghost div - place OUTSIDE all scene divs */}
+      <div
+        ref={ghostRef}
+        style={{
+          display: "none",
+          position: "fixed",
+          pointerEvents: "none",
+          zIndex: 500,
+          fontSize: 36,
+          userSelect: "none",
+          filter: isDragWrong
+            ? "drop-shadow(0 0 10px #EF5350)"
+            : "drop-shadow(0 0 10px #00E676)",
+        }}
+      >
+        🌿
+      </div>
     </div>
   );
 }

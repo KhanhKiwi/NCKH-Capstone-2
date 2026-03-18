@@ -605,6 +605,43 @@
   box-shadow: 0 4px 0 #e65100;
 }
 
+.sickleFloat {
+  position: absolute;
+  cursor: grab;
+  animation: sicklePulse 1.5s ease-in-out infinite;
+  transition: filter 0.2s;
+  user-select: none;
+}
+.sickleCursor {
+  position: fixed;
+  pointer-events: none;
+  z-index: 200;
+  transform: rotate(-20deg);
+  filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5));
+}
+.ropeBundle {
+  position: absolute;
+  bottom: 3%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 8;
+  text-align: center;
+  transition: filter 0.2s, transform 0.2s;
+}
+.ropeBundleGlow {
+  filter: drop-shadow(0 0 16px #FFD54F) !important;
+  transform: translateX(-50%) scale(1.08) !important;
+}
+.ropeBundleRed {
+  filter: drop-shadow(0 0 12px #EF5350) !important;
+}
+.plantFalling {
+  animation: plantFall 0.5s ease-in forwards !important;
+}
+.fallenPlant {
+  transform: translateX(-50%) rotate(90deg) translateY(45px) !important;
+}
+
 /* ── KEYFRAMES ── */
 @keyframes fadeScene {
   from {
@@ -761,26 +798,53 @@
 /* Plant fall animation */
 @keyframes plantFall {
   0% {
-    transform: translateX(-50%) rotate(0deg);
+    transform: translateX(-50%) rotate(0deg) translateY(0);
   }
-  60% {
-    transform: translateX(-50%) rotate(75deg) translateY(25px);
+  40% {
+    transform: translateX(-50%) rotate(55deg) translateY(18px);
   }
   100% {
-    transform: translateX(-50%) rotate(90deg) translateY(40px);
+    transform: translateX(-50%) rotate(90deg) translateY(45px);
   }
 }
 
-/* Bundle grow */
+.bundleBody {
+  display: block;
+  margin: 0 auto;
+  margin-bottom: -4px;
+}
+
+/* Override bundleGrow to work as inline style */
 @keyframes bundleGrow {
-  0% {
-    transform: scale(0.8);
+  0%   { transform: scale(0.72); opacity: 0.7; }
+  55%  { transform: scale(1.16); }
+  100% { transform: scale(1.0);  opacity: 1; }
+}
+
+/* Rope shake rejection */
+@keyframes ropeShake {
+  0%,
+  100% {
+    transform: translateX(-50%) rotate(0deg);
   }
-  60% {
-    transform: scale(1.15);
+  25% {
+    transform: translateX(-50%) rotate(-4deg);
+  }
+  75% {
+    transform: translateX(-50%) rotate(4deg);
+  }
+}
+
+/* Plant bounce back */
+@keyframes plantBounce {
+  0% {
+    transform: translateX(var(--bx)) translateY(var(--by));
+  }
+  50% {
+    transform: translateX(calc(var(--bx) * 0.4)) translateY(calc(var(--by) * 0.4));
   }
   100% {
-    transform: scale(1);
+    transform: translateX(0) translateY(0);
   }
 }
 
@@ -788,11 +852,10 @@
 @keyframes sicklePulse {
   0%,
   100% {
-    filter: drop-shadow(0 0 6px #ffd54f);
+    filter: drop-shadow(0 0 6px #ffd54f) drop-shadow(0 0 2px #ffd54f);
   }
   50% {
-    filter: drop-shadow(0 0 18px #ffd54f)
-      drop-shadow(0 0 30px rgba(255, 213, 79, 0.4));
+    filter: drop-shadow(0 0 20px #ffd54f) drop-shadow(0 0 8px rgba(255, 213, 79, 0.6));
   }
 }
 

@@ -11,6 +11,7 @@ export interface Plant {
   yPercent: number;
   isWrong?: boolean;
   swayDuration: number;
+  plantHeight?: number;
 }
 
 export interface ScorePopItem {

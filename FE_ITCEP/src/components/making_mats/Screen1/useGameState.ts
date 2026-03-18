@@ -2,48 +2,70 @@ import { useState, useCallback, useRef } from "react";
 import type { GameState, Plant, PlantType } from "./game.types";
 
 function makePlants(): Plant[] {
-  // Fixed x positions spread across entire screen width: 5,12,19,27,35,43,51,59,67,74,81,88,93,97
-  const xPositions = [5, 12, 19, 27, 35, 43, 51, 59, 67, 74, 81, 88, 93, 97];
-  // Mix of y positions for depth perception
-  const yPositions = [50, 55, 58, 62, 65, 68, 72, 75];
   const plants: Plant[] = [];
 
-  // 8 MATURE plants
-  for (let i = 0; i < 8; i++) {
+  // Generate 14 plants with random scattered positions
+  const plantTypes: Array<{ id: string; type: "mature" | "young" | "wilted" }> =
+    [
+      // 8 MATURE plants
+      ...[0, 1, 2, 3, 4, 5, 6, 7].map((i) => ({
+        id: `m${i}`,
+        type: "mature" as const,
+      })),
+      // 4 YOUNG plants
+      ...[0, 1, 2, 3].map((i) => ({ id: `y${i}`, type: "young" as const })),
+      // 2 WILTED plants
+      ...[0, 1].map((i) => ({ id: `w${i}`, type: "wilted" as const })),
+    ];
+
+  for (const plantDef of plantTypes) {
+    let xPercent = 0;
+    let yPercent = 0;
+    let attempts = 0;
+    let valid = false;
+
+    // Generate position with minimum distance check
+    while (!valid && attempts < 15) {
+      xPercent = 4 + Math.random() * 90; // 4 to 94
+      yPercent = 42 + Math.random() * 26; // 42 to 68
+
+      // Check minimum distance from existing plants
+      valid = plants.every((p) => {
+        const xDist = Math.abs(p.xPercent - xPercent);
+        const yDist = Math.abs(p.yPercent - yPercent);
+        return !(xDist < 7 && yDist < 5);
+      });
+
+      attempts++;
+    }
+
+    // Plant sizes for visual variety
+    let height = 100;
+    let sway = 1600;
+    if (plantDef.type === "mature") {
+      height = 95 + Math.random() * 20; // 95-115px
+      sway = 1600 + Math.random() * 900;
+    } else if (plantDef.type === "young") {
+      height = 45 + Math.random() * 13; // 45-58px
+      sway = 1400 + Math.random() * 700;
+    } else {
+      // wilted
+      height = 55 + Math.random() * 15; // 55-70px
+      sway = 2000 + Math.random() * 500;
+    }
+
     plants.push({
-      id: `m${i}`,
-      type: "mature",
+      id: plantDef.id,
+      type: plantDef.type,
       state: "standing",
-      xPercent: xPositions[i],
-      yPercent: yPositions[i % yPositions.length],
+      xPercent,
+      yPercent,
       isWrong: false,
-      swayDuration: 1600 + Math.random() * 900,
+      swayDuration: sway,
+      plantHeight: height,
     });
   }
-  // 4 YOUNG plants
-  for (let i = 0; i < 4; i++) {
-    plants.push({
-      id: `y${i}`,
-      type: "young",
-      state: "standing",
-      xPercent: xPositions[8 + i],
-      yPercent: yPositions[(i + 1) % yPositions.length],
-      isWrong: false,
-      swayDuration: 1400 + Math.random() * 700,
-    });
-  }
-  // 2 WILTED plants
-  for (let i = 0; i < 2; i++) {
-    plants.push({
-      id: `w${i}`,
-      type: "wilted",
-      state: "standing",
-      xPercent: xPositions[12 + i],
-      yPercent: yPositions[(i + 3) % yPositions.length],
-      isWrong: false,
-      swayDuration: 2000 + Math.random() * 500,
-    });
-  }
+
   return plants;
 }
 
@@ -51,18 +73,19 @@ function makeDecoys(existing: Plant[]): Plant[] {
   const usedX = existing.map((p) => p.xPercent);
   const types: PlantType[] = ["young", "wilted", "young"];
   return types.map((type, i) => {
-    let x = 5 + Math.random() * 82;
+    let x = 25 + Math.random() * 70; // right side only
     let tries = 0;
-    while (usedX.some((u) => Math.abs(u - x) < 7) && tries < 30) {
-      x = 5 + Math.random() * 82;
+    while (usedX.some((u) => Math.abs(u - x) < 8) && tries < 20) {
+      x = 25 + Math.random() * 70;
       tries++;
     }
+    usedX.push(x);
     return {
       id: `decoy${i}`,
       type,
       state: "cut" as const,
       xPercent: x,
-      yPercent: 70 + Math.random() * 8,
+      yPercent: 68 + Math.random() * 10,
       isWrong: true,
       swayDuration: 1800,
     };
@@ -186,6 +209,7 @@ export function useGameState() {
         if (!plant || plant.state === "cut" || plant.state === "collected")
           return s;
 
+        // Allow cutting ANY standing plant, not just selected ones
         const isCorrect = plant.state === "selected";
         const updatedPlants = s.plants.map((p) =>
           p.id === id
@@ -203,8 +227,7 @@ export function useGameState() {
                 phase: 3,
                 plants: [...prev.plants, ...makeDecoys(prev.plants)],
                 farmerMood: "talking",
-                bubbleText:
-                  "Now drag the DARK GREEN plants into the basket! 🧺",
+                bubbleText: "Drag the fallen GREEN plants to the basket! 🌾",
               }));
             }, 1600);
           }
@@ -225,7 +248,7 @@ export function useGameState() {
             stars: Math.max(1, s.stars - 1),
             penalties: s.penalties + 1,
             farmerMood: "sad",
-            bubbleText: "That was a young plant! Be careful! 😬",
+            bubbleText: "Wrong plant! Only cut the marked ones! 😬",
           };
         }
       });
@@ -240,7 +263,10 @@ export function useGameState() {
         const plant = s.plants.find((p) => p.id === id);
         if (!plant || plant.state === "collected") return s;
 
-        const isCorrect = plant.type === "mature" && !plant.isWrong;
+        // Correct: must be mature, not wrong, and already cut (fallen)
+        const isCorrect =
+          plant.type === "mature" && !plant.isWrong && plant.state === "cut";
+
         if (isCorrect) {
           const updatedPlants = s.plants.map((p) =>
             p.id === id ? { ...p, state: "collected" as const } : p,
@@ -274,7 +300,7 @@ export function useGameState() {
             stars: Math.max(1, s.stars - 1),
             penalties: s.penalties + 1,
             farmerMood: "sad",
-            bubbleText: "That one is no good! Only dark green ones! ❌",
+            bubbleText: "Wrong bundle! Only dark green plants! ❌",
           };
         }
       });
