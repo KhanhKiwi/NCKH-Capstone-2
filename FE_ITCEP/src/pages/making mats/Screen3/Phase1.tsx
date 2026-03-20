@@ -15,9 +15,11 @@ import TopPanel from '../../../components/making_mats/Screen3/Phase1/TopPanel'
 import CenterHint from '../../../components/making_mats/Screen3/Phase1/CenterHint'
 import BoardCanvas from '../../../components/making_mats/Screen3/Phase1/BoardCanvas'
 import Controls from '../../../components/making_mats/Screen3/Phase1/Controls'
-import Overlay from '../../../components/making_mats/Screen3/Phase1/Overlay'
+
+import Phase2 from './Phase2'
 
 export default function Game(){
+  const [showPhase2, setShowPhase2] = useState(false)
   const [started, setStarted] = useState(false);
   const [showRequireStart, setShowRequireStart] = useState(false);
   // Hide the start message after 5s
@@ -166,16 +168,22 @@ export default function Game(){
   const progress = Math.min(100, Math.round((slicesMade / SLICES_NEEDED) * 100));
 
   return (
-    <div className="screen1 board-root">
+    showPhase2 ? <Phase2 onExit={() => setShowPhase2(false)} /> : (
+    <div className="screen1 board-root page-wrap">
       <TopPanel progress={progress} secondsLeft={secondsLeft} />
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <CenterHint />
           <button
             className="start-btn"
-            style={{ padding: '12px 32px', borderRadius: 28, background: started ? '#eaffef' : 'linear-gradient(90deg,#bff3c9,#eaffef)', color: '#125b44', fontWeight: 700, border: 'none', fontSize: 18, boxShadow: '0 2px 8px #bff3c966', cursor: (started && !gameOver) ? 'not-allowed' : 'pointer', opacity: (started && !gameOver) ? 0.6 : 1, transition: 'all 0.2s' }}
-            disabled={started && !gameOver}
+            style={{ background: started ? 'linear-gradient(180deg,#fff7ee,#fff0df)' : 'linear-gradient(90deg,#bff3c9,#eaffef)', color: '#125b44', boxShadow: '0 2px 8px #bff3c966', cursor: (started && !gameOver && !win) ? 'not-allowed' : 'pointer', opacity: (started && !gameOver && !win) ? 0.6 : 1, transition: 'all 0.2s' }}
+            disabled={started && !gameOver && !win}
             onClick={() => {
+              if (win) {
+                // go to phase 2
+                setShowPhase2(true)
+                return
+              }
               if (gameOver) {
                 restart();
                 setStarted(true);
@@ -185,7 +193,7 @@ export default function Game(){
                 setShowRequireStart(false);
               }
             }}
-          >Bắt đầu</button>
+          >{win ? 'Giai đoạn tiếp theo' : 'Bắt đầu'}</button>
         </div>
       </div>
       <div style={{ position: 'relative', width: 'fit-content', margin: '0 auto', marginTop: 8 }}>
@@ -215,5 +223,6 @@ export default function Game(){
       </div>
       <Controls />
     </div>
+    )
   )
 }

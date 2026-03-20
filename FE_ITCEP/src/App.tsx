@@ -1,14 +1,19 @@
-import Phase1 from '../src/pages/making mats/Screen3/Phase1'
-
-
+import { BrowserRouter, Routes, Route  } from 'react-router-dom'
+import Phase1 from './pages/making mats/Screen3/Phase1'
+import Phase2 from './pages/making mats/Screen3/Phase2'
 import './App.css'
 import '../src/styles/Screen3/Phase1/game.css'
 
 function App() {
   return (
-    <div className="app-root">
-      <Phase1 />
-    </div>
+    <BrowserRouter>
+      <div className="app-root">
+        <Routes>
+          <Route path="/" element={<Phase1 />} />
+          <Route path="/phase2" element={<Phase2 />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
   )
 }
 
