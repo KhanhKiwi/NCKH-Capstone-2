@@ -1,27 +1,53 @@
-
 import React, { useState } from "react";
 
+// Định nghĩa Interface chuẩn để hết lỗi "any"
 interface BoardCanvasProps {
+  pieces?: { 
+    seg: { type: string; w: number }; 
+    left: number; 
+    idx: number 
+  }[]; 
+  trackRef?: React.RefObject<HTMLDivElement | null>;
+  moverRef?: React.RefObject<HTMLDivElement | null>;
+  bladeRef?: React.RefObject<HTMLDivElement | null>;
+  bladeUp?: boolean;
+  onKnifeClick?: () => void;
+
   onSplit?: (count: number) => void;
   started?: boolean;
   onRequireStart?: () => void;
   gameOver?: boolean;
 }
 
-const BoardCanvas: React.FC<BoardCanvasProps> = ({ onSplit, started = true, onRequireStart = () => {}, gameOver = false }) => {
+const BoardCanvas: React.FC<BoardCanvasProps> = ({ 
+  onSplit, 
+  started = true, 
+  onRequireStart = () => {}, 
+  gameOver = false,
+  onKnifeClick
+}) => {
   const [split, setSplit] = useState(false);
-  const [count, setCount] = useState(0);
+  
+  // Đã xóa biến 'count' bị lỗi unused ở đây
 
   const handleKnifeClick = () => {
-    if (!started) { onRequireStart(); return; }
-    if (split) return; // Only allow click when plank is merged
-    if (gameOver) return; // Disable click when game over
+    if (!started) { 
+      onRequireStart(); 
+      return; 
+    }
+    if (split) return; 
+    if (gameOver) return; 
+
     setSplit(true);
-    setCount((c) => {
-      const newCount = c + 1;
-      if (onSplit) onSplit(newCount);
-      return newCount;
-    });
+
+    // Thay vì dùng state count, ta dùng một biến cục bộ hoặc logic từ cha
+    // Nếu bạn cần gửi một con số nào đó về cho onSplit:
+    if (onSplit) {
+        onSplit(1); // Gửi giá trị 1 hoặc logic đếm từ Game.tsx sẽ tự xử lý
+    }
+
+    if (onKnifeClick) onKnifeClick();
+
     setTimeout(() => {
       setSplit(false);
     }, 1200);
@@ -31,6 +57,7 @@ const BoardCanvas: React.FC<BoardCanvasProps> = ({ onSplit, started = true, onRe
     <div className="board-canvas-root">
       <div className="board-canvas-center">
         <div className="wood-split-container">
+          {/* Giữ nguyên logic class cũ của bạn */}
           <div className={split ? "wood-left split" : "wood-left"} />
           <div className={split ? "wood-right split" : "wood-right"} />
           {!split && (
@@ -40,7 +67,11 @@ const BoardCanvas: React.FC<BoardCanvasProps> = ({ onSplit, started = true, onRe
             </svg>
           )}
         </div>
-        <div className={"knife" + (split ? " disabled" : "")} onClick={handleKnifeClick} style={split ? { pointerEvents: "none", opacity: 0.5 } : {}}>
+        <div 
+          className={"knife" + (split ? " disabled" : "")} 
+          onClick={handleKnifeClick} 
+          style={split ? { pointerEvents: "none", opacity: 0.5 } : {}}
+        >
           <div className="knife-head" />
           <div className="knife-blade" />
         </div>

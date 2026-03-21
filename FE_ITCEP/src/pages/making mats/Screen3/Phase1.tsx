@@ -1,25 +1,13 @@
-function FailureMessage() {
-  const [visible, setVisible] = useState(true);
-  useEffect(() => {
-    const t = setTimeout(() => setVisible(false), 5000);
-    return () => clearTimeout(t);
-  }, []);
-  if (!visible) return null;
-  return (
-    <div className="knife-message" style={{background: 'linear-gradient(90deg,#fff4f4,#ffeaea)', color: '#b93b3b'}}>Thất bại! Hết thời gian.</div>
-  );
-}
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import TopPanel from '../../../components/making_mats/Screen3/Phase1/TopPanel'
 import CenterHint from '../../../components/making_mats/Screen3/Phase1/CenterHint'
 import BoardCanvas from '../../../components/making_mats/Screen3/Phase1/BoardCanvas'
 import Controls from '../../../components/making_mats/Screen3/Phase1/Controls'
 
-import Phase2 from './Phase2'
-
 export default function Game(){
-  const [showPhase2, setShowPhase2] = useState(false)
+  const navigate = useNavigate()
   const [started, setStarted] = useState(false);
   const [showRequireStart, setShowRequireStart] = useState(false);
   // Hide the start message after 5s
@@ -94,12 +82,12 @@ export default function Game(){
   }, [running])
 
   useEffect(() => {
-    let t: any = null;
-    if (started && !win) {
-      t = setInterval(() => setSecondsLeft(s => Math.max(0, s - 1)), 1000);
-    }
-    return () => { if (t) clearInterval(t); };
-  }, [started, win])
+  let t: ReturnType<typeof setInterval> | null = null; // Thay 'any' bằng kiểu chuẩn
+  if (started && !win) {
+    t = setInterval(() => setSecondsLeft(s => Math.max(0, s - 1)), 1000);
+  }
+  return () => { if (t) clearInterval(t); };
+}, [started, win])
 
   useEffect(() => { if (secondsLeft <= 0 && slicesMade < SLICES_NEEDED) { setGameOver(true); setRunning(false) } }, [secondsLeft, slicesMade])
   useEffect(() => { if (slicesMade >= SLICES_NEEDED) { setWin(true); setRunning(false) } }, [slicesMade])
@@ -166,9 +154,7 @@ export default function Game(){
 
   // Tính tiến độ dựa trên slicesMade
   const progress = Math.min(100, Math.round((slicesMade / SLICES_NEEDED) * 100));
-
   return (
-    showPhase2 ? <Phase2 onExit={() => setShowPhase2(false)} /> : (
     <div className="screen1 board-root page-wrap">
       <TopPanel progress={progress} secondsLeft={secondsLeft} />
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
@@ -180,8 +166,7 @@ export default function Game(){
             disabled={started && !gameOver && !win}
             onClick={() => {
               if (win) {
-                // go to phase 2
-                setShowPhase2(true)
+                navigate('/phase2')
                 return
               }
               if (gameOver) {
@@ -224,5 +209,16 @@ export default function Game(){
       <Controls />
     </div>
     )
-  )
+}
+
+function FailureMessage() {
+  const [visible, setVisible] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setVisible(false), 5000);
+    return () => clearTimeout(t);
+  }, []);
+  if (!visible) return null;
+  return (
+    <div className="knife-message" style={{background: 'linear-gradient(90deg,#fff4f4,#ffeaea)', color: '#b93b3b'}}>Thất bại! Hết thời gian.</div>
+  );
 }

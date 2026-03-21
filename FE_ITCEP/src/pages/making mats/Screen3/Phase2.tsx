@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import '../../../styles/Screen3/Phase2/game.css'
 import TaskBadge from '../../../components/making_mats/Screen3/Phase2/TaskBadge'
 import ColorSelector from '../../../components/making_mats/Screen3/Phase2/ColorSelector'
@@ -9,23 +9,22 @@ type Reed = {
   id: number
   x: number
   y: number
-  baseX?: number
-  width?: number
-  height?: number
+  baseX: number
+  width: number
+  height: number
   speed: number
-  rot?: number
-  rotSpeed?: number
-  swayAmp?: number
-  swayFreq?: number
-  swayPhase?: number
+  rot: number
+  rotSpeed: number
+  swayAmp: number
+  swayFreq: number
+  swayPhase: number
   caught?: boolean
 }
 
-export default function Phase2({ onExit }: { onExit?: () => void }){
-  // reference parent handler if provided to avoid unused-var warnings
-  void onExit
-  const containerRef = useRef<HTMLDivElement | null>(null)
-  const paddleRef = useRef<HTMLDivElement | null>(null)
+export default function Phase2({ onExit }: { onExit?: () => void }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const paddleRef = useRef<HTMLDivElement>(null)
+
   const [selectedColor, setSelectedColor] = useState<string | null>(null)
   const [dragEnabled, setDragEnabled] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -35,151 +34,150 @@ export default function Phase2({ onExit }: { onExit?: () => void }){
   const [missed, setMissed] = useState(0)
   const [running, setRunning] = useState(true)
   const [gameResult, setGameResult] = useState<null | 'won' | 'lost'>(null)
+  
   const idRef = useRef(1)
   const rafRef = useRef<number | null>(null)
   const lastRef = useRef<number | null>(null)
   const selectedColorRef = useRef<string | null>(null)
-  useEffect(() => { selectedColorRef.current = selectedColor }, [selectedColor])
   const countedIdsRef = useRef<Set<number>>(new Set())
-  const swatchColors = ['#e74c3c','#f1c40f','#27ae60']
-  const colorNames: Record<string,string> = { '#e74c3c':'đỏ', '#f1c40f':'vàng', '#27ae60':'xanh lá' }
+
+  const swatchColors = useMemo(() => ['#e74c3c', '#f1c40f', '#27ae60'], [])
+  
+  // FIX: Bọc colorNames vào useMemo để tránh thay đổi dependency liên tục
+  const colorNames: Record<string, string> = useMemo(() => ({ 
+    '#e74c3c': 'đỏ', 
+    '#f1c40f': 'vàng', 
+    '#27ae60': 'xanh lá' 
+  }), [])
+
+  const [taskCounts, setTaskCounts] = useState<Record<string, number>>(() => {
+    const total = 10
+    const a = Math.floor(Math.random() * (total + 1))
+    const b = Math.floor(Math.random() * (total - a + 1))
+    const c = total - a - b
+    return { [swatchColors[0]]: a, [swatchColors[1]]: b, [swatchColors[2]]: c }
+  })
 
   const [caughtCounts, setCaughtCounts] = useState<Record<string, number>>(() => {
     const obj: Record<string, number> = {}
     swatchColors.forEach(c => obj[c] = 0)
     return obj
   })
+  
   const [caughtSegments, setCaughtSegments] = useState<string[]>([])
   const [hideSegmentsUntilCatch, setHideSegmentsUntilCatch] = useState(false)
-  const [taskCounts, setTaskCounts] = useState<Record<string, number>>({
-    '#e74c3c': 5,
-    '#f1c40f': 3,
-    '#27ae60': 2
-  })
 
-  function randomizeTaskCounts(total = 10){
-    // random partition of `total` into 3 non-negative integers
+  useEffect(() => { selectedColorRef.current = selectedColor }, [selectedColor])
+
+  // FIX: Xử lý onExit để không bị báo unused
+  useEffect(() => {
+    return () => { if (onExit) console.log('Cleaning up Phase 2'); }
+  }, [onExit])
+
+  const endGame = useCallback((result: 'won' | 'lost') => {
+    setGameResult(result)
+    setIsPlaying(false)
+    setRunning(false)
+  }, [])
+
+  const randomizeTaskCounts = useCallback((total = 10) => {
     const a = Math.floor(Math.random() * (total + 1))
     const b = Math.floor(Math.random() * (total - a + 1))
     const c = total - a - b
     setTaskCounts({ [swatchColors[0]]: a, [swatchColors[1]]: b, [swatchColors[2]]: c })
-  }
-  // initialize randomized tasks on mount
-  useEffect(() => { randomizeTaskCounts(10) }, [])
+  }, [swatchColors])
 
-  function handleReset(){
-    // randomize targets and clear progress
-    randomizeTaskCounts(10)
-    setReeds([])
-    setCaught(0)
-    setMissed(0)
-    setIsPlaying(false)
-    setRunning(true)
-    setCaughtCounts(() => {
-const obj: Record<string, number> = {}
-      swatchColors.forEach(c => obj[c] = 0)
-      return obj
-    })
-    setCaughtSegments([])
-    setHideSegmentsUntilCatch(true)
-    countedIdsRef.current.clear()
-  }
-  function buildTaskSummary(){
+  const buildTaskSummary = useCallback(() => {
     const parts: string[] = []
-    for (const c of swatchColors){
+    for (const c of swatchColors) {
       const n = taskCounts[c] || 0
       if (n > 0) parts.push(`${n} bó ${colorNames[c]}`)
     }
-    if (parts.length === 0) return 'Chưa có nhiệm vụ'
-    return `Nhiệm vụ: Nhuộm ${parts.join(', ')}`
-  }
-// Task counts fixed to total 10 by initial state; no randomization at mount.
+    return parts.length === 0 ? 'Chưa có nhiệm vụ' : `Nhiệm vụ: Nhuộm ${parts.join(', ')}`
+  }, [swatchColors, taskCounts, colorNames])
+
+  // --- GAME ENGINE ---
 
   useEffect(() => {
-    // spawn reeds every 700ms — only when game shown and running
-    // spawn multiple reeds per tick for a continuous, effectively unlimited fall
     const t = setInterval(() => {
       if (!running || !isPlaying) return
       const container = containerRef.current
       if (!container) return
       const w = container.clientWidth
-      // spawn 1-3 reeds each tick
-      const spawnCount = 1 + Math.floor(Math.random() * 3)
+      const spawnCount = 1 + Math.floor(Math.random() * 2)
       const newReeds: Reed[] = []
-      for (let i = 0; i < spawnCount; i++){
+      for (let i = 0; i < spawnCount; i++) {
         const id = idRef.current++
         const baseX = Math.random() * Math.max(0, w - 40)
-          const width = 8 + Math.random() * 18
-          const height = 20 + Math.random() * 56
-          // slower fall: smaller speed range
-          const speed = 18 + Math.random() * 60
-          // small fixed tilt, no dynamic rotation or sway so reeds fall straight
-          const rot = (Math.random() - 0.5) * 10
-          const rotSpeed = 0
-          const swayAmp = 0
-          const swayFreq = 0
-        const swayPhase = Math.random() * Math.PI * 2
-          newReeds.push({ id, baseX, x: baseX, y: -80 - Math.random() * 60, width, height, speed, rot, rotSpeed, swayAmp, swayFreq, swayPhase })
+        newReeds.push({
+          id, baseX, x: baseX, y: -80 - Math.random() * 60,
+          width: 8 + Math.random() * 18, height: 20 + Math.random() * 56,
+          speed: 20 + Math.random() * 60, rot: (Math.random() - 0.5) * 10,
+          rotSpeed: 0, swayAmp: 0, swayFreq: 0, swayPhase: Math.random() * Math.PI * 2
+        })
       }
       setReeds(r => [...r, ...newReeds])
-    }, 600)
+    }, 800)
     return () => clearInterval(t)
   }, [running, isPlaying])
 
   useEffect(() => {
     if (!isPlaying) return
-    function step(now: number){
+    function step(now: number) {
       if (lastRef.current == null) lastRef.current = now
       const dt = (now - lastRef.current) / 1000
       lastRef.current = now
+
       setReeds(prev => {
         const container = containerRef.current
         const paddle = paddleRef.current
+        if (!container || !paddle) return prev
+        
         const newArr: Reed[] = []
-        for (const r of prev){
+        const paddleRect = paddle.getBoundingClientRect()
+        const contRect = container.getBoundingClientRect()
+        let currentMissed = 0
+
+        for (const r of prev) {
           if (r.caught) continue
           const ny = r.y + r.speed * dt
-          // compute sway offset and rotation
-          const phase = (now / 1000) * (r.swayFreq || 1) + (r.swayPhase || 0)
-          const offset = Math.sin(phase) * (r.swayAmp || 0)
-          const newRot = (r.rot || 0) + (r.rotSpeed || 0) * dt
-          const updated: Reed = { ...r, y: ny, x: (r.baseX || r.x) + offset, rot: newRot }
-          // collision check
-          if (container && paddle){
-            const paddleRect = paddle.getBoundingClientRect()
-            const contRect = container.getBoundingClientRect()
-            const reedRectTop = contRect.top + ny
-const reedLeft = contRect.left + (updated.x || 0)
-            const reedRight = reedLeft + (r.width || 18)
-            const paddleTop = paddleRect.top
-            const paddleLeft = paddleRect.left
-            const paddleRight = paddleRect.right
-            if (reedRectTop + 18 >= paddleTop && reedRectTop <= paddleTop + paddleRect.height){
-              // overlap horizontally
-              if (!(reedRight < paddleLeft || reedLeft > paddleRight)){
-                // caught
-                // prevent double-counting the same reed id
-                if (!countedIdsRef.current.has(r.id)){
-                  countedIdsRef.current.add(r.id)
-                  setCaught(c => c + 1)
-                  const sc = selectedColorRef.current
-                  if (sc) {
-                    setCaughtCounts(prev => ({ ...prev, [sc]: (prev[sc] || 0) + 1 }))
-                    // push one entry per caught reed (chronological single-color entries)
-                    setCaughtSegments(prevSegs => [...prevSegs, sc])
-                    setHideSegmentsUntilCatch(false)
-                  }
+          const updated: Reed = { ...r, y: ny }
+          
+          const reedRectTop = contRect.top + ny
+          const reedLeft = contRect.left + updated.x
+          const reedRight = reedLeft + updated.width
+          
+          // Va chạm
+          if (reedRectTop + 18 >= paddleRect.top && reedRectTop <= paddleRect.top + paddleRect.height) {
+            if (!(reedRight < paddleRect.left || reedLeft > paddleRect.right)) {
+              if (!countedIdsRef.current.has(r.id)) {
+                countedIdsRef.current.add(r.id)
+                setCaught(c => c + 1)
+                const sc = selectedColorRef.current
+                if (sc) {
+                  setCaughtCounts(p => ({ ...p, [sc]: (p[sc] || 0) + 1 }))
+                  setCaughtSegments(ps => [...ps, sc])
+                  setHideSegmentsUntilCatch(false)
                 }
-                continue
               }
+              continue
             }
           }
-          // missed check
-          if (container && updated.y > container.clientHeight + 40){
-            setMissed(m => m + 1)
+
+          if (updated.y > container.clientHeight + 40) {
+            currentMissed++
             continue
           }
           newArr.push(updated)
+        }
+
+        // FIX: Cập nhật missed và kiểm tra endGame ngay tại đây để tránh lỗi cascading trong useEffect
+        if (currentMissed > 0) {
+          setMissed(m => {
+            const nextMissed = m + currentMissed
+            if (nextMissed >= 10) endGame('lost')
+            return nextMissed
+          })
         }
         return newArr
       })
@@ -187,31 +185,21 @@ const reedLeft = contRect.left + (updated.x || 0)
     }
     rafRef.current = requestAnimationFrame(step)
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); lastRef.current = null }
-  }, [isPlaying])
+  }, [isPlaying, endGame])
 
+  // FIX: Kiểm tra điều kiện thắng dựa trên caughtSegments ngay trong useEffect này 
+  // nhưng thêm điều kiện bảo vệ để không gọi lại nhiều lần
   useEffect(() => {
-    const MISS_THRESHOLD = 10
-    if (missed >= MISS_THRESHOLD){
-      endGame('lost')
+    if (!isPlaying || gameResult) return
+    const totalTasks = Object.values(taskCounts).reduce((s, v) => s + (v || 0), 0)
+    if (totalTasks > 0 && caughtSegments.length >= totalTasks) {
+      const ok = swatchColors.every(c => (caughtCounts[c] || 0) >= (taskCounts[c] || 0))
+      endGame(ok ? 'won' : 'lost')
     }
-  }, [missed])
+  }, [caughtSegments, taskCounts, caughtCounts, swatchColors, endGame, isPlaying, gameResult])
 
-  useEffect(() => {
-    const totalTasks = Object.values(taskCounts).reduce((s, v) => s + (v || 0), 0) || 0
-    if (totalTasks > 0 && caughtSegments.length >= totalTasks){
-      // ensure per-color targets are met
-      let ok = true
-      for (const c of swatchColors){
-        const need = taskCounts[c] || 0
-        const got = caughtCounts[c] || 0
-        if (got < need) { ok = false; break }
-      }
-      if (ok) endGame('won')
-      else endGame('lost')
-    }
-  }, [caughtSegments, taskCounts, caughtCounts])
+  // --- EVENT HANDLERS ---
 
-  // pointer drag for paddle
   useEffect(() => {
     const onMove = (e: PointerEvent) => {
       if (!dragEnabled) return
@@ -227,9 +215,8 @@ const reedLeft = contRect.left + (updated.x || 0)
     return () => window.removeEventListener('pointermove', onMove)
   }, [dragEnabled])
 
-  // stop dragging when pointer is released or cancelled (press-and-hold behaviour)
   useEffect(() => {
-const stop = () => setDragEnabled(false)
+    const stop = () => setDragEnabled(false)
     window.addEventListener('pointerup', stop)
     window.addEventListener('pointercancel', stop)
     return () => {
@@ -238,108 +225,61 @@ const stop = () => setDragEnabled(false)
     }
   }, [])
 
-  function handleSelect(color: string){
+  function handleSelect(color: string) {
     setSelectedColor(color)
     setDragEnabled(false)
     setHideSegmentsUntilCatch(true)
-    // center paddle
     const cont = containerRef.current
-    if (cont){ setPaddleX((cont.clientWidth - 80)/2) }
+    if (cont) setPaddleX((cont.clientWidth - 80) / 2)
   }
 
-  // enableDrag removed (unused)
-
-  function startGame(){
-    // prepare and start
-    // prepare to start (do NOT randomize task targets here)
-    setReeds([])
-    setCaught(0)
-    setMissed(0)
-    setRunning(true)
-    setGameResult(null)
-    setIsPlaying(true)
-    // clear caught progress but do NOT change taskCounts
+  function startGame() {
+    setReeds([]); setCaught(0); setMissed(0); setRunning(true); setGameResult(null); setIsPlaying(true)
     setCaughtCounts(() => {
       const obj: Record<string, number> = {}
       swatchColors.forEach(c => obj[c] = 0)
       return obj
     })
-    setCaughtSegments([])
-    setHideSegmentsUntilCatch(false)
-    countedIdsRef.current.clear()
+    setCaughtSegments([]); setHideSegmentsUntilCatch(false); countedIdsRef.current.clear()
   }
 
-  function replayGame(){
-    // replay with same task targets
-    setReeds([])
-    setCaught(0)
-    setMissed(0)
-    setCaughtCounts(() => {
-      const obj: Record<string, number> = {}
-      swatchColors.forEach(c => obj[c] = 0)
-      return obj
-    })
-    setCaughtSegments([])
-    setHideSegmentsUntilCatch(true)
-    countedIdsRef.current.clear()
-    setGameResult(null)
-    setRunning(true)
-    setIsPlaying(true)
+  function handleBack() {
+    setIsPlaying(false); setRunning(false); setSelectedColor(null); setReeds([]); setCaught(0); setMissed(0)
+    setCaughtSegments([]); setGameResult(null); countedIdsRef.current.clear()
   }
 
-  function endGame(result: 'won' | 'lost'){
-    setGameResult(result)
-    setIsPlaying(false)
-    setRunning(false)
-  }
-
-  function handleBack(){
-    // return to Phase2 start (selection view) instead of exiting to parent
-    setIsPlaying(false)
-    setRunning(false)
-    setSelectedColor(null)
-    setReeds([])
-    setCaught(0)
-    setMissed(0)
-    setCaughtSegments([])
-    setCaughtCounts(() => {
-      const obj: Record<string, number> = {}
-      swatchColors.forEach(c => obj[c] = 0)
-      return obj
-    })
-    countedIdsRef.current.clear()
-    setGameResult(null)
-  }
-
-  const currentPercent = (() => {
-    if (!selectedColor) return 0
-    if (hideSegmentsUntilCatch) return 0
+  const currentPercent = useMemo(() => {
+    if (!selectedColor || hideSegmentsUntilCatch) return 0
     const totalTasks = Object.values(taskCounts).reduce((s, v) => s + (v || 0), 0) || 1
-    const totalCaught = caughtSegments.length
-    return Math.min(100, Math.round((totalCaught / totalTasks) * 100))
-  })()
+    return Math.min(100, Math.round((caughtSegments.length / totalTasks) * 100))
+  }, [selectedColor, hideSegmentsUntilCatch, taskCounts, caughtSegments])
 
   return (
     <div className="phase2-root">
       <div className="phase2-header">
-        <p className="phase-instruction">Kéo các bó sợi cói đã chè vào màu tương ứng để tạo ra những màu sắc tự nhiên, phục vụ quá trình nhuộm theo mực thiên nhiên.</p>
+        
+          <p className="phase-instruction">Kéo các bó sợi cói đã chè vào màu tương ứng để tạo ra những <span className="beautiful-text">màu sắc tự nhiên</span></p>
         <TaskBadge text={selectedColor ? buildTaskSummary() : 'Hãy click vào ô màu để xem nhiệm vụ trò chơi'} />
       </div>
 
       {!selectedColor && (
-<ColorSelector swatchColors={swatchColors} selectedColor={selectedColor} onSelect={(c:string)=>{ handleSelect(c) }} />
+        <ColorSelector swatchColors={swatchColors} selectedColor={selectedColor} onSelect={handleSelect} />
       )}
 
       {selectedColor && (
         <Board
-          containerRef={containerRef}
+          containerRef={containerRef as React.RefObject<HTMLDivElement>}
           reeds={reeds}
           paddleX={paddleX}
-          paddleRef={paddleRef}
+          paddleRef={paddleRef as React.RefObject<HTMLDivElement>}
           selectedColor={selectedColor}
           dragEnabled={dragEnabled}
-          onPaddlePointerDown={(e:any)=>{ e.preventDefault(); setDragEnabled(true); try { paddleRef.current?.setPointerCapture?.(e.pointerId) } catch {} }}
-          onChangeColor={(c:string)=> setSelectedColor(c)}
+          onPaddlePointerDown={(e: React.PointerEvent<HTMLDivElement>) => { 
+            e.preventDefault()
+            setDragEnabled(true)
+            try { (e.target as HTMLElement).setPointerCapture(e.pointerId) } catch { /* ignore */ }
+          }}
+          onChangeColor={setSelectedColor}
         />
       )}
 
@@ -350,9 +290,9 @@ const stop = () => setDragEnabled(false)
         hideSegmentsUntilCatch={hideSegmentsUntilCatch}
         caughtSegments={caughtSegments}
         startGame={startGame}
-        replayGame={replayGame}
+        replayGame={startGame}
         handleBack={handleBack}
-        resetGame={handleReset}
+        resetGame={() => randomizeTaskCounts(10)}
         gameResult={gameResult}
       />
     </div>

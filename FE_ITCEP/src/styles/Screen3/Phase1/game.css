@@ -98,7 +98,7 @@ body{margin:0;font-family:Poppins, Inter, system-ui, -apple-system, 'Segoe UI', 
 .board-bottom{display:flex;justify-content:center;margin-top:18px}
 .control-row{display:flex;gap:12px;flex-wrap:wrap}
 .ctrl{padding:12px 20px;border-radius:999px;border:1px solid rgba(120,90,50,0.08);background:linear-gradient(180deg,#fff,#fffaf6);cursor:pointer;font-weight:700;color:var(--muted);box-shadow:0 12px 30px rgba(20,20,16,0.06);transition:transform .14s ease,box-shadow .14s}
-.ctrl.primary{background:linear-gradient(180deg,#fff7ee,#fff0df);border-color:rgba(184,122,52,0.18);color:var(--accent)}
+.ctrl.primary{border-color:rgba(184,122,52,0.18);color:white}
 .ctrl.primary:hover{transform:translateY(-3px);box-shadow:0 18px 44px rgba(20,20,16,0.1)}
 .ctrl.muted{opacity:0.75}
 
@@ -139,13 +139,6 @@ body{margin:0;font-family:Poppins, Inter, system-ui, -apple-system, 'Segoe UI', 
   .board-canvas{height:300px}
 }
 
-  align-items: center;
-  gap: 12px;
-  justify-content: center;
-  box-shadow: 0 8px 18px rgba(31, 54, 46, 0.06);
-  font-weight: 700;
-  font-size: 15px;
-}
 
 .center-hint .hint-icon {
   width: 36px;
