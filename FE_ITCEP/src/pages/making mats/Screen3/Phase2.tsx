@@ -43,7 +43,6 @@ export default function Phase2({ onExit }: { onExit?: () => void }) {
 
   const swatchColors = useMemo(() => ['#e74c3c', '#f1c40f', '#27ae60'], [])
   
-  // FIX: Bọc colorNames vào useMemo để tránh thay đổi dependency liên tục
   const colorNames: Record<string, string> = useMemo(() => ({ 
     '#e74c3c': 'đỏ', 
     '#f1c40f': 'vàng', 
@@ -69,7 +68,6 @@ export default function Phase2({ onExit }: { onExit?: () => void }) {
 
   useEffect(() => { selectedColorRef.current = selectedColor }, [selectedColor])
 
-  // FIX: Xử lý onExit để không bị báo unused
   useEffect(() => {
     return () => { if (onExit) console.log('Cleaning up Phase 2'); }
   }, [onExit])
@@ -147,7 +145,6 @@ export default function Phase2({ onExit }: { onExit?: () => void }) {
           const reedLeft = contRect.left + updated.x
           const reedRight = reedLeft + updated.width
           
-          // Va chạm
           if (reedRectTop + 18 >= paddleRect.top && reedRectTop <= paddleRect.top + paddleRect.height) {
             if (!(reedRight < paddleRect.left || reedLeft > paddleRect.right)) {
               if (!countedIdsRef.current.has(r.id)) {
@@ -171,7 +168,6 @@ export default function Phase2({ onExit }: { onExit?: () => void }) {
           newArr.push(updated)
         }
 
-        // FIX: Cập nhật missed và kiểm tra endGame ngay tại đây để tránh lỗi cascading trong useEffect
         if (currentMissed > 0) {
           setMissed(m => {
             const nextMissed = m + currentMissed
@@ -187,8 +183,6 @@ export default function Phase2({ onExit }: { onExit?: () => void }) {
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); lastRef.current = null }
   }, [isPlaying, endGame])
 
-  // FIX: Kiểm tra điều kiện thắng dựa trên caughtSegments ngay trong useEffect này 
-  // nhưng thêm điều kiện bảo vệ để không gọi lại nhiều lần
   useEffect(() => {
     if (!isPlaying || gameResult) return
     const totalTasks = Object.values(taskCounts).reduce((s, v) => s + (v || 0), 0)
@@ -257,8 +251,15 @@ export default function Phase2({ onExit }: { onExit?: () => void }) {
   return (
     <div className="phase2-root">
       <div className="phase2-header">
-        
+        <div className="instruction-row">
           <p className="phase-instruction">Kéo các bó sợi cói đã chè vào màu tương ứng để tạo ra những <span className="beautiful-text">màu sắc tự nhiên</span></p>
+          {/* HIỂN THỊ MISSED TẠI ĐÂY ĐỂ GIẢI QUYẾT LỖI UNUSED BIẾN */}
+          {isPlaying && (
+            <div className="missed-indicator">
+              Bỏ lỡ: <span className={missed > 7 ? 'danger' : ''}>{missed}/10</span>
+            </div>
+          )}
+        </div>
         <TaskBadge text={selectedColor ? buildTaskSummary() : 'Hãy click vào ô màu để xem nhiệm vụ trò chơi'} />
       </div>
 

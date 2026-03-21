@@ -3,7 +3,9 @@
 /* Phase2 styles (harmonized with Phase1) */
 .phase2-root{max-width:1100px;margin:18px auto;padding:12px 18px;display:flex;flex-direction:column;gap:18px;font-family:Poppins, Inter, Arial;background:linear-gradient(180deg,var(--earth-50),#fff);color:var(--muted)}
 .phase2-top{display:flex;gap:36px;justify-content:center;align-items:flex-start}
-.phase2-header{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:6px}
+.phase2-header{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;margin-bottom:6px;text-align:center}
+/* instruction row: keep instruction left and missed indicator right on wide screens, wrap on small */
+.instruction-row{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;flex-wrap:wrap}
 .phase-instruction{flex:1;color: black;font-size:18px;line-height:1.45;max-width:820px; font-weight: bold;}
 .beautiful-text{
   background: linear-gradient(90deg,#2fc46f,#12a85d,#16c95a);
