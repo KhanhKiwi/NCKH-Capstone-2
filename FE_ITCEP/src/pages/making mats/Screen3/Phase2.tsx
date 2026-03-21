@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import '../../../styles/Screen3/Phase2/game.css'
 import TaskBadge from '../../../components/making_mats/Screen3/Phase2/TaskBadge'
 import ColorSelector from '../../../components/making_mats/Screen3/Phase2/ColorSelector'
@@ -29,7 +29,6 @@ export default function Phase2({ onExit }: { onExit?: () => void }){
   const [isPlaying, setIsPlaying] = useState(false)
   const [paddleX, setPaddleX] = useState<number>(0)
   const [reeds, setReeds] = useState<Reed[]>([])
-  const [caught, setCaught] = useState(0)
   const [missed, setMissed] = useState(0)
   const [running, setRunning] = useState(true)
   const [gameResult, setGameResult] = useState<null | 'won' | 'lost'>(null)
@@ -65,23 +64,6 @@ export default function Phase2({ onExit }: { onExit?: () => void }){
   // initialize randomized tasks on mount
   useEffect(() => { randomizeTaskCounts(10) }, [])
 
-  function handleReset(){
-    // randomize targets and clear progress
-    randomizeTaskCounts(10)
-    setReeds([])
-    setCaught(0)
-    setMissed(0)
-    setIsPlaying(false)
-    setRunning(true)
-    setCaughtCounts(() => {
-      const obj: Record<string, number> = {}
-      swatchColors.forEach(c => obj[c] = 0)
-      return obj
-    })
-    setCaughtSegments([])
-    setHideSegmentsUntilCatch(true)
-    countedIdsRef.current.clear()
-  }
   function buildTaskSummary(){
     const parts: string[] = []
     for (const c of swatchColors){
@@ -159,7 +141,6 @@ export default function Phase2({ onExit }: { onExit?: () => void }){
                 // prevent double-counting the same reed id
                 if (!countedIdsRef.current.has(r.id)){
                   countedIdsRef.current.add(r.id)
-                  setCaught(c => c + 1)
                   const sc = selectedColorRef.current
                   if (sc) {
                     setCaughtCounts(prev => ({ ...prev, [sc]: (prev[sc] || 0) + 1 }))
@@ -245,13 +226,10 @@ export default function Phase2({ onExit }: { onExit?: () => void }){
     if (cont){ setPaddleX((cont.clientWidth - 80)/2) }
   }
 
-  function enableDrag(){ if (selectedColor) setDragEnabled(true) }
-
   function startGame(){
     // prepare and start
     // prepare to start (do NOT randomize task targets here)
     setReeds([])
-    setCaught(0)
     setMissed(0)
     setRunning(true)
     setGameResult(null)
@@ -270,7 +248,6 @@ export default function Phase2({ onExit }: { onExit?: () => void }){
   function replayGame(){
     // replay with same task targets
     setReeds([])
-    setCaught(0)
     setMissed(0)
     setCaughtCounts(() => {
       const obj: Record<string, number> = {}
@@ -298,7 +275,6 @@ export default function Phase2({ onExit }: { onExit?: () => void }){
     setRunning(false)
     setSelectedColor(null)
     setReeds([])
-    setCaught(0)
     setMissed(0)
     setCaughtSegments([])
     setCaughtCounts(() => {

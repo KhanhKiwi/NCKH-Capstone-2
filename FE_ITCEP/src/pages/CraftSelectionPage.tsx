@@ -213,7 +213,7 @@ export default function CraftSelectionPage() {
 
                 {/* Levels */}
                 <div className="space-y-6">
-                  {levels.map((level, index) => (
+                  {levels.map((level) => (
                     <div
                       key={level.id}
                       className={`

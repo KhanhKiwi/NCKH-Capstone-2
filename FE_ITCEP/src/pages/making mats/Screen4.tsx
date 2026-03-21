@@ -158,7 +158,9 @@ function DraggablePuzzlePiece({
   return (
     <div className="flex flex-col items-center gap-2">
       <div
-        ref={drag}
+        ref={(node) => {
+          drag(node);
+        }}
         className={`
           bg-white p-3 rounded-xl shadow-lg cursor-move
           transform transition-all duration-200
@@ -435,7 +437,9 @@ function MiniGame1({ onComplete }: { onComplete: (stars: number) => void }) {
 
     return (
       <div
-        ref={drop}
+        ref={(node) => {
+          drop(node);
+        }}
         onClick={handleCellClick}
         className={`
           w-14 h-14 border-2 rounded transition-all duration-200

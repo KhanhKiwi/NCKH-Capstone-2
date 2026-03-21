@@ -1,5 +1,3 @@
-import styles from "./Screen1.module.css";
-
 interface Props {
   count: number;
   isDragOver: boolean;
