@@ -30,11 +30,18 @@ export default function SedgePlant({
   // Freeze cut plant position on first render when cut
   if (isCut && !isCutRef.current) {
     isCutRef.current = true;
+    // Ensure x position avoids center zone 40-60% and farmer left 0-28%
+    let safeX = xPercent;
+    if (safeX >= 46 && safeX <= 60) {
+      safeX = safeX < 53 ? safeX - 18 : safeX + 18;
+    }
+    safeX = Math.max(28, safeX);
+    
     // Calculate bottom position for cut plants - max 22% from bottom
     const cutBottom = `${Math.min(yPercent * 0.3, 22)}%`;
     cutStyleRef.current = {
       position: "absolute" as const,
-      left: `${xPercent}%`,
+      left: `${safeX}%`,
       bottom: cutBottom,
       transform: "translateX(-50%) rotate(90deg)",
       transition: "none",

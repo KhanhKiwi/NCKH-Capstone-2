@@ -9,17 +9,19 @@ import HUD from "./HUD";
 import HintPanel from "./HintPanel";
 import ScorePop from "./ScorePop";
 import Basket from "./Basket";
-import bg0 from "../../../assets/ChatGPT Image 23_51_53 17 thg 3, 2026.png";
-import bg1 from "../../../assets/ChatGPT Image 23_34_54 17 thg 3, 2026.png";
-import bg2 from "../../../assets/ChatGPT Image 23_25_32 17 thg 3, 2026.png";
-import bg3 from "../../../assets/ChatGPT Image 23_32_12 17 thg 3, 2026.png";
+
+// Import background images
+import bg0 from "../../../assets/bg0-intro.png";
+import bg1 from "../../../assets/bg1-select.png";
+import bg2 from "../../../assets/bg2-harvest.png";
+import bg3 from "../../../assets/bg3-collect.png";
 
 const BG: Record<number, string> = {
   0: bg0,
   1: bg1,
   2: bg2,
   3: bg3,
-  4: bg3,
+  4: bg0,
 };
 
 const OVERLAY: Record<number, string> = {
@@ -27,7 +29,7 @@ const OVERLAY: Record<number, string> = {
   1: "rgba(0,0,0,0.15)",
   2: "rgba(0,0,0,0.20)",
   3: "rgba(0,0,0,0.18)",
-  4: "rgba(0,0,0,0.25)",
+  4: "rgba(0,0,0,0.28)",
 };
 
 export default function Screen1() {
@@ -223,6 +225,13 @@ export default function Screen1() {
     [state.phase],
   );
 
+  const handleBack = useCallback(() => {
+    const ok = window.confirm(
+      "Bạn có muốn trở về không?\nTiến trình sẽ bị mất.",
+    );
+    if (ok) resetGame();
+  }, [resetGame]);
+
   const {
     phase,
     plants,
@@ -251,7 +260,11 @@ export default function Screen1() {
 
       {/* HUD */}
       {phase >= 1 && phase <= 3 && (
-        <HUD state={state} onToggleHint={toggleHint} />
+        <HUD
+          state={state}
+          onToggleHint={toggleHint}
+          onBack={handleBack}
+        />
       )}
 
       {/* Hint panel */}
@@ -261,12 +274,12 @@ export default function Screen1() {
       {phase === 0 && (
         <div className={styles.scene}>
           <div className={styles.introBadge}>
-            🏮 Traditional Mat Weaving — Level 1
+            🏮 Nghề Làm Chiếu Truyền Thống — Level 1
           </div>
           <FarmerNPC mood={farmerMood} />
           <SpeechBubble text={bubbleText} visible />
           <button className={styles.startBtn} onClick={startGame}>
-            Let's Start! →
+            Bắt Đầu! →
           </button>
         </div>
       )}
@@ -288,7 +301,7 @@ export default function Screen1() {
           )}
           <div className={styles.progressWrap}>
             <div className={styles.progressLabel}>
-              Selected: {selectedIds.length}/5 🌿
+              Đã chọn: {selectedIds.length}/5 🌿
             </div>
             <div className={styles.progressTrack}>
               <div
@@ -305,7 +318,7 @@ export default function Screen1() {
         <div className={styles.scene}>
           <FarmerNPC mood={farmerMood} />
           <SpeechBubble
-            text="Hold my sickle and drag to the glowing plants! 🌾 Cut the marked ones!"
+            text="Cầm liềm của tôi kéo vào cây có vòng xanh để cắt! 🌾"
             visible
           />
 
@@ -349,7 +362,7 @@ export default function Screen1() {
                   opacity="0.6"
                 />
               </svg>
-              <div className={styles.sickleLabel}>Hold & drag to cut!</div>
+              <div className={styles.sickleLabel}>Cầm liềm kéo vào cây có vòng xanh!</div>
             </div>
           )}
 
@@ -409,7 +422,7 @@ export default function Screen1() {
           )}
           <div className={styles.progressWrap}>
             <div className={styles.progressLabel}>
-              Cut: {cutIds.length}/5 ✂️
+              Đã cắt: {cutIds.length}/5 ✂️
             </div>
             <div className={styles.progressTrack}>
               <div
@@ -454,7 +467,7 @@ export default function Screen1() {
           {/* Progress */}
           <div className={styles.progressWrap}>
             <div className={styles.progressLabel}>
-              Bundle: {state.collectedCount}/5 🌾
+              Bó cói: {state.collectedCount}/5 🌾
             </div>
             <div className={styles.progressTrack}>
               <div
@@ -472,9 +485,9 @@ export default function Screen1() {
           <FarmerNPC mood="excited" />
           <SpeechBubble text={bubbleText} visible />
           <div className={styles.resultCard}>
-            <div className={styles.resultTitle}>🌾 Level Complete!</div>
+            <div className={styles.resultTitle}>🌾 Hoàn Thành! 🌾</div>
             <div className={styles.resultScore}>{score}</div>
-            <div className={styles.resultScoreSub}>points</div>
+            <div className={styles.resultScoreSub}>điểm</div>
             <div className={styles.resultStars}>
               {[1, 2, 3].map((i) => (
                 <span
@@ -495,27 +508,27 @@ export default function Screen1() {
               ))}
             </div>
             <div className={styles.resultStats}>
-              Mistakes: {state.penalties} &nbsp;|&nbsp; Score: {score} pts
+              Lần sai: {state.penalties} &nbsp;|&nbsp; Điểm: {score} pts
             </div>
             <div className={styles.knowledgeTitle}>
-              📚 What you learned today:
+              📚 Bạn đã học được gì?
             </div>
             <div className={styles.cards}>
               {[
                 {
                   icon: "🌊",
-                  front: "Sedge & wetlands",
-                  back: "Sedge grass grows in coastal wetland areas",
+                  front: "Cói & vùng ngập nước",
+                  back: "Cây cói mọc ở vùng đất ngập nước ven biển",
                 },
                 {
                   icon: "📏",
-                  front: "When to harvest",
-                  back: "Harvest when tall with thick dark green leaves",
+                  front: "Khi nào thu hoạch",
+                  back: "Thu hoạch khi cây cao, lá xanh đậm và dày",
                 },
                 {
                   icon: "🌱",
-                  front: "Young plants",
-                  back: "Young plants need 3–4 more months to grow",
+                  front: "Cây non",
+                  back: "Cây non cần thêm 3-4 tháng để trưởng thành",
                 },
               ].map((c, i) => (
                 <div key={i} className={styles.flipCard}>
@@ -543,7 +556,7 @@ export default function Screen1() {
             </div>
             <div className={styles.resultBtns}>
               <button className={styles.btnRetry} onClick={resetGame}>
-                Play Again 🔄
+                Chơi Lại 🔄
               </button>
               <button className={styles.btnNext}>Level 2 →</button>
             </div>

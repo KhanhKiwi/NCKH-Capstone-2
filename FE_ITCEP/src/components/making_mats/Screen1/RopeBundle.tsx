@@ -1,5 +1,3 @@
-import styles from "../../../styles/Screen1/Screen1.module.css";
-
 interface Props {
   count: number;
   isDragOver: boolean;
@@ -11,13 +9,6 @@ export default function RopeBundle({
   isDragOver,
   isDragOverWrong,
 }: Props) {
-  // Rope wrapping stages based on count
-  const ropeStages = [
-    // 0: straight rope on ground
-    // 1-4: rope partially coiled
-    // 5: fully coiled bundle
-  ];
-
   return (
     <div
       id="rope-bundle-zone"

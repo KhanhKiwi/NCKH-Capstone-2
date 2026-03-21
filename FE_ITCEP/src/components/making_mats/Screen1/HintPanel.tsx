@@ -3,30 +3,30 @@ import type { GamePhase } from "./game.types";
 
 const HINTS: Record<number, { title: string; items: string[] }> = {
   1: {
-    title: "💡 Step 1 — Select",
+    title: "💡 Gợi ý - Bước 1",
     items: [
-      "🌿 Mature: tall, thick, dark green",
-      "🍃 Many large leaves spreading wide",
-      "❌ Short & thin = young (skip!)",
-      "❌ Yellow drooping = wilted (skip!)",
+      "🌿 Trưởng thành: cao, thân dày, xanh đậm",
+      "🍃 Nhiều lá to xòe rộng ra hai bên",
+      "❌ Cây thấp mảnh = cây non (bỏ qua!)",
+      "❌ Lá vàng rũ xuống = cây héo (bỏ!)",
     ],
   },
   2: {
-    title: "✂️ Step 2 — Cut",
+    title: "✂️ Gợi ý - Bước 2",
     items: [
-      "✅ Click plants with green ✓ ring",
-      "🔆 Selected plants are brighter",
-      "⚠️ Faded = do NOT cut",
-      "⚡ Cut all 5 quickly for bonus!",
+      "✅ Cầm liềm kéo vào cây có vòng xanh",
+      "🔆 Cây đã chọn sáng hơn các cây khác",
+      "⚠️ Cây mờ = KHÔNG được cắt",
+      "⚡ Cắt nhanh 5 cây để nhận thưởng tốc độ!",
     ],
   },
   3: {
-    title: "🧺 Step 3 — Collect",
+    title: "🧺 Gợi ý - Bước 3",
     items: [
-      "✅ Drag DARK GREEN into basket",
-      "❌ Pale / yellow = leave them!",
-      '💚 "drag me ✓" label = correct',
-      "🏆 5 correct = level complete!",
+      "✅ Kéo cây xanh đậm vào rổ",
+      "❌ Cây nhạt/vàng = để lại (trừ 20 điểm!)",
+      "💚 Nhãn \"kéo vào ✓\" = đúng loại",
+      "🏆 Gom đủ 5 cây = hoàn thành bước 3!",
     ],
   },
 };

@@ -3,9 +3,9 @@ import type { GameState } from "./game.types";
 
 const PHASE_LABEL = [
   "",
-  "Step 1: Select mature plants",
-  "Step 2: Cut the marked plants",
-  "Step 3: Collect into basket",
+  "Bước 1: Chọn cây trưởng thành",
+  "Bước 2: Cắt cây đã chọn",
+  "Bước 3: Thu gom vào rổ",
   "",
 ];
 const COUNTER = (s: GameState) => [
@@ -19,16 +19,21 @@ const COUNTER = (s: GameState) => [
 export default function HUD({
   state,
   onToggleHint,
+  onBack,
 }: {
   state: GameState;
   onToggleHint: () => void;
+  onBack: () => void;
 }) {
   const counter = COUNTER(state)[state.phase];
   return (
     <div className={styles.hud}>
       <div className={styles.hudLeft}>
+        <button className={styles.backBtn} onClick={onBack}>
+          ← Trở về
+        </button>
         <span className={styles.badgeGold}>Level 1</span>
-        <span className={styles.badgeOutline}>Sedge Harvesting</span>
+        <span className={styles.badgeOutline}>Thu Hoạch Cói</span>
       </div>
       <div className={styles.hudCenter}>
         <span className={styles.phaseLabel}>

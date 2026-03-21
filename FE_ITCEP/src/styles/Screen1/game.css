@@ -18,6 +18,7 @@
   object-position: center;
   z-index: 0;
   animation: fadeScene 0.6s ease-out;
+  display: block;
 }
 
 .bgOverlay {

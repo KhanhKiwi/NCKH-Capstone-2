@@ -20,7 +20,7 @@ export default function SpeechBubble({
   return (
     <div className={styles.bubble}>
       {text}
-      {hint && <span className={styles.bubbleHint}>Click to continue...</span>}
+      {hint && <span className={styles.bubbleHint}>Nhấn để tiếp tục...</span>}
     </div>
   );
 }

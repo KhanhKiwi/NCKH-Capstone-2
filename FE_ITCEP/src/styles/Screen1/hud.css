@@ -98,3 +98,21 @@
   cursor: pointer;
   animation: pulse 1.8s ease-in-out infinite;
 }
+
+.backBtn {
+  background: rgba(0, 0, 0, 0.52);
+  border: 1.5px solid rgba(255, 255, 255, 0.32);
+  border-radius: 20px;
+  color: white;
+  font-family: "Baloo 2", cursive;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-right: 6px;
+}
+
+.backBtn:hover {
+  background: rgba(0, 0, 0, 0.75);
+}

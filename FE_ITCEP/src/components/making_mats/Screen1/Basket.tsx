@@ -1,5 +1,3 @@
-import styles from "../../../styles/Screen1/Screen1.module.css";
-
 interface Props {
   count: number;
   isDragOver: boolean;
@@ -14,8 +12,8 @@ export default function Basket({ count, isDragOver, isDragOverWrong }: Props) {
       id="basket-drop-zone"
       style={{
         position: "absolute",
-        right: "5%",
-        bottom: "6%",
+        right: "4%",
+        bottom: "5%",
         zIndex: 15,
         textAlign: "center",
         cursor: "default",
@@ -28,7 +26,7 @@ export default function Basket({ count, isDragOver, isDragOverWrong }: Props) {
         transition: "filter 0.2s, transform 0.2s",
       }}
     >
-      <svg width="140" height="130" viewBox="0 0 140 130">
+      <svg width="150" height="140" viewBox="0 0 140 130">
         {/* Handle */}
         <path
           d="M25,40 Q70,-5 115,40"
@@ -154,9 +152,9 @@ export default function Basket({ count, isDragOver, isDragOverWrong }: Props) {
           marginTop: 4,
         }}
       >
-        {count === 0 && "Drop here! 🧺"}
+        {count === 0 && "Thả vào đây! 🧺"}
         {count > 0 && count < 5 && `${count}/5 🧺`}
-        {count === 5 && "✅ Done! 🎉"}
+        {count === 5 && "✅ Xong! 🎉"}
       </div>
     </div>
   );

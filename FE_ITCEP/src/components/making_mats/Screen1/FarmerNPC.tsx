@@ -1,4 +1,4 @@
-import farmerImg from "../../../assets/ChatGPT Image 22_38_54 17 thg 3, 2026.png";
+import farmerImg from "../../../assets/farmer.png";
 import styles from "../../../styles/Screen1/Screen1.module.css";
 import type { FarmerMood } from "./game.types";
 

@@ -4,7 +4,14 @@ import type { GameState, Plant, PlantType } from "./game.types";
 function makePlants(): Plant[] {
   const plants: Plant[] = [];
 
-  // Generate 14 plants with random scattered positions
+  // Scattered grid positions for phase 3
+  const xSlots = [29, 34, 39, 44, 51, 57, 63, 68, 73, 78, 83, 89, 94];
+  const ySlots = [36, 42, 48, 54, 60, 66, 72, 78];
+
+  // Shuffle x positions
+  const shuffledX = [...xSlots].sort(() => Math.random() - 0.5);
+
+  // Generate 14 plants with scattered positions
   const plantTypes: Array<{ id: string; type: "mature" | "young" | "wilted" }> =
     [
       // 8 MATURE plants
@@ -18,26 +25,12 @@ function makePlants(): Plant[] {
       ...[0, 1].map((i) => ({ id: `w${i}`, type: "wilted" as const })),
     ];
 
-  for (const plantDef of plantTypes) {
-    let xPercent = 0;
-    let yPercent = 0;
-    let attempts = 0;
-    let valid = false;
+  for (let i = 0; i < plantTypes.length; i++) {
+    const plantDef = plantTypes[i];
+    const xPercent = shuffledX[i % shuffledX.length];
 
-    // Generate position with minimum distance check
-    while (!valid && attempts < 15) {
-      xPercent = 4 + Math.random() * 90; // 4 to 94
-      yPercent = 42 + Math.random() * 26; // 42 to 68
-
-      // Check minimum distance from existing plants
-      valid = plants.every((p) => {
-        const xDist = Math.abs(p.xPercent - xPercent);
-        const yDist = Math.abs(p.yPercent - yPercent);
-        return !(xDist < 7 && yDist < 5);
-      });
-
-      attempts++;
-    }
+    // Alternate y positions across ySlots to spread vertically
+    const yPercent = ySlots[i % ySlots.length];
 
     // Plant sizes for visual variety
     let height = 100;
@@ -72,11 +65,13 @@ function makePlants(): Plant[] {
 function makeDecoys(existing: Plant[]): Plant[] {
   const usedX = existing.map((p) => p.xPercent);
   const types: PlantType[] = ["young", "wilted", "young"];
+  const decoyYSlots = [38, 55, 70];
+
   return types.map((type, i) => {
-    let x = 25 + Math.random() * 70; // right side only
+    let x = 30 + Math.random() * 62;
     let tries = 0;
-    while (usedX.some((u) => Math.abs(u - x) < 8) && tries < 20) {
-      x = 25 + Math.random() * 70;
+    while (usedX.some((u) => Math.abs(u - x) < 7) && tries < 25) {
+      x = 30 + Math.random() * 62;
       tries++;
     }
     usedX.push(x);
@@ -85,7 +80,7 @@ function makeDecoys(existing: Plant[]): Plant[] {
       type,
       state: "cut" as const,
       xPercent: x,
-      yPercent: 68 + Math.random() * 10,
+      yPercent: decoyYSlots[i],
       isWrong: true,
       swayDuration: 1800,
     };
@@ -103,7 +98,7 @@ const INIT: GameState = {
   cutIds: [],
   farmerMood: "idle",
   bubbleText:
-    "Hello! I am Duy Ân. Welcome to our village! We weave beautiful mats from sedge grass here.",
+    "Xin chào! Tôi là Chị Lan.\nChào mừng đến làng nghề chiếu của chúng tôi!",
   isLocked: false,
   scorePops: [],
   showHint: false,
@@ -142,7 +137,7 @@ export function useGameState() {
       phase: 1,
       farmerMood: "talking",
       bubbleText:
-        "Find 5 MATURE plants! 🌿 Tall, thick, dark green. Avoid small pale ones!",
+        "Tìm 5 cây CÓI TRƯỞNG THÀNH! 🌿\nCao, thân dày, xanh đậm.\nTránh cây nhỏ nhạt màu!",
     });
   }, []);
 
@@ -166,10 +161,12 @@ export function useGameState() {
                 ...prev,
                 phase: 2,
                 farmerMood: "talking",
-                bubbleText: "Now click the ✓ marked plants to cut them! ✂️",
+                bubbleText:
+                  "Cầm liềm của tôi kéo vào\ncây có vòng xanh để cắt! 🌾",
               }));
             }, 1600);
           }
+          addPop("+Chọn đúng! ✓", "#00E676", x, y);
 
           return {
             ...s,
@@ -178,8 +175,8 @@ export function useGameState() {
             score: s.score + 20,
             farmerMood: done ? "excited" : "happy",
             bubbleText: done
-              ? "Perfect 5! Now cut them! ✂️"
-              : "That's it! Great eye! ✓",
+              ? "Chọn đủ 5 rồi! Bây giờ hãy cắt! ✂️"
+              : "Đúng rồi! Mắt tinh thật! ✓",
           };
         } else {
           if (lockTimer.current) clearTimeout(lockTimer.current);
@@ -193,7 +190,8 @@ export function useGameState() {
             penalties: s.penalties + 1,
             isLocked: true,
             farmerMood: "sad",
-            bubbleText: "Oh no! Too young! Find tall dark green ones!",
+            bubbleText:
+              "Ối không! Cây này chưa đủ tuổi!\nTìm cây cao xanh đậm nhé!",
           };
         }
       });
@@ -227,18 +225,19 @@ export function useGameState() {
                 phase: 3,
                 plants: [...prev.plants, ...makeDecoys(prev.plants)],
                 farmerMood: "talking",
-                bubbleText: "Drag the fallen GREEN plants to the basket! 🌾",
+                bubbleText:
+                  "Kéo cây CÓI XANH vào rổ! 🧺\nĐể những cây xấu lại!",
               }));
             }, 1600);
           }
-          addPop("+10 pts", "#FFD54F", x, y);
+          addPop("+10 điểm", "#FFD54F", x, y);
           return {
             ...s,
             plants: updatedPlants,
             cutIds: newCuts,
             score: s.score + 10,
             farmerMood: "happy",
-            bubbleText: "Nice cut! ✂️",
+            bubbleText: "Cắt đẹp lắm! ✂️",
           };
         } else {
           addPop("-1 ⭐", "#EF5350", x, y);
@@ -248,7 +247,7 @@ export function useGameState() {
             stars: Math.max(1, s.stars - 1),
             penalties: s.penalties + 1,
             farmerMood: "sad",
-            bubbleText: "Wrong plant! Only cut the marked ones! 😬",
+            bubbleText: "Ối! Đó là cây non! Cẩn thận hơn nhé!",
           };
         }
       });
@@ -279,28 +278,32 @@ export function useGameState() {
                 ...prev,
                 phase: 4,
                 farmerMood: "excited",
-                bubbleText: "WONDERFUL! 🎉 You harvested perfectly!",
+                bubbleText:
+                  "TUYỆT VỜI! 🎉\nBạn thu hoạch thành công!\nLàng nghề cảm ơn bạn!",
               }));
             }, 1200);
           }
-          addPop("+15 pts", "#00E676", x, y);
+          addPop("+15 điểm", "#00E676", x, y);
           return {
             ...s,
             plants: updatedPlants,
             collectedCount: newCount,
             score: s.score + 15,
             farmerMood: "happy",
-            bubbleText: "Great! Keep going! 🌿",
+            bubbleText:
+              newCount < 5
+                ? `Tốt lắm! Còn ${5 - newCount} cây nữa! 🌿`
+                : "Xuất sắc! Hoàn thành bó cói! 🎉",
           };
         } else {
-          addPop("-20 pts", "#EF5350", x, y);
+          addPop("-20 điểm", "#EF5350", x, y);
           return {
             ...s,
             score: Math.max(0, s.score - 20),
             stars: Math.max(1, s.stars - 1),
             penalties: s.penalties + 1,
             farmerMood: "sad",
-            bubbleText: "Wrong bundle! Only dark green plants! ❌",
+            bubbleText: "Cây đó không tốt! Chỉ lấy cây xanh đậm!",
           };
         }
       });
