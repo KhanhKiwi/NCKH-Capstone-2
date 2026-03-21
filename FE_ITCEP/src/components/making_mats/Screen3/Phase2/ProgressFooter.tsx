@@ -1,4 +1,6 @@
 // 1. Định nghĩa Interface cho các Props
+import { useNavigate } from 'react-router-dom'
+
 interface ProgressFooterProps {
   selectedColor: string | null;
   isPlaying: boolean;
@@ -23,6 +25,7 @@ export default function ProgressFooter({
   handleBack,
   gameResult,
 }: ProgressFooterProps) { // Thay 'any' bằng 'ProgressFooterProps'
+  const navigate = useNavigate()
   return (
     <div className="phase2-footer">
       <div className="processing-box">
@@ -89,8 +92,8 @@ export default function ProgressFooter({
           ) : gameResult === 'won' ? (
             <div style={{ textAlign: 'center' }}>
               <div className="result win">Bạn đã thắng — Giai đoạn cuối</div>
-              <div style={{ marginTop: 8, display: 'flex', justifyContent: 'center', gap: 12 }}>
-                <button className="ctrl" onClick={() => {}}>Tiếp theo</button>
+                <div style={{ marginTop: 8, display: 'flex', justifyContent: 'center', gap: 12 }}>
+                <button className="ctrl" onClick={() => navigate('/phase3')}>Tiếp theo</button>
                 <button className="ctrl" onClick={handleBack}>Quay lại</button>
               </div>
             </div>
