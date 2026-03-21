@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import styles from "./Screen1.module.css";
+import styles from "../../../styles/Screen1/Screen1.module.css";
 
 export default function SpeechBubble({
   text,

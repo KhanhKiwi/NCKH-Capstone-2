@@ -1,4 +1,4 @@
-import styles from "./Screen1.module.css";
+import styles from "../../../styles/Screen1/Screen1.module.css";
 import type { GameState } from "./game.types";
 
 const PHASE_LABEL = [

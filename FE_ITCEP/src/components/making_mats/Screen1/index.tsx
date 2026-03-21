@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import styles from "./Screen1.module.css";
+import styles from "../../../styles/Screen1/Screen1.module.css";
 import { useGameState } from "./useGameState";
 import FarmerNPC from "./FarmerNPC";
 import SpeechBubble from "./SpeechBubble";

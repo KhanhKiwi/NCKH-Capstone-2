@@ -103,7 +103,7 @@ const INIT: GameState = {
   cutIds: [],
   farmerMood: "idle",
   bubbleText:
-    "Hello! I am Chi Lan. Welcome to our village! We weave beautiful mats from sedge grass here.",
+    "Hello! I am Duy Ân. Welcome to our village! We weave beautiful mats from sedge grass here.",
   isLocked: false,
   scorePops: [],
   showHint: false,

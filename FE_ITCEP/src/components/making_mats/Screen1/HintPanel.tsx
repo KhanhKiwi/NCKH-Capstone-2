@@ -1,4 +1,4 @@
-import styles from "./Screen1.module.css";
+import styles from "../../../styles/Screen1/Screen1.module.css";
 import type { GamePhase } from "./game.types";
 
 const HINTS: Record<number, { title: string; items: string[] }> = {

@@ -1,0 +1,100 @@
+/* HUD */
+.hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  z-index: 30;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.85),
+    rgba(0, 0, 0, 0.4) 70%,
+    transparent
+  );
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.hudLeft {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.hudCenter {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.hudRight {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.badgeGold {
+  background: #f9a825;
+  color: #3e2723;
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.badgeOutline {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+}
+
+.phaseLabel {
+  background: rgba(0, 0, 0, 0.55);
+  border: 1.5px solid #f9a825;
+  border-radius: 20px;
+  padding: 5px 18px;
+  font-weight: 800;
+  font-size: 13px;
+  color: white;
+}
+
+.scoreText {
+  color: #ffd54f;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.starsRow {
+  display: flex;
+  gap: 2px;
+}
+
+.starOn {
+  font-size: 20px;
+}
+
+.starOff {
+  font-size: 20px;
+  opacity: 0.22;
+  filter: grayscale(1);
+}
+
+.hintBtn {
+  width: 34px;
+  height: 34px;
+  background: #f9a825;
+  border: 2px solid #e65100;
+  border-radius: 50%;
+  font-family: "Baloo 2", cursive;
+  font-weight: 800;
+  font-size: 17px;
+  color: #3e2723;
+  cursor: pointer;
+  animation: pulse 1.8s ease-in-out infinite;
+}

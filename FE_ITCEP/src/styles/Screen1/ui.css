@@ -1,0 +1,75 @@
+/* HINT PANEL */
+.hintPanel {
+  position: absolute;
+  top: 74px;
+  right: 14px;
+  background: rgba(255, 253, 231, 0.97);
+  border: 2.5px solid #f9a825;
+  border-radius: 16px;
+  padding: 14px 16px;
+  width: 222px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.18);
+  z-index: 35;
+  font-family: "Nunito", sans-serif;
+  font-size: 12px;
+  color: #3e2723;
+  animation: bubblePop 0.3s ease-out;
+}
+
+.hintTitle {
+  font-family: "Baloo 2", cursive;
+  font-size: 14px;
+  font-weight: 800;
+  color: #e65100;
+  margin-bottom: 8px;
+}
+
+.hintRow {
+  margin-bottom: 5px;
+  line-height: 1.5;
+}
+
+/* INTRO */
+.introBadge {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.65);
+  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  border-radius: 24px;
+  padding: 10px 26px;
+  color: white;
+  font-size: 15px;
+  z-index: 20;
+  white-space: nowrap;
+}
+
+.startBtn {
+  position: absolute;
+  bottom: 55px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #f9a825, #f57f17);
+  border: 3px solid #e65100;
+  border-radius: 30px;
+  padding: 14px 50px;
+  font-family: "Baloo 2", cursive;
+  font-size: 20px;
+  font-weight: 800;
+  color: #3e2723;
+  cursor: pointer;
+  z-index: 20;
+  box-shadow: 0 6px 0 #e65100;
+  transition: all 0.15s;
+}
+
+.startBtn:hover {
+  transform: translateX(-50%) translateY(3px);
+  box-shadow: 0 3px 0 #e65100;
+}
+
+.startBtn:active {
+  transform: translateX(-50%) translateY(6px);
+  box-shadow: none;
+}
