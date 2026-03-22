@@ -15,7 +15,7 @@ import TopPanel from '../../../components/making_mats/Screen3/Phase1/TopPanel'
 import CenterHint from '../../../components/making_mats/Screen3/Phase1/CenterHint'
 import BoardCanvas from '../../../components/making_mats/Screen3/Phase1/BoardCanvas'
 import Controls from '../../../components/making_mats/Screen3/Phase1/Controls'
-import Overlay from '../../../components/making_mats/Screen3/Phase1/Overlay'
+
 
 export default function Game(){
   const [started, setStarted] = useState(false);

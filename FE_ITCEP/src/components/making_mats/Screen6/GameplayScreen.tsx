@@ -53,12 +53,12 @@ export default function GameplayScreen() {
   const [lives, setLives] = useState(GAME_CONFIG.MAX_LIVES);
   const [timeLeft, setTimeLeft] = useState(GAME_CONFIG.DURATION);
   const [progress, setProgress] = useState(0);
-  const [nextDefectId, setNextDefectId] = useState(0);
+  const [nextDefectId] = useState(0);
   const [isGameActive, setIsGameActive] = useState(true);
   const [characterState, setCharacterState] = useState<"idle" | "encourage" | "celebrate">("idle");
   const [characterMessage, setCharacterMessage] = useState<string>();
   const [isShopOpen, setIsShopOpen] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
+  const [isPaused] = useState(false);
 
   // Upgrades state
   const [upgrades, setUpgrades] = useState<Upgrade[]>([
@@ -112,7 +112,7 @@ export default function GameplayScreen() {
   // Calculate current multipliers (memoized to prevent infinite loops)
   const getSpawnRate = useCallback(
     () => {
-      const baseRate = GAME_CONFIG.BASE_SPAWN_RATE * (0.8 + upgrades.find(u => u.id === "slowtime")?.level * 0.1);
+      const baseRate = GAME_CONFIG.BASE_SPAWN_RATE * (0.8 + (upgrades.find(u => u.id === "slowtime")?.level || 0) * 0.1);
       // Increase spawn rate as progress increases (spawn more defects) - much faster now
       const progressFactor = 1 - (progress / 100) * 0.75; // 0% progress = 1x, 100% = 0.25x (4x faster)
       return baseRate * progressFactor;
@@ -120,7 +120,7 @@ export default function GameplayScreen() {
     [upgrades, progress]
   );
   const getDefectTimeout = useCallback(
-    () => GAME_CONFIG.BASE_DEFECT_TIMEOUT * (1 + upgrades.find(u => u.id === "slowtime")?.level * 0.5),
+    () => GAME_CONFIG.BASE_DEFECT_TIMEOUT * (1 + (upgrades.find(u => u.id === "slowtime")?.level || 0) * 0.5),
     [upgrades]
   );
   const getScoreMultiplier = useCallback(

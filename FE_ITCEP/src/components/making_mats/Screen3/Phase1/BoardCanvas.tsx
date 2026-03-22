@@ -2,6 +2,12 @@
 import React, { useState } from "react";
 
 interface BoardCanvasProps {
+  pieces?: any;
+  trackRef?: React.RefObject<HTMLDivElement | null>;
+  moverRef?: React.RefObject<HTMLDivElement | null>;
+  bladeRef?: React.RefObject<HTMLDivElement | null>;
+  bladeUp?: boolean;
+  onKnifeClick?: () => void;
   onSplit?: (count: number) => void;
   started?: boolean;
   onRequireStart?: () => void;
@@ -10,7 +16,8 @@ interface BoardCanvasProps {
 
 const BoardCanvas: React.FC<BoardCanvasProps> = ({ onSplit, started = true, onRequireStart = () => {}, gameOver = false }) => {
   const [split, setSplit] = useState(false);
-  const [count, setCount] = useState(0);
+  const [, setCount] = useState(0);
+
 
   const handleKnifeClick = () => {
     if (!started) { onRequireStart(); return; }

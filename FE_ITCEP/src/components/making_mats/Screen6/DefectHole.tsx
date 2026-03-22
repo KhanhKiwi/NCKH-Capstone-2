@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import { Scissors, Circle, Search, Feather } from "lucide-react";
+import { Circle, Search, Feather } from "lucide-react";
 import confetti from "canvas-confetti";
 
 interface DefectHoleProps {
@@ -105,7 +105,6 @@ export function DefectHole({
         type: "spring",
         stiffness: 500,
         damping: 28,
-        exit: { duration: 0.25 },
       }}
       className="absolute cursor-pointer z-40"
       style={{

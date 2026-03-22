@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router";
+import { Routes, Route, Navigate } from "react-router-dom";
 import GameplayScreen from "./GameplayScreen";
 import SuccessScreen from "./SuccessScreen";
 import FailScreen from "./FailScreen";
