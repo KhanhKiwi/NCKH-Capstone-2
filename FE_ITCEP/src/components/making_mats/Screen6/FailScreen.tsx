@@ -105,8 +105,8 @@ export function FailScreen({ score = 0, onRestart }: FailScreenProps) {
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="text-4xl mb-4"
-          style={{ color: "#8B4513" }}
+          className="text-5xl font-bold mb-2"
+          style={{ color: "#8B4513", letterSpacing: "0.5px" }}
         >
           Thử lại nhé!
         </motion.h1>
@@ -116,8 +116,8 @@ export function FailScreen({ score = 0, onRestart }: FailScreenProps) {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="text-xl mb-8"
-          style={{ color: "#C9A66B" }}
+          className="text-lg mb-10 font-medium"
+          style={{ color: "#C9A66B", letterSpacing: "0.3px" }}
         >
           Cố lên, lần sau sẽ đẹp hơn!
         </motion.p>
@@ -127,16 +127,17 @@ export function FailScreen({ score = 0, onRestart }: FailScreenProps) {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.6 }}
-          className="inline-block px-8 py-4 rounded-xl mb-8"
+          className="px-12 py-6 rounded-2xl mb-8 shadow-lg"
           style={{
-            background: "rgba(255,255,255,0.5)",
-            border: "2px solid #C9A66B",
+            background: "linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.5) 100%)",
+            border: "3px solid #C9A66B",
+            minWidth: "200px",
           }}
         >
-          <div className="text-sm opacity-70" style={{ color: "#8B4513" }}>
+          <div className="text-base font-semibold opacity-75" style={{ color: "#8B4513", letterSpacing: "0.3px" }}>
             Điểm đã đạt
           </div>
-          <div className="text-3xl" style={{ color: "#E8A520" }}>
+          <div className="text-5xl font-bold mt-1" style={{ color: "#E8A520" }}>
             {score}
           </div>
         </motion.div>
@@ -151,23 +152,26 @@ export function FailScreen({ score = 0, onRestart }: FailScreenProps) {
         </motion.div>
 
         {/* Retry button */}
-        <motion.button
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleRestart}
-          className="px-8 py-4 rounded-full flex items-center gap-3 mx-auto"
-          style={{
-            background: "linear-gradient(135deg, #E8A520 0%, #FFD700 100%)",
-            color: "#FFFFFF",
-            boxShadow: "0 4px 16px #E8A52060",
-          }}
-        >
-          <RefreshCw className="w-6 h-6" />
-          <span className="text-lg">Thử lại</span>
-        </motion.button>
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <motion.button
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleRestart}
+            className="px-20 py-6 rounded-full inline-flex items-center justify-center gap-4 font-bold text-2xl"
+            style={{
+              background: "linear-gradient(135deg, #E8A520 0%, #FFD700 100%)",
+              color: "#FFFFFF",
+              boxShadow: "0 10px 30px #E8A52080",
+              letterSpacing: "0.5px",
+            }}
+          >
+            <RefreshCw className="w-8 h-8" />
+            <span>Thử lại</span>
+          </motion.button>
+        </div>
       </div>
     </motion.div>
   );
