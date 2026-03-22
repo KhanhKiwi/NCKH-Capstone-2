@@ -31,7 +31,6 @@ export default function Phase2({ onExit }: { onExit?: () => void }) {
   const [paddleX, setPaddleX] = useState<number>(0)
   const [reeds, setReeds] = useState<Reed[]>([])
   const [, setCaught] = useState(0)
-  const [missed, setMissed] = useState(0)
   const [running, setRunning] = useState(true)
   const [gameResult, setGameResult] = useState<null | 'won' | 'lost'>(null)
   
@@ -109,8 +108,8 @@ export default function Phase2({ onExit }: { onExit?: () => void }) {
         const baseX = Math.random() * Math.max(0, w - 40)
         newReeds.push({
           id, baseX, x: baseX, y: -80 - Math.random() * 60,
-          width: 8 + Math.random() * 18, height: 20 + Math.random() * 56,
-          speed: 20 + Math.random() * 60, rot: (Math.random() - 0.5) * 10,
+          width: 14, height: 90,
+          speed: (20 + Math.random() * 60) * 0.7, rot: (Math.random() - 0.5) * 10,
           rotSpeed: 0, swayAmp: 0, swayFreq: 0, swayPhase: Math.random() * Math.PI * 2
         })
       }
@@ -134,7 +133,6 @@ export default function Phase2({ onExit }: { onExit?: () => void }) {
         const newArr: Reed[] = []
         const paddleRect = paddle.getBoundingClientRect()
         const contRect = container.getBoundingClientRect()
-        let currentMissed = 0
 
         for (const r of prev) {
           if (r.caught) continue
@@ -162,18 +160,10 @@ export default function Phase2({ onExit }: { onExit?: () => void }) {
           }
 
           if (updated.y > container.clientHeight + 40) {
-            currentMissed++
+            // reed passed bottom — drop it without counting
             continue
           }
           newArr.push(updated)
-        }
-
-        if (currentMissed > 0) {
-          setMissed(m => {
-            const nextMissed = m + currentMissed
-            if (nextMissed >= 10) endGame('lost')
-            return nextMissed
-          })
         }
         return newArr
       })
@@ -228,7 +218,7 @@ export default function Phase2({ onExit }: { onExit?: () => void }) {
   }
 
   function startGame() {
-    setReeds([]); setCaught(0); setMissed(0); setRunning(true); setGameResult(null); setIsPlaying(true)
+    setReeds([]); setCaught(0); setRunning(true); setGameResult(null); setIsPlaying(true)
     setCaughtCounts(() => {
       const obj: Record<string, number> = {}
       swatchColors.forEach(c => obj[c] = 0)
@@ -238,7 +228,7 @@ export default function Phase2({ onExit }: { onExit?: () => void }) {
   }
 
   function handleBack() {
-    setIsPlaying(false); setRunning(false); setSelectedColor(null); setReeds([]); setCaught(0); setMissed(0)
+    setIsPlaying(false); setRunning(false); setSelectedColor(null); setReeds([]); setCaught(0)
     setCaughtSegments([]); setGameResult(null); countedIdsRef.current.clear()
   }
 
@@ -253,12 +243,7 @@ export default function Phase2({ onExit }: { onExit?: () => void }) {
       <div className="phase2-header">
         <div className="instruction-row">
           <p className="phase-instruction">Kéo các bó sợi cói đã chè vào màu tương ứng để tạo ra những <span className="beautiful-text">màu sắc tự nhiên</span></p>
-          {/* HIỂN THỊ MISSED TẠI ĐÂY ĐỂ GIẢI QUYẾT LỖI UNUSED BIẾN */}
-          {isPlaying && (
-            <div className="missed-indicator">
-              Bỏ lỡ: <span className={missed > 7 ? 'danger' : ''}>{missed}/10</span>
-            </div>
-          )}
+          {/* missed indicator removed */}
         </div>
         <TaskBadge text={selectedColor ? buildTaskSummary() : 'Hãy click vào ô màu để xem nhiệm vụ trò chơi'} />
       </div>

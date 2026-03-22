@@ -1,29 +1,118 @@
 /* Phase3 styles */
 /* Phase3 styles (redesigned to match screenshot) */
-.phase3-root{max-width:1100px;margin:18px auto;padding:22px 18px;display:flex;flex-direction:column;gap:28px;font-family:Poppins, Inter, Arial;color:var(--muted)}
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@400;600;700&display=swap');
+.phase3-root{max-width:2000px;margin:18px auto;padding:12px 18px;display:flex;flex-direction:column;gap:28px;font-family:Poppins, Inter, Arial;color:var(--muted)}
 
 /* Hero */
-.hero-card{position:relative;border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#e6f7ee,#bfead0);box-shadow:0 14px 40px rgba(16,80,40,0.06);min-height:300px}
-.hero-media{position:absolute;inset:0;background-image:linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.02));opacity:0.25}
-.hero-inner{position:relative;display:flex;align-items:center;justify-content:space-between;padding:34px 42px}
+.hero-card{position:relative;border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#e6f7ee,#bfead0);box-shadow:0 14px 40px rgba(16,80,40,0.06);min-height:480px;
+  /* hero text color variables (can be overridden per weather) */
+  --hero-text-color: #000;
+  --hero-text-shadow: 0 6px 18px rgba(0,0,0,0.55);
+}
+.hero-media{position:absolute;inset:0;background-image:linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.02));opacity:0.25;z-index:1}
+.hero-inner{position:relative;z-index:10;display:flex;align-items:flex-start;justify-content:space-between;padding:44px 18px}
 .hero-left{max-width:68%}
-.hero-title{font-size:30px;margin:0;color:#123927;font-weight:800}
-.hero-desc{margin-top:10px;color:#174d32;opacity:0.9}
+.hero-title{font-size:44px;margin:0;color:var(--hero-text-color);font-weight:700;text-shadow:var(--hero-text-shadow);font-family:'Playfair Display',serif;letter-spacing:0.6px;line-height:1.05;-webkit-text-stroke:0.3px rgba(0,0,0,0.06)}
+.hero-desc{margin-top:14px;color:var(--hero-text-color);opacity:0.95;font-size:18px;line-height:1.35;font-family:Poppins, Inter, Arial;font-weight:600}
 .hero-right{display:flex;align-items:center}
-.btn-cta{background:#fff;padding:10px 18px;border-radius:22px;border:none;color:#0f6b3d;font-weight:800;box-shadow:0 8px 22px rgba(12,20,12,0.06);cursor:pointer}
+.btn-cta{background:#fff;padding:10px 18px;border-radius:22px;border:none;color:#000;font-weight:800;box-shadow:0 8px 22px rgba(12,20,12,0.06);cursor:pointer}
 
 /* Info cards: side-by-side */
-.info-row{display:flex;gap:20px;flex-wrap:wrap;align-items:stretch}
-.info-card{flex:1 1 48%;min-width:320px;background:#ffffff;padding:20px;border-radius:12px;border:1px solid rgba(22,201,90,0.08);box-shadow:0 10px 26px rgba(22,201,90,0.04);display:flex;flex-direction:column}
+.info-row{display:flex;gap:20px;flex-wrap:nowrap;align-items:stretch;justify-content:space-between;width:100%}
+.info-card{flex:1 1 0;background:#ffffff;padding:20px;border-radius:12px;border:1px solid rgba(22,201,90,0.08);box-shadow:0 10px 26px rgba(22,201,90,0.04);display:flex;flex-direction:column;box-sizing:border-box;min-width:0}
 .info-top{display:flex;align-items:center;justify-content:space-between}
-.info-meta{font-size:12px;text-transform:uppercase;color:#7fbf9a;font-weight:800;display:flex;align-items:center;gap:8px}
+.info-meta{font-size:20px;text-transform:uppercase;color:#7fbf9a;font-weight:800;display:flex;align-items:center;gap:8px}
 .meta-ico{display:inline-block;margin-right:6px;color:#83d69f}
-.meta-badge{color:#16c95a;font-weight:700}
 .info-title{font-size:18px;font-weight:800;color:#16392f;margin-top:10px}
 .info-sub{margin-top:12px;color:#6b6b6b;font-size:14px}
 .progress-percent{font-size:22px;font-weight:900;color:#16392f}
 .progress-bar{height:14px;background:#f0fff6;border-radius:999px;margin-top:12px;overflow:hidden;border:1px solid rgba(22,201,90,0.06)}
 .progress-fill{height:100%;background:linear-gradient(90deg,#36d36a,#16c95a);transition:width .4s}
+
+/* Grasses panel animation */
+.grasses-panel{max-height:0;overflow:hidden;transition:all .45s cubic-bezier(.2,.9,.2,1);opacity:0;padding-top:0}
+.grasses-panel.show{max-height:1200px;opacity:1;padding-top:18px}
+.grasses-panel .card{transform:translateY(14px);opacity:0;transition:transform .36s ease,opacity .36s ease}
+.grasses-panel.show .card{transform:translateY(0);opacity:1}
+.grass-sample{transition:transform .36s ease,opacity .36s ease}
+
+/* Floating grasses inside hero */
+.floating-grasses{position:absolute;right:28px;bottom:22px;display:flex;gap:12px;padding:10px 14px;background:rgba(255,255,255,0.9);border-radius:12px;box-shadow:0 10px 30px rgba(12,20,12,0.06);align-items:center}
+.floating-grass-card{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:#fff;box-shadow:0 6px 16px rgba(12,20,12,0.04);transform:translateY(8px);opacity:0;animation:fg-in .36s forwards}
+.floating-grass-card:nth-child(2){animation-delay:80ms}
+.floating-grass-card:nth-child(3){animation-delay:150ms}
+
+@keyframes fg-in{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* Floating reeds (reused from Phase2 look) */
+.floating-grasses{position:absolute;inset:0;pointer-events:none;z-index:10}
+.floating-reed{position:absolute;border-radius:8px 8px 12px 12px;box-shadow:inset 0 2px 8px rgba(255,255,255,0.06),0 8px 20px rgba(10,30,10,0.06);transform-origin:center center;opacity:0.98;transition:transform .12s linear;z-index:10}
+.floating-reed::after{content:'';position:absolute;left:6%;right:6%;top:8%;bottom:18%;border-radius:6px;background:linear-gradient(180deg,rgba(255,255,255,0.22),rgba(255,255,255,0.04));opacity:0.9}
+.floating-reed{animation:reed-sway 3.5s ease-in-out infinite}
+
+@keyframes reed-sway{
+  0%{transform:translateY(0) rotate(0deg)}
+  50%{transform:translateY(-6px) rotate(4deg)}
+  100%{transform:translateY(0) rotate(0deg)}
+}
+
+/* Floating reed enter/exit animations */
+@keyframes reed-in{
+  0%{opacity:0;transform:translateY(-28px) scale(.92) rotate(var(--rot,0deg))}
+  60%{opacity:1;transform:translateY(6px) scale(1.02) rotate(var(--rot,0deg))}
+  100%{opacity:1;transform:translateY(0) scale(1) rotate(var(--rot,0deg))}
+}
+@keyframes reed-out{
+  0%{opacity:1;transform:translateY(0) scale(1) rotate(var(--rot,0deg))}
+  100%{opacity:0;transform:translateY(30px) scale(.9) rotate(var(--rot,0deg))}
+}
+.floating-reed.enter{animation:reed-in .62s cubic-bezier(.2,.9,.3,1) forwards}
+.floating-reed.exit{animation:reed-out .48s cubic-bezier(.4,.0,.2,1) forwards}
+.floating-reed.idle{animation:none;opacity:1}
+/* ensure each reed uses its inline transform but suppress initial flicker */
+.floating-reed{opacity:0;will-change:transform,opacity}
+
+/* Drying rope + bundle visuals */
+.drying-line{position:absolute;inset:0;pointer-events:none;z-index:10}
+.drying-line .rope{position:absolute;left:40px;right:40px;top:140px;height:2px;background:linear-gradient(90deg,#a8885a,#6b4c2c);box-shadow:0 2px 8px rgba(0,0,0,0.08);border-radius:2px}
+.bundle{position:absolute;top:144px;width:56px;transform-origin:top center;pointer-events:none}
+.bundle{will-change:transform}
+
+/* Wind sway animation */
+@keyframes bundle-sway{
+  0%{transform:rotate(calc(var(--sway-amt) * -1))}
+  50%{transform:rotate(calc(var(--sway-amt) * 0.6))}
+  100%{transform:rotate(calc(var(--sway-amt) * -1))}
+}
+.bundle.sway{animation-name:bundle-sway;animation-duration:var(--sway-speed,3s);animation-timing-function:ease-in-out;animation-iteration-count:infinite;animation-direction:alternate}
+.bundle .bundle-rope{position:absolute;left:50%;transform:translateX(-50%);height:var(--length);width:2px;background:linear-gradient(180deg,#6b4c2c,#9b7a55);border-radius:2px}
+.bundle .bundle-body{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--length));width:18px;height:var(--length);border-radius:999px;box-shadow:0 10px 18px rgba(0,0,0,0.12);overflow:visible;background:linear-gradient(180deg,rgba(255,255,255,0.15),rgba(0,0,0,0.06));}
+.bundle .bundle-body::before{content:'';position:absolute;inset:6% 6% 6% 6%;border-radius:999px;background:linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0));opacity:0.9}
+.bundle .bundle-body{background-image:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(0,0,0,0.06));}
+.bundle .bundle-body{background-color:var(--color,#2ecc71)}
+.bundle.enter{animation:bundle-in .6s cubic-bezier(.2,.9,.3,1) forwards}
+.bundle.exit{animation:bundle-out .48s cubic-bezier(.4,.0,.2,1) forwards}
+.bundle.idle{opacity:1}
+
+@keyframes bundle-in{
+  0%{opacity:0;transform:translateY(-20px) rotate(-6deg) scale(.96)}
+  60%{opacity:1;transform:translateY(6px) rotate(4deg) scale(1.02)}
+  100%{opacity:1;transform:translateY(0) rotate(0) scale(1)}
+}
+@keyframes bundle-out{
+  0%{opacity:1;transform:translateY(0) rotate(0)}
+  100%{opacity:0;transform:translateY(30px) rotate(8deg) scale(.9)}
+}
+
+/* Rain overlay styling */
+.rain-overlay{position:absolute;inset:0;background-repeat:no-repeat;background-position:center top;background-size:cover;opacity:.55;pointer-events:none;mix-blend-mode:normal;filter:contrast(.95) saturate(.85);z-index:2}
+
+/* Top cards inside hero (weather + progress) */
+.hero-top-cards{position:absolute;top:18px;right:18px;display:flex;gap:12px;align-items:center;z-index:100000;pointer-events:auto}
+.info-card-small{width:220px;background:rgba(255,255,255,0.92);padding:12px;border-radius:10px;border:1px solid rgba(12,20,12,0.04);box-shadow:0 10px 30px rgba(12,20,12,0.06)}
+.info-card-small .info-top{display:flex;align-items:center;justify-content:space-between}
+.info-card-small .info-title.small{font-size:13px;margin-top:8px}
+.info-card-small .progress-percent{font-size:16px}
 
 /* Section + grid */
 .section-title{font-size:16px;margin:0;color:#2f6b45;font-weight:700}
@@ -46,14 +135,33 @@
   .info-card{flex:1 1 100%;min-width:unset}
 }
 
-/* Weather-specific hero variations */
-.hero-card.sunny{background:linear-gradient(180deg,#e6f7e8,#bfead0)}
-.hero-card.rain{background:linear-gradient(180deg,#dfeef8,#b7d7ee)}
-.hero-card.cloudy{background:linear-gradient(180deg,#f0f2f4,#e6e9ec)}
+/* When grasses are shown, ensure we don't add a translucent white veil over the hero */
+.hero-card.with-grasses .floating-grasses{background:transparent !important;padding:0 !important}
+.hero-card.with-grasses .hero-overlay{display:none !important}
+.hero-card.with-grasses .hero-media{opacity:1 !important}
 
-.weather-display{display:flex;align-items:center;gap:8px;margin-right:12px;font-weight:700;color:#0f6b3d}
-.weather-ico{font-size:18px}
-.weather-label{font-size:13px}
+.hero-card.sunny{background:linear-gradient(180deg,#fff4d9,#ffd36a);
+  /* use black text for all weather states per user request */
+  --hero-text-color: #000;
+  --hero-text-shadow: 0 3px 8px rgba(255,255,255,0.85), 0 8px 22px rgba(0,0,0,0.28);
+}
+.hero-card.sunny .hero-media{background-image:linear-gradient(180deg, rgba(255,220,120,0.38), rgba(255,200,80,0.18)), url('https://images.pexels.com/photos/6128940/pexels-photo-6128940.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');background-repeat:no-repeat;background-position:center top;background-size:cover;background-blend-mode:overlay,normal;opacity:1;z-index:1}
+.hero-card.rain{background:linear-gradient(180deg,#dfeef8,#b7d7ee)}
+.hero-card.rain{ /* use black text per user request */
+  --hero-text-color: #000;
+  --hero-text-shadow: 0 6px 20px rgba(0,0,0,0.6);
+}
+.hero-card.rain .hero-media{background-image:linear-gradient(180deg, rgba(10,18,28,0.62), rgba(10,18,28,0.42)), url('https://media.istockphoto.com/id/1127768977/vi/anh/m%C6%B0a-l%E1%BB%9Bn-m%C3%B9a-xu%C3%A2n-%E1%BB%9F-n%C3%B4ng-th%C3%B4n.jpg?b=1&s=612x612&w=0&k=20&c=dFs45HTlbTYNFWMJKmSpIurNIn2ou-onpar87iuHNpM=');background-repeat:no-repeat;background-position:center top;background-size:cover;background-blend-mode:overlay,normal;opacity:1;z-index:1}
+.hero-card.cloudy{background:linear-gradient(180deg,#f0f2f4,#e6e9ec)}
+.hero-card.cloudy{ /* use black text per user request */
+  --hero-text-color: #000;
+  --hero-text-shadow: 0 6px 20px rgba(0,0,0,0.6);
+}
+.hero-card.cloudy .hero-media{background-image:linear-gradient(180deg, rgba(20,28,36,0.62), rgba(20,28,36,0.42)), url('https://images.pexels.com/photos/334030/pexels-photo-334030.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');background-repeat:no-repeat;background-position:center top;background-size:cover;background-blend-mode:overlay,normal;opacity:1;z-index:1}
+
+.weather-display{display:flex;align-items:center;gap:8px;margin-right:12px;font-weight:700;color:#000}
+.weather-ico{font-size:18px;color:inherit}
+.weather-label{font-size:20px;color:inherit}
 
 /* Warning styles when timer <= 10s */
 .time-warning{color:#e53935;font-weight:900;display:inline-block;animation:shake 0.45s cubic-bezier(.36,.07,.19,.97) infinite}
@@ -69,4 +177,20 @@
 
 /* Slight pulse for the badge when warning */
 .info-card.warning .meta-badge{color:#e53935}
+
+/* Use internal padding for reliable gutters (prevents external wrapper conflicts).
+   This ensures left/right gutters are always applied even if parent layout centers or constrains width. */
+.phase3-root{box-sizing:border-box;max-width:none !important;width:100% !important;padding-left:250px;padding-right:250px;margin:18px 0 !important}
+@media (min-width:1400px) and (max-width:2200px){
+  /* larger screens retain big gutters */
+  .phase3-root{padding-left:250px;padding-right:250px}
+}
+@media (max-width:1400px){
+  /* medium screens: reduce gutters */
+  .phase3-root{padding-left:80px;padding-right:80px}
+}
+@media (max-width:720px){
+  /* mobile/tablet fallback */
+  .phase3-root{padding-left:20px;padding-right:20px}
+}
 

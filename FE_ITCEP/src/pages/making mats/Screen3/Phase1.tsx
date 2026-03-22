@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import '../../../styles/Screen3/Phase1/game.css'
 import TopPanel from '../../../components/making_mats/Screen3/Phase1/TopPanel'
 import CenterHint from '../../../components/making_mats/Screen3/Phase1/CenterHint'
 import BoardCanvas from '../../../components/making_mats/Screen3/Phase1/BoardCanvas'
