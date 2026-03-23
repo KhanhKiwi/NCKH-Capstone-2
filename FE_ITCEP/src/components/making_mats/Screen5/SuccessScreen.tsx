@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
-import { Trophy, Heart } from "lucide-react";
+import { Heart } from "lucide-react";
 
 export default function SuccessScreen() {
   const navigate = useNavigate();
@@ -196,7 +196,7 @@ export default function SuccessScreen() {
             transition={{ delay: 1 }}
             className="mb-8 flex items-center justify-center gap-3"
           >
-            <Trophy className="w-8 h-8" style={{ color: "#E8A520" }} />
+            <Heart className="w-8 h-8" style={{ color: "#E8A520", fill: "#E8A520" }} />
             <span className="text-2xl" style={{ color: "#C9A66B" }}>Level 5 Hoàn thành!</span>
           </motion.div>
 
@@ -215,7 +215,7 @@ export default function SuccessScreen() {
                 color: "white",
               }}
             >
-              <Trophy className="w-6 h-6" />
+              <Heart className="w-6 h-6" />
               Tiếp tục
             </button>
             <button
