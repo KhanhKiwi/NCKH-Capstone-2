@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import '../../../styles/Screen3/Phase2/game.css'
 import TaskBadge from '../../../components/making_mats/Screen3/Phase2/TaskBadge'
 import ColorSelector from '../../../components/making_mats/Screen3/Phase2/ColorSelector'
@@ -33,6 +34,7 @@ export default function Phase2({ onExit }: { onExit?: () => void }) {
   const [, setCaught] = useState(0)
   const [running, setRunning] = useState(true)
   const [gameResult, setGameResult] = useState<null | 'won' | 'lost'>(null)
+  const navigate = useNavigate()
   
   const idRef = useRef(1)
   const rafRef = useRef<number | null>(null)
@@ -75,6 +77,12 @@ export default function Phase2({ onExit }: { onExit?: () => void }) {
     setGameResult(result)
     setIsPlaying(false)
     setRunning(false)
+    // persist stars for phase2: won => 3, lost => 0
+    try {
+      const stars = result === 'won' ? 3 : 0
+      localStorage.setItem('phase2_stars', String(stars))
+      localStorage.setItem('phase2_result', result)
+    } catch (e) { }
   }, [])
 
   const randomizeTaskCounts = useCallback((total = 10) => {
@@ -281,6 +289,11 @@ export default function Phase2({ onExit }: { onExit?: () => void }) {
         resetGame={() => randomizeTaskCounts(10)}
         gameResult={gameResult}
       />
+      {gameResult === 'won' && (
+        <div style={{display: 'flex', justifyContent: 'center', marginTop: 12}}>
+          <button className="btn-cta" onClick={() => navigate('/phase3')}>Giai đoạn tiếp theo</button>
+        </div>
+      )}
     </div>
   )
 }

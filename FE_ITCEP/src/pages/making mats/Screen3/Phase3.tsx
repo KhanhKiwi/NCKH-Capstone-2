@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import '../../../styles/Screen3/Phase3/game.css'
 
 const samples = [
@@ -23,6 +24,7 @@ export default function Phase3(){
   const [secondsLeft, setSecondsLeft] = useState<number>(() => getDuration(weather))
   const [grassesOut, setGrassesOut] = useState<boolean>(false)
   const [running, setRunning] = useState<boolean>(false)
+  const navigate = useNavigate()
   const [bundles, setBundles] = useState<Array<{id:number,left:number,length:number,color:string,progress:number,stage:string,top?:number,swayAmt?:number,swaySpeed?:number}>>([])
   const bundleColors = ['#d35400','#f1c40f','#27ae60','#9b59b6']
   const weatherSubtitle = weather === 'sunny'
@@ -107,6 +109,13 @@ export default function Phase3(){
   }, [weather, grassesOut, running])
   const overall = bundles && bundles.length ? Math.round(bundles.reduce((s, x) => s + (x.progress || 0), 0) / bundles.length) : 0
 
+  // Stop the timer automatically when overall reaches 100%
+  useEffect(() => {
+    if (overall >= 100) {
+      setRunning(false)
+    }
+  }, [overall])
+
   return (
     <div className="phase3-root">
       <div className={`hero-card ${weather} ${grassesOut || bundles.length ? 'with-grasses' : ''}`}>
@@ -129,15 +138,27 @@ export default function Phase3(){
               <span className="weather-label">{weatherInfo[weather].label}</span>
             </div>
               <div style={{display:'flex',gap:8,alignItems:'center'}}>
-                <button
-                  className="btn-cta"
-                  onClick={() => setRunning(r => !r)}
-                  aria-pressed={running}
-                >
-                  {running ? 'Tạm dừng' : 'Bắt đầu'}
-                </button>
-                {running && (
-                  <button className="btn-cta" onClick={handleToggleGrasses}>{grassesOut ? 'Đưa cói vào' : 'Đưa cói ra'}</button>
+                {overall === 100 ? (
+                  <button className="btn-cta" onClick={() => {
+                    try {
+                      localStorage.setItem('phase3_stars', String(3))
+                      localStorage.setItem('phase3_overall', String(overall))
+                    } catch (e) { }
+                    navigate('/phase4')
+                  }}>Màn tiếp theo</button>
+                ) : (
+                  <>
+                    <button
+                      className="btn-cta"
+                      onClick={() => setRunning(r => !r)}
+                      aria-pressed={running}
+                    >
+                      {running ? 'Tạm dừng' : 'Bắt đầu'}
+                    </button>
+                    {running && (
+                      <button className="btn-cta" onClick={handleToggleGrasses}>{grassesOut ? 'Đưa cói vào' : 'Đưa cói ra'}</button>
+                    )}
+                  </>
                 )}
               </div>
           </div>
@@ -205,3 +226,5 @@ export default function Phase3(){
     </div>
   )
 }
+
+ 

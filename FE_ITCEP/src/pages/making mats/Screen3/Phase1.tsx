@@ -93,6 +93,21 @@ export default function Game(){
   useEffect(() => { if (secondsLeft <= 0 && slicesMade < SLICES_NEEDED) { setGameOver(true); setRunning(false) } }, [secondsLeft, slicesMade])
   useEffect(() => { if (slicesMade >= SLICES_NEEDED) { setWin(true); setRunning(false) } }, [slicesMade])
 
+  // Persist Phase1 result (compute stars) when player wins
+  useEffect(() => {
+    if (!win) return
+    try {
+      // Rule: remaining >= 60 => 3 stars; remaining >= 30 => 2 stars; otherwise 1 star
+      const remaining = secondsLeft
+      let stars = 1
+      if (remaining >= 60) stars = 3
+      else if (remaining >= 30) stars = 2
+      else stars = 1
+      localStorage.setItem('phase1_stars', String(stars))
+      localStorage.setItem('phase1_elapsed', String(90 - remaining))
+    } catch (e) { /* ignore storage errors */ }
+  }, [win, secondsLeft])
+
   function handleKnifeClick(){
     if (!started) { setShowRequireStart(true); return; }
     if (!moverRef.current || !bladeRef.current) return
