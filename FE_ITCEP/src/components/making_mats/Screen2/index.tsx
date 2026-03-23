@@ -50,12 +50,20 @@ const Screen2 = () => {
               <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#5a4a3a' }}>{game.score}</div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '12px', color: '#8b6f47', fontWeight: 'bold' }}>� Cói còn</div>
-              <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#ef8b3a' }}>{game.basket}</div>
+              <div style={{ fontSize: '12px', color: '#8b6f47', fontWeight: 'bold' }}>⭐ Sao</div>
+              <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#CD853F' }}>
+                {Array(Math.max(game.stars, 0)).fill('⭐').join('')}
+              </div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '12px', color: '#8b6f47', fontWeight: 'bold' }}>⚡ Gió</div>
-              <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#3b82f6' }}>{game.wind}</div>
+              <div style={{ fontSize: '12px', color: '#8b6f47', fontWeight: 'bold' }}>⏱️ Thời gian</div>
+              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#A0522D' }}>
+                {Math.floor(game.timeRemaining / 1000 / 60)}:{String(Math.floor((game.timeRemaining / 1000) % 60)).padStart(2, '0')}
+              </div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '12px', color: '#8b6f47', fontWeight: 'bold' }}>🌾 Cói còn</div>
+              <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#CD853F' }}>{game.basket}</div>
             </div>
           </div>
 
@@ -151,6 +159,7 @@ const Screen2 = () => {
           dropSedge={game.dropSedge}
           onBundleDragStart={game.setDraggedBundleProgress}
           onHarvest={game.harvestSedge}
+          onCatchBug={game.catchBug}
           weather={game.weather}
         />
 

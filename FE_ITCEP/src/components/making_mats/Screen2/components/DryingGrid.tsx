@@ -6,10 +6,11 @@ type Props = {
   dropSedge:(cellId:number, bundleIndex:number)=>void
   onBundleDragStart?: (bundleIndex: number, progress: number) => void
   onHarvest?: (cellId: number, bundleIndex: number) => void
+  onCatchBug?: (cellId: number, bugId: string) => void
   weather?: string
 }
 
-const DryingGrid = ({ cells, dropSedge, onBundleDragStart, onHarvest, weather }: Props) => {
+const DryingGrid = ({ cells, dropSedge, onBundleDragStart, onHarvest, onCatchBug, weather }: Props) => {
 
   return (
     <div style={{
@@ -31,6 +32,7 @@ const DryingGrid = ({ cells, dropSedge, onBundleDragStart, onHarvest, weather }:
             onDrop={dropSedge}
             onDragStart={onBundleDragStart}
             onHarvest={onHarvest}
+            onCatchBug={onCatchBug}
             weather={weather}
           />
         ))}

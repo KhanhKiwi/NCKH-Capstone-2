@@ -250,7 +250,7 @@ const WeatherStatus = ({ weather, wind, isWeatherChanging = false }: Props) => {
         {isWeatherChanging && (
           <div style={{
             fontSize: '10px',
-            color: '#ef4444',
+            color: '#A0522D',
             marginTop: '4px',
             fontWeight: 'bold',
             animation: 'weatherChange 0.6s ease-out'

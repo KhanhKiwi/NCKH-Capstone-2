@@ -106,10 +106,10 @@ const SedgeBasket = ({ total, placedBundles = new Set(), draggingBundleIndex, dr
           alignItems: 'center',
           gap: '8px',
           backdropFilter: 'blur(4px)',
-          border: '2px solid #22c55e'
+          border: '2px solid #8B7355'
         }}>
           <span>🌾 Cói #{(draggingBundleIndex ?? 0) + 1}</span>
-          <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#22c55e' }}>
+          <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#8B7355' }}>
             {Math.floor(draggedBundleProgress)}%
           </span>
         </div>
@@ -161,7 +161,7 @@ const SedgeBasket = ({ total, placedBundles = new Set(), draggingBundleIndex, dr
               dragImage.style.position = 'absolute'
               dragImage.style.width = '45px'
               dragImage.style.height = '100px'
-              dragImage.style.background = 'linear-gradient(90deg, #22c55e 0%, #16a34a 50%, #15803d 100%)'
+              dragImage.style.background = 'linear-gradient(90deg, #8B7355 0%, #6B5D4F 50%, #5A4A40 100%)'
               dragImage.style.borderRadius = '3px'
               dragImage.style.border = '2px solid #15803d'
               dragImage.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.5)'
@@ -190,7 +190,7 @@ const SedgeBasket = ({ total, placedBundles = new Set(), draggingBundleIndex, dr
               style={{
                 width: '45px',
                 height: '100px',
-                background: 'linear-gradient(90deg, #22c55e 0%, #16a34a 50%, #15803d 100%)',
+                background: 'linear-gradient(90deg, #8B7355 0%, #6B5D4F 50%, #5A4A40 100%)',
                 borderRadius: '3px',
                 position: 'relative',
                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.4), inset -2px 0 4px rgba(0, 0, 0, 0.2)',
@@ -209,9 +209,9 @@ const SedgeBasket = ({ total, placedBundles = new Set(), draggingBundleIndex, dr
                 }}
               >
                 {/* Top leaves */}
-                <line x1="8" y1="0" x2="5" y2="-6" stroke="#22c55e" strokeWidth="2" opacity="0.8" />
-                <line x1="22" y1="0" x2="20" y2="-8" stroke="#22c55e" strokeWidth="2" opacity="0.8" />
-                <line x1="37" y1="0" x2="40" y2="-6" stroke="#22c55e" strokeWidth="2" opacity="0.8" />
+                <line x1="8" y1="0" x2="5" y2="-6" stroke="#8B7355" strokeWidth="2" opacity="0.8" />
+                <line x1="22" y1="0" x2="20" y2="-8" stroke="#8B7355" strokeWidth="2" opacity="0.8" />
+                <line x1="37" y1="0" x2="40" y2="-6" stroke="#8B7355" strokeWidth="2" opacity="0.8" />
                 
                 {/* Texture lines */}
                 <line x1="5" y1="15" x2="12" y2="50" stroke="#15803d" strokeWidth="1" opacity="0.5" />

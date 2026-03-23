@@ -120,7 +120,7 @@ const GuideCharacter = ({
 
   const getNotificationBorder = () => {
     if (hasNewWeatherNotification) {
-      if (weather === 'rainy') return '#ef4444'
+      if (weather === 'rainy') return '#A0522D'
       if (weather === 'sunny') return '#f59e0b'
       if (weather === 'cloudy') return '#9ca3af'
     }

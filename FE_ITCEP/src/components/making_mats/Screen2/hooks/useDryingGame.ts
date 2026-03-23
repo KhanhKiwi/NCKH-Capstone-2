@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { GRID_DATA } from "../constants"
-import type { DryingCellType } from "../types"
+import type { DryingCellType, BugType } from "../types"
 
 const WEATHER_CYCLE = ["sunny", "cloudy", "rainy"] as const
 const WEATHER_DURATION = 15000 // 15 seconds per weather state
@@ -9,6 +9,10 @@ const WIND_MAP = {
   cloudy: "moderate",
   rainy: "strong"
 } as const
+const BUG_COLORS = ["#8B4513", "#A0522D", "#6B4423", "#8B7355", "#556B2F", "#8B6914", "#696969", "#A0826D", "#704214"] as const
+const BUG_SPAWN_CHANCE = 0.15 // 15% chance per second to spawn a bug
+const BUG_DAMAGE_RATE = 1.5 // Reduce 1.5% per second when bugs are present
+const GAME_TIME = 5 * 60 * 1000 // 5 minutes in milliseconds
 
 export const useDryingGame = () => {
 
@@ -21,6 +25,10 @@ export const useDryingGame = () => {
 
   const [score, setScore] = useState(0)
   const [progress, setProgress] = useState(0)
+  const [stars, setStars] = useState(5)
+  const [timeRemaining, setTimeRemaining] = useState(GAME_TIME)
+  const [gameStartTime] = useState(Date.now())
+  const [completedBundles, setCompletedBundles] = useState<Set<number>>(new Set())
 
   // Dynamic weather system
   const [weatherIndex, setWeatherIndex] = useState(0)
@@ -114,6 +122,19 @@ export const useDryingGame = () => {
     setDraggedBundleProgress(0)
   }
 
+  // Catch bug on a cell
+  const catchBug = (cellId: number, bugId: string) => {
+    setCells(prev =>
+      prev.map(cell =>
+        cell.id === cellId
+          ? { ...cell, bugs: cell.bugs?.filter(b => b.id !== bugId) || [] }
+          : cell
+      )
+    )
+    // Add points for catching bug
+    setScore(s => s + 25)
+  }
+
   // Monitor damaged cells and remove them after 2 seconds
   useEffect(() => {
     const damagedCells = cells.filter(c => c.status === 'damaged' && c.hasSedge)
@@ -151,7 +172,28 @@ export const useDryingGame = () => {
     }
   }, [cells.some(c => c.status === 'damaged')])
 
-  // Weather change effect
+  // Time management effect
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const elapsedTime = Date.now() - gameStartTime
+      const remaining = Math.max(GAME_TIME - elapsedTime, 0)
+      setTimeRemaining(remaining)
+
+      // Calculate stars based on time remaining
+      // 5 minutes = 5 stars, each minute lost = -1 star
+      const minutesRemaining = remaining / (60 * 1000)
+      const newStars = Math.max(Math.ceil(minutesRemaining), 0)
+      setStars(newStars)
+
+      // Game over when time reaches 0
+      if (remaining === 0) {
+        clearInterval(timer)
+        // Game ends here - you can add logic to handle game over
+      }
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [gameStartTime])
   useEffect(() => {
     const weatherTimer = setInterval(() => {
       setWeatherIndex(prev => {
@@ -198,12 +240,18 @@ export const useDryingGame = () => {
 
           // Handle rainy weather - reduce progress
           if (weather === 'rainy') {
-            let newProgress = Math.max(cell.progress - 0.5, 0) // Decrease by 0.5% per second when rainy
+            let newProgress = Math.max(cell.progress - 0.5, 0) // Decrease by 0.5% per second when rainy, but not below 0
             return { ...cell, progress: newProgress }
           }
 
+          // Calculate damage from bugs
+          const bugDamage = (cell.bugs?.length || 0) > 0 ? BUG_DAMAGE_RATE : 0
+          
           // Normal drying when not rainy
-          let newProgress = cell.progress + cell.speed
+          let newProgress = cell.progress + cell.speed - bugDamage
+
+          // Ensure progress doesn't go below 0
+          newProgress = Math.max(newProgress, 0)
 
           // Cối bị hỏng khi vượt quá 110%
           if (newProgress > 110) {
@@ -215,22 +263,43 @@ export const useDryingGame = () => {
             return { ...cell, progress: newProgress, status: 'ready' as const }
           }
 
-          // Giới hạn ở 100% nếu không bị hỏng
-          if (newProgress >= 100 && newProgress <= 110) {
+          // Check if bundle just completed (reached 100%)
+          const wasCompleted = cell.progress < 100 && newProgress >= 100
+          if (wasCompleted && cell.bundleIndex !== undefined) {
+            // Mark this bundle as completed and increment progress
+            setCompletedBundles(prev => {
+              if (!prev.has(cell.bundleIndex!)) {
+                // Increment progress by 10% for each completed bundle
+                setProgress(p => Math.min(p + 10, 100))
+                const newSet = new Set(prev)
+                newSet.add(cell.bundleIndex!)
+                return newSet
+              }
+              return prev
+            })
             setScore(s => s + 10)
             return { ...cell, progress: newProgress, status: 'ready' as const }
           }
 
-          return {
-            ...cell,
-            progress: newProgress,
-            status: 'drying' as const
+          // Randomly spawn bugs on cells with sedge
+          let updatedCell = { ...cell, progress: newProgress, status: 'drying' as const }
+          if (Math.random() < BUG_SPAWN_CHANCE && (!cell.bugs || cell.bugs.length < 3)) {
+            const newBug: BugType = {
+              id: `bug-${Date.now()}-${Math.random()}`,
+              color: BUG_COLORS[Math.floor(Math.random() * BUG_COLORS.length)],
+              x: Math.random() * 80 + 10,
+              y: Math.random() * 60 + 10
+            }
+            updatedCell = {
+              ...updatedCell,
+              bugs: [...(cell.bugs || []), newBug]
+            }
           }
+
+          return updatedCell
 
         })
       )
-
-      setProgress(prev => Math.min(prev + 1, 100))
 
     }, 1000)
 
@@ -243,6 +312,8 @@ export const useDryingGame = () => {
     basket: totalBundles - placedBundles.size,
     score,
     progress,
+    stars,
+    timeRemaining,
     weather,
     wind,
     weatherNotification,
@@ -251,6 +322,7 @@ export const useDryingGame = () => {
     dropSedge,
     returnSedge,
     harvestSedge,
+    catchBug,
     placedBundles,
     draggingBundleIndex,
     setDraggingBundleIndex,
