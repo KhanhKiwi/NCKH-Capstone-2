@@ -260,11 +260,7 @@ export default function Screen1() {
 
       {/* HUD */}
       {phase >= 1 && phase <= 3 && (
-        <HUD
-          state={state}
-          onToggleHint={toggleHint}
-          onBack={handleBack}
-        />
+        <HUD state={state} onToggleHint={toggleHint} onBack={handleBack} />
       )}
 
       {/* Hint panel */}
@@ -362,7 +358,9 @@ export default function Screen1() {
                   opacity="0.6"
                 />
               </svg>
-              <div className={styles.sickleLabel}>Cầm liềm kéo vào cây có vòng xanh!</div>
+              <div className={styles.sickleLabel}>
+                Cầm liềm kéo vào cây có vòng xanh!
+              </div>
             </div>
           )}
 
@@ -510,9 +508,79 @@ export default function Screen1() {
             <div className={styles.resultStats}>
               Lần sai: {state.penalties} &nbsp;|&nbsp; Điểm: {score} pts
             </div>
-            <div className={styles.knowledgeTitle}>
-              📚 Bạn đã học được gì?
+            <div
+              style={{
+                background: "rgba(0,0,0,0.05)",
+                borderRadius: 10,
+                padding: "10px 14px",
+                margin: "8px 0",
+                fontFamily: "'Nunito', sans-serif",
+                fontSize: 12,
+                textAlign: "left",
+              }}
+            >
+              <div
+                style={{
+                  fontWeight: 800,
+                  fontFamily: "'Baloo 2', cursive",
+                  fontSize: 13,
+                  color: "#4E342E",
+                  marginBottom: 6,
+                }}
+              >
+                Chi tiết điểm:
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: 4,
+                  color: "#2E7D32",
+                }}
+              >
+                <span>🌿 Bước 1 — Chọn cây</span>
+                <span style={{ fontWeight: 700 }}>{state.scoreB1}/100đ</span>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: 4,
+                  color: "#E65100",
+                }}
+              >
+                <span>✂️ Bước 2 — Cắt cây</span>
+                <span style={{ fontWeight: 700 }}>{state.scoreB2}/100đ</span>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: 4,
+                  color: "#993C1D",
+                }}
+              >
+                <span>🧺 Bước 3 — Gom cói</span>
+                <span style={{ fontWeight: 700 }}>{state.scoreB3}/100đ</span>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  borderTop: "0.5px solid rgba(0,0,0,0.1)",
+                  paddingTop: 6,
+                  marginTop: 4,
+                  fontWeight: 800,
+                  fontFamily: "'Baloo 2', cursive",
+                  fontSize: 14,
+                  color: "#F57F17",
+                }}
+              >
+                <span>Tổng điểm</span>
+                <span>{state.score}/300đ</span>
+              </div>
             </div>
+            <div className={styles.knowledgeTitle}>📚 Bạn đã học được gì?</div>
             <div className={styles.cards}>
               {[
                 {

@@ -42,7 +42,7 @@ export default function HUD({
         </span>
       </div>
       <div className={styles.hudRight}>
-        <span className={styles.scoreText}>{state.score} pts</span>
+        <span className={styles.scoreText}>{state.score}/300 đ</span>
         <div className={styles.starsRow}>
           {[1, 2, 3].map((i) => (
             <span

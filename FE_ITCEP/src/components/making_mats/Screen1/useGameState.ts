@@ -91,6 +91,10 @@ const INIT: GameState = {
   phase: 0,
   plants: [],
   score: 0,
+  scoreB1: 0,
+  scoreB2: 0,
+  scoreB3: 0,
+  combo: 0,
   stars: 3,
   penalties: 0,
   collectedCount: 0,
@@ -149,11 +153,23 @@ export function useGameState() {
         if (!plant || plant.state !== "standing") return s;
 
         if (plant.type === "mature") {
+          // CORRECT selection
           const newSelected = [...s.selectedIds, id];
           const updatedPlants = s.plants.map((p) =>
             p.id === id ? { ...p, state: "selected" as const } : p,
           );
           const done = newSelected.length >= 5;
+
+          // Update scoreB1
+          let newScoreB1 = Math.min(100, s.scoreB1 + 20);
+          let newCombo = s.combo + 1;
+          let newScore = newScoreB1 + s.scoreB2 + s.scoreB3;
+
+          // Combo bonus
+          if (newCombo >= 3) {
+            newScore = Math.min(300, newScore + 10);
+            newCombo = 0;
+          }
 
           if (done) {
             setTimeout(() => {
@@ -166,26 +182,36 @@ export function useGameState() {
               }));
             }, 1600);
           }
-          addPop("+Chọn đúng! ✓", "#00E676", x, y);
+          addPop("+20 đ ✓", "#00E676", x, y);
 
           return {
             ...s,
             plants: updatedPlants,
             selectedIds: newSelected,
-            score: s.score + 20,
+            score: newScore,
+            scoreB1: newScoreB1,
+            combo: newCombo,
             farmerMood: done ? "excited" : "happy",
             bubbleText: done
               ? "Chọn đủ 5 rồi! Bây giờ hãy cắt! ✂️"
               : "Đúng rồi! Mắt tinh thật! ✓",
           };
         } else {
+          // WRONG selection
           if (lockTimer.current) clearTimeout(lockTimer.current);
           lockTimer.current = setTimeout(() => {
             setState((prev: GameState) => ({ ...prev, isLocked: false }));
           }, 1500);
-          addPop("-1 ⭐", "#EF5350", x, y);
+
+          let newScoreB1 = Math.max(0, s.scoreB1 - 10);
+          let newScore = newScoreB1 + s.scoreB2 + s.scoreB3;
+
+          addPop("-10 đ ⭐", "#EF5350", x, y);
           return {
             ...s,
+            score: newScore,
+            scoreB1: newScoreB1,
+            combo: 0,
             stars: Math.max(1, s.stars - 1),
             penalties: s.penalties + 1,
             isLocked: true,
@@ -216,8 +242,13 @@ export function useGameState() {
         );
 
         if (isCorrect) {
+          // CORRECT cut
           const newCuts = [...s.cutIds, id];
           const done = newCuts.length >= 5;
+
+          let newScoreB2 = Math.min(100, s.scoreB2 + 20);
+          let newScore = s.scoreB1 + newScoreB2 + s.scoreB3;
+
           if (done) {
             setTimeout(() => {
               setState((prev: GameState) => ({
@@ -230,20 +261,27 @@ export function useGameState() {
               }));
             }, 1600);
           }
-          addPop("+10 điểm", "#FFD54F", x, y);
+          addPop("+20 đ ✂️", "#FFD54F", x, y);
           return {
             ...s,
             plants: updatedPlants,
             cutIds: newCuts,
-            score: s.score + 10,
+            score: newScore,
+            scoreB2: newScoreB2,
             farmerMood: "happy",
             bubbleText: "Cắt đẹp lắm! ✂️",
           };
         } else {
-          addPop("-1 ⭐", "#EF5350", x, y);
+          // WRONG cut
+          let newScoreB2 = Math.max(0, s.scoreB2 - 10);
+          let newScore = s.scoreB1 + newScoreB2 + s.scoreB3;
+
+          addPop("-10 đ ⭐", "#EF5350", x, y);
           return {
             ...s,
             plants: updatedPlants,
+            score: newScore,
+            scoreB2: newScoreB2,
             stars: Math.max(1, s.stars - 1),
             penalties: s.penalties + 1,
             farmerMood: "sad",
@@ -267,11 +305,16 @@ export function useGameState() {
           plant.type === "mature" && !plant.isWrong && plant.state === "cut";
 
         if (isCorrect) {
+          // CORRECT collection
           const updatedPlants = s.plants.map((p) =>
             p.id === id ? { ...p, state: "collected" as const } : p,
           );
           const newCount = s.collectedCount + 1;
           const done = newCount >= 5;
+
+          let newScoreB3 = Math.min(100, s.scoreB3 + 20);
+          let newScore = s.scoreB1 + s.scoreB2 + newScoreB3;
+
           if (done) {
             setTimeout(() => {
               setState((prev: GameState) => ({
@@ -280,15 +323,18 @@ export function useGameState() {
                 farmerMood: "excited",
                 bubbleText:
                   "TUYỆT VỜI! 🎉\nBạn thu hoạch thành công!\nLàng nghề cảm ơn bạn!",
+                // Recalculate stars based on penalties
+                stars: prev.penalties === 0 ? 3 : prev.penalties <= 3 ? 2 : 1,
               }));
             }, 1200);
           }
-          addPop("+15 điểm", "#00E676", x, y);
+          addPop("+20 đ 🧺", "#00E676", x, y);
           return {
             ...s,
             plants: updatedPlants,
             collectedCount: newCount,
-            score: s.score + 15,
+            score: newScore,
+            scoreB3: newScoreB3,
             farmerMood: "happy",
             bubbleText:
               newCount < 5
@@ -296,10 +342,15 @@ export function useGameState() {
                 : "Xuất sắc! Hoàn thành bó cói! 🎉",
           };
         } else {
-          addPop("-20 điểm", "#EF5350", x, y);
+          // WRONG collection
+          let newScoreB3 = Math.max(0, s.scoreB3 - 20);
+          let newScore = s.scoreB1 + s.scoreB2 + newScoreB3;
+
+          addPop("-20 đ ⭐", "#EF5350", x, y);
           return {
             ...s,
-            score: Math.max(0, s.score - 20),
+            score: newScore,
+            scoreB3: newScoreB3,
             stars: Math.max(1, s.stars - 1),
             penalties: s.penalties + 1,
             farmerMood: "sad",

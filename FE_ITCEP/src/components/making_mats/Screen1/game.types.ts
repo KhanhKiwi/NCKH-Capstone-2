@@ -26,6 +26,10 @@ export interface GameState {
   phase: GamePhase;
   plants: Plant[];
   score: number;
+  scoreB1: number;
+  scoreB2: number;
+  scoreB3: number;
+  combo: number;
   stars: number;
   penalties: number;
   collectedCount: number;
