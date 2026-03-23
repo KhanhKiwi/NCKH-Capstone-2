@@ -1,4 +1,5 @@
 export type CellQuality = "best" | "normal" | "bad"
+export type CellStatus = "drying" | "ready" | "damaged"
 
 export type DryingCellType = {
   id: number
@@ -7,4 +8,5 @@ export type DryingCellType = {
   hasSedge?: boolean
   bundleIndex?: number
   progress: number
+  status?: CellStatus
 }

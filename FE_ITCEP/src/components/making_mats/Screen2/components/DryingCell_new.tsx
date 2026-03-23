@@ -92,6 +92,10 @@ const DryingCell = ({ cell, onDrop, onHarvest, weather, onDragStart, onDragOver,
             50% { color: #ef4444; }
             100% { color: #5a4a3a; }
           }
+          @keyframes fadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+          }
           @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.1); }
@@ -99,6 +103,7 @@ const DryingCell = ({ cell, onDrop, onHarvest, weather, onDragStart, onDragOver,
           }
         `}
       </style>
+
       <div style={{
         fontSize: '14px',
         fontWeight: 'bold',
@@ -217,7 +222,7 @@ const DryingCell = ({ cell, onDrop, onHarvest, weather, onDragStart, onDragOver,
           color: '#8b7a5a',
           textAlign: 'center'
         }}>
-          Kéo cói<br/>vào đây
+          Kéo cối<br/>vào đây
         </div>
       )}
 

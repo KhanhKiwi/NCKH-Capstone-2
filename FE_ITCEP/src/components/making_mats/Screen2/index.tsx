@@ -109,6 +109,7 @@ const Screen2 = () => {
           <WeatherStatus
             weather={game.weather}
             wind={game.wind}
+            isWeatherChanging={game.isWeatherChanging}
           />
           
           {/* Guide Message */}
@@ -149,6 +150,8 @@ const Screen2 = () => {
           cells={game.cells}
           dropSedge={game.dropSedge}
           onBundleDragStart={game.setDraggedBundleProgress}
+          onHarvest={game.harvestSedge}
+          weather={game.weather}
         />
 
         {/* Sedge Basket */}
@@ -167,6 +170,7 @@ const Screen2 = () => {
       <GuideCharacter 
         weather={game.weather}
         progress={game.progress}
+        weatherNotification={game.weatherNotification}
       />
     </div>
   )
