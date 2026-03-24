@@ -1,10 +1,11 @@
-import Screen1 from "./components/making_mats/Screen1";
+
 import "./App.css";
+import HomePage from "./pages/web-home/HomePage";
 
 function App() {
   return (
     <>
-      <Screen1 />
+      <HomePage />
     </>
   );
 }
