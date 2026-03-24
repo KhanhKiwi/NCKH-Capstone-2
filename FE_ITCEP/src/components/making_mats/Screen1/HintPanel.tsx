@@ -1,5 +1,5 @@
 import styles from "../../../styles/Screen1/Screen1.module.css";
-import type { GamePhase } from "./game.types";
+import type { GamePhase } from "../../../types/making_mats/Screen1/game.types";
 
 const HINTS: Record<number, { title: string; items: string[] }> = {
   1: {

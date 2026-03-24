@@ -1,5 +1,5 @@
 import styles from "../../../styles/Screen1/Screen1.module.css";
-import type { ScorePopItem } from "./game.types";
+import type { ScorePopItem } from "../../../types/making_mats/Screen1/game.types";
 
 export default function ScorePop({ pops }: { pops: ScorePopItem[] }) {
   return (

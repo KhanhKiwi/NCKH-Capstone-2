@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from "react";
-import type { GameState, Plant, PlantType } from "./game.types";
+import type { GameState, Plant, PlantType } from "../../../types/making_mats/Screen1/game.types";
 
 function makePlants(): Plant[] {
   const plants: Plant[] = [];

@@ -1,14 +1,14 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import styles from "../../../styles/Screen1/Screen1.module.css";
-import { useGameState } from "./useGameState";
-import FarmerNPC from "./FarmerNPC";
-import SpeechBubble from "./SpeechBubble";
-import SedgePlant from "./SedgePlant";
-import Phase3Plant from "./Phase3Plant";
-import HUD from "./HUD";
-import HintPanel from "./HintPanel";
-import ScorePop from "./ScorePop";
-import Basket from "./Basket";
+import { useGameState } from "../../../hooks/making_mats/Screen1/useGameState";
+import FarmerNPC from "../../../components/making_mats/Screen1/FarmerNPC";
+import SpeechBubble from "../../../components/making_mats/Screen1/SpeechBubble";
+import SedgePlant from "../../../components/making_mats/Screen1/SedgePlant";
+import Phase3Plant from "../../../components/making_mats/Screen1/Phase3Plant";
+import HUD from "../../../components/making_mats/Screen1/HUD";
+import HintPanel from "../../../components/making_mats/Screen1/HintPanel";
+import ScorePop from "../../../components/making_mats/Screen1/ScorePop";
+import Basket from "../../../components/making_mats/Screen1/Basket";
 
 // Import background images
 import bg0 from "../../../assets/bg0-intro.png";

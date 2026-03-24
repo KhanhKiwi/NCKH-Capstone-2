@@ -1,4 +1,4 @@
-import type { Plant } from "./game.types";
+import type { Plant } from "../../../types/making_mats/Screen1/game.types";
 
 interface Props {
   plant: Plant;

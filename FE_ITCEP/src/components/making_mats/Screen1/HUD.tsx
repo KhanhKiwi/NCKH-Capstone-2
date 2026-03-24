@@ -1,5 +1,5 @@
 import styles from "../../../styles/Screen1/Screen1.module.css";
-import type { GameState } from "./game.types";
+import type { GameState } from "../../../types/making_mats/Screen1/game.types";
 
 const PHASE_LABEL = [
   "",
