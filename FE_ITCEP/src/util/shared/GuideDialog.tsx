@@ -1,0 +1,136 @@
+import React from 'react'
+import GuidePerson from './GuidePerson'
+
+export default function GuideDialog({
+  started,
+  showRequireStart,
+  win,
+  progress,
+  message: messageProp,
+  phase,
+  weather,
+  event,
+  onNext
+}: {
+  started: boolean
+  showRequireStart: boolean
+  win: boolean
+  progress: number
+  message?: string
+  phase?: string
+  weather?: string
+  event?: string
+  onNext?: () => void
+}){
+  const hintsByPhase: Record<string, string[]> = {
+    phase1: [
+      "Nhấn vào dao để chẻ sợi.",
+      'Chọn thời điểm phù hợp để nhấn dao — quan sát chuyển động.',
+      'Cố gắng chẻ đều tay để thu được nhiều lát hơn.',
+      "Hoàn thành! Hãy bấm nút 'Giai đoạn tiếp theo' để qua màn tiếp theo."
+    ],
+    phase2: [
+      'Hãy xem nhiệm vụ của bạn và chọn màu phù hợp',
+      'Kéo cói vào đúng ô màu để hoàn thành nhiệm vụ.',
+      'Tập trung theo dõi màu nhiệm vụ ở thanh bên; mỗi màu có số lượng cần đạt.',
+      'Dùng thanh hứng (paddle) để bắt các bó cói — di chuyển nhanh/chậm theo nhịp rơi.',
+      'Nếu lỡ bắt nhầm màu, bạn có thể thả hoặc thử bắt tiếp để cân bằng số lượng.',
+      'Theo dõi thanh tiến độ phía dưới để biết còn bao nhiêu phần trăm.',
+      "Hoàn thành! Hãy bấm nút 'Giai đoạn tiếp theo' để qua màn tiếp theo."
+    ],
+    phase3: [
+      'Nhấn Bắt đầu để phơi cói — điều kiện thời tiết sẽ ảnh hưởng.',
+      'Khi nắng, sợi sẽ khô nhanh hơn; mưa làm chậm tiến trình.',
+      'Đưa cói ra/thu vào theo thời điểm để tối đa hoá tiến độ.',
+      'Trời sắp nắng rồi',
+      'Nếu trời chuyển nắng, hãy tận dụng để phơi thêm.',
+      "Hoàn thành! Tiếp tục sang màn kế tiếp."
+    ]
+  }
+
+  const phaseKey = phase || 'phase1'
+  let message = messageProp ?? ''
+  if (!messageProp) {
+    if (showRequireStart && !started) {
+      message = "Hãy bấm 'Bắt đầu' để bắt đầu trò chơi, sau đó nhấn vào dao để chẻ sợi"
+    } else if (!started) {
+      message = "Nhấn 'Bắt đầu' để chơi trò chơi"
+    } else if (win) {
+      const finalHints = hintsByPhase[phaseKey] || hintsByPhase.phase1
+      message = finalHints[finalHints.length - 1]
+    } else {
+      const hints = hintsByPhase[phaseKey] || hintsByPhase.phase1
+      if (phaseKey === 'phase3' && typeof event === 'string') {
+        if (event === 'started') {
+          message = 'Bắt đầu phơi — hãy đưa cói ra khi trời nắng để tăng tiến độ.'
+        } else if (event === 'soon_rain') {
+          message = 'Trời sắp nắng — hãy chuẩn bị cói ra phơi.'
+        } else if (event === 'raining') {
+          message = 'Đang mưa — tạm dừng phơi và thu cói vào nơi an toàn.'
+        } else if (event === 'soon_clear' || event === 'sun_coming' || event === 'soon_sunny') {
+          message = 'Sắp hết mưa — có thể chuẩn bị phơi trở lại để tận dụng thời tiết.'
+        }
+      }
+
+      if (!message) {
+        if (phaseKey === 'phase3' && typeof weather === 'string') {
+          if (weather === 'soon_rain' || weather === 'cloudy_soon') {
+            message = 'Thời tiết có vẻ sắp nắng - hãy chuẩn bị cói để phơi.'
+          } else if (weather === 'raining' || weather === 'rain') {
+            message = 'Đang mưa — tạm dừng phơi và thu cói vào nơi an toàn.'
+          } else if (weather === 'stopped' || weather === 'clear') {
+            message = 'Hết mưa rồi — có thể phơi tiếp để tăng tiến độ.'
+          } else if (weather === 'sunny') {
+            message = 'Điều kiện tốt để phơi, hãy đưa cói ra.'
+          }
+        }
+      }
+
+      if (!message) {
+        const hintCount = Math.max(1, hints.length - 1)
+        const idx = Math.min(hintCount - 1, Math.floor((progress / 100) * hintCount))
+        message = hints[idx]
+      }
+    }
+  }
+
+  const container: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+    transform: 'translateX(0)',
+    transition: 'transform 320ms cubic-bezier(.2,.9,.3,1), opacity 320ms ease',
+    opacity: 1,
+    marginTop: 14,
+  }
+
+  const bubble: React.CSSProperties = {
+    maxWidth: 360,
+    background: 'linear-gradient(90deg, #ffffff, #f7fff7)',
+    padding: '12px 18px',
+    borderRadius: 999,
+    boxShadow: '0 18px 40px rgba(6,120,60,0.06)',
+    color: '#0b5b3f',
+    fontWeight: 700,
+    fontSize: 14,
+    lineHeight: '1.2',
+    border: '1px solid rgba(6,120,60,0.04)'
+  }
+
+  const avatarWrap: React.CSSProperties = {
+    width: 72,
+    height: 72,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  }
+
+  void onNext
+
+  return (
+    <div style={container}>
+      <div style={bubble}>{message}</div>
+      <div style={avatarWrap}><GuidePerson size={64} /></div>
+    </div>
+  )
+}
