@@ -1,4 +1,4 @@
-import type { Plant } from "./game.types";
+import type { Plant } from "../../../types/making_mats/Screen1/game.types";
 
 interface Props {
   plant: Plant;
@@ -18,20 +18,23 @@ export default function Phase3Plant({ plant, onDragStart, isDragging }: Props) {
 
   const getSafePosition = () => {
     if (isStanding) {
-      // Standing: keep original vertical, but ensure left >= 25%
+      // Standing: keep original vertical, but ensure left >= 28% (avoid farmer)
       return {
-        left: Math.max(25, plant.xPercent),
+        left: Math.max(28, plant.xPercent),
         bottom: 100 - plant.yPercent,
       };
     } else if (isCut) {
-      // Cut plants: bottom 18%, right side only (avoid farmer on left)
-      // safeLeft = 22 + (xPercent * 0.76) maps 0-100 → 22-98%
-      const safeLeft = 22 + plant.xPercent * 0.76;
-      // Use ID seed to spread plants across bottom region (3-19%)
-      const idNum = parseInt(plant.id.replace(/\D/g, "") || "1");
-      const bottomPct = 3 + ((idNum * 13) % 16);
+      // Cut plants: spread across full dirt area, no center gap in phase 3
+      let safeX = plant.xPercent;
+      // Phase 3 allows center to be filled with plants
+      safeX = Math.max(28, safeX);
+
+      // Map yPercent to screen bottom position
+      // yPercent 35 → bottom 55%, yPercent 78 → bottom 12%
+      const bottomPct = Math.max(8, 100 - plant.yPercent - 10);
+
       return {
-        left: safeLeft,
+        left: safeX,
         bottom: bottomPct,
       };
     }
@@ -49,28 +52,28 @@ export default function Phase3Plant({ plant, onDragStart, isDragging }: Props) {
   let opacity: number;
 
   if (isCut && isCorrect) {
-    // 'cut' + mature + !isWrong → green, draggable, "✓ drag me"
+    // 'cut' + mature + !isWrong → green, draggable, "✓ kéo vào"
     stemColor = "#2E7D32";
     labelBg = "#00C853";
-    labelText = "✓ drag me";
+    labelText = "✓ kéo vào";
     opacity = 1;
   } else if (isCut && plant.isWrong) {
-    // 'cut' + isWrong → gray, draggable, "✗ bad"
+    // 'cut' + isWrong → gray, draggable, "✗ xấu"
     stemColor = "#8D6E63";
     labelBg = "#EF5350";
-    labelText = "✗ bad";
+    labelText = "✗ xấu";
     opacity = 0.65;
   } else if (isCut && (plant.type === "young" || plant.type === "wilted")) {
-    // 'cut' + young/wilted → pale, draggable, "✗ bad"
+    // 'cut' + young/wilted → pale, draggable, "✗ xấu"
     stemColor = plant.type === "young" ? "#66BB6A" : "#8D6E63";
     labelBg = "#EF5350";
-    labelText = "✗ bad";
+    labelText = "✗ xấu";
     opacity = 0.65;
   } else if (isStanding) {
-    // 'standing' or 'selected' → upright, draggable, "standing"
+    // 'standing' or 'selected' → upright, draggable, "đang đứng"
     stemColor = "#8D6E63";
     labelBg = "#795548";
-    labelText = "standing";
+    labelText = "đang đứng";
     opacity = 1;
   } else {
     stemColor = "#8D6E63";
@@ -103,12 +106,20 @@ export default function Phase3Plant({ plant, onDragStart, isDragging }: Props) {
     >
       {/* Simple plant SVG */}
       <svg
-        width={plant.type === "mature" ? 44 : 28}
-        height={plant.type === "mature" ? 108 : 58}
-        viewBox={plant.type === "mature" ? "-35 -120 70 125" : "-20 -65 40 68"}
+        width={plant.type === "mature" ? 52 : plant.type === "young" ? 34 : 38}
+        height={
+          plant.type === "mature" ? 126 : plant.type === "young" ? 70 : 82
+        }
+        viewBox={
+          plant.type === "mature"
+            ? "-35 -120 70 125"
+            : plant.type === "young"
+              ? "-20 -65 40 68"
+              : "-22 -75 44 80"
+        }
         style={{
           filter: isCorrect
-            ? "drop-shadow(0 0 6px rgba(0,200,83,0.5))"
+            ? "drop-shadow(0 0 5px rgba(0,200,83,0.4))"
             : "drop-shadow(1px 1px 3px rgba(0,0,0,0.3))",
         }}
       >
@@ -222,12 +233,12 @@ export default function Phase3Plant({ plant, onDragStart, isDragging }: Props) {
         <div
           style={{
             position: "absolute",
-            bottom: -6,
-            left: "10%",
-            width: "80%",
-            height: 7,
+            bottom: -8,
+            left: "15%",
+            width: "70%",
+            height: 10,
             background:
-              "radial-gradient(ellipse, rgba(0,0,0,0.28), transparent)",
+              "radial-gradient(ellipse, rgba(0,0,0,0.4), transparent)",
             borderRadius: "50%",
             pointerEvents: "none",
           }}

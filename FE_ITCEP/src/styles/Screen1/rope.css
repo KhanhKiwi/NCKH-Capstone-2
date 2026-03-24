@@ -1,0 +1,35 @@
+/* ROPE BUNDLE */
+.ropeBundle {
+  position: absolute;
+  bottom: 3%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 8;
+  text-align: center;
+  transition:
+    filter 0.2s,
+    transform 0.2s;
+}
+
+.ropeBundleGlow {
+  filter: drop-shadow(0 0 16px #ffd54f) !important;
+  transform: translateX(-50%) scale(1.08) !important;
+}
+
+.ropeBundleRed {
+  filter: drop-shadow(0 0 12px #ef5350) !important;
+}
+
+.bundleBody {
+  display: block;
+  margin: 0 auto;
+  margin-bottom: -4px;
+}
+
+.plantFalling {
+  animation: plantFall 0.5s ease-in forwards !important;
+}
+
+.fallenPlant {
+  transform: translateX(-50%) rotate(90deg) translateY(45px) !important;
+}

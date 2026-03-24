@@ -1,0 +1,37 @@
+/* BASKET */
+.basketWrap {
+  position: absolute;
+  right: 5%;
+  bottom: 5%;
+  z-index: 10;
+  text-align: center;
+  transition:
+    filter 0.2s,
+    transform 0.2s;
+}
+
+.basketGlow {
+  filter: drop-shadow(0 0 18px #69f0ae);
+  transform: scale(1.12);
+}
+
+.basketLabel {
+  color: #f9a825;
+  font-family: "Baloo 2", cursive;
+  font-size: 13px;
+  font-weight: 800;
+  animation: basketPulse 2s ease-in-out infinite;
+  margin-top: 4px;
+}
+
+/* SCORE POP */
+.scorePop {
+  position: fixed;
+  pointer-events: none;
+  z-index: 200;
+  font-family: "Baloo 2", cursive;
+  font-size: 18px;
+  font-weight: 800;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  animation: popUp 0.95s forwards;
+}

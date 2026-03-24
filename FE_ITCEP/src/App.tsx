@@ -1,6 +1,12 @@
-import { RouterProvider } from "react-router";
-import { router } from "./routers";
+import Screen1 from "./components/making_mats/Screen1";
+import "./App.css";
 
-export default function App() {
-  return <RouterProvider router={router} />;
+function App() {
+  return (
+    <>
+      <Screen1 />
+    </>
+  );
 }
+
+export default App;
