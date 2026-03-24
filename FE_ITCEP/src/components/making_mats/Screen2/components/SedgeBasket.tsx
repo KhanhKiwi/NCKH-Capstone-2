@@ -12,14 +12,6 @@ type Props = {
 }
 
 const SedgeBasket = ({ total, placedBundles = new Set(), draggingBundleIndex, draggedBundleProgress = 0, setDraggingBundleIndex, setBundleProgress, onReturn, onDragStart }: Props) => {
-  const [returnedMessage, setReturnedMessage] = useState<{ bundleIndex: number; progress: number } | null>(null)
-
-  const handleBundleReturned = (bundleIndex: number, progress: number) => {
-    setReturnedMessage({ bundleIndex, progress })
-    setTimeout(() => {
-      setReturnedMessage(null)
-    }, 3000)
-  }
   // Tạo các vị trí ngẫu nhiên cho các bó cói - phân tán khắp nơi
   const getRandomPosition = (index: number) => {
     const cols = 5

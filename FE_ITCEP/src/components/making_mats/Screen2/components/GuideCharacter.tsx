@@ -36,7 +36,7 @@ const GuideCharacter = ({
 
   // Regular message cycle
   useEffect(() => {
-    let messageInterval: NodeJS.Timeout
+    let messageInterval: ReturnType<typeof setInterval>
     
     if (!hasNewWeatherNotification) {
       messageInterval = setInterval(() => {
