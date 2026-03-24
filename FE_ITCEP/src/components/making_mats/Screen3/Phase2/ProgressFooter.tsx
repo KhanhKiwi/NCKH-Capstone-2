@@ -93,7 +93,7 @@ export default function ProgressFooter({
             <div style={{ textAlign: 'center' }}>
               <div className="result win">Bạn đã thắng — Giai đoạn cuối</div>
                 <div style={{ marginTop: 8, display: 'flex', justifyContent: 'center', gap: 12 }}>
-                <button className="ctrl" onClick={() => navigate('/phase3')}>Tiếp theo</button>
+                <button className="ctrl" onClick={() => navigate('/phase3')}>Giai đoạn cuối</button>
                 <button className="ctrl" onClick={handleBack}>Quay lại</button>
               </div>
             </div>

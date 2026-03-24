@@ -59,14 +59,16 @@ export default function Board({
       )}
 
       <div className="board-side">
-        {['#e74c3c', '#f1c40f', '#27ae60'].map((c) => (
+        {['#e74c3c', '#f1c40f', '#27ae60'].map((c, i) => (
           <button
             key={c}
             className={`swatch ${selectedColor === c ? 'selected' : ''}`}
-            style={{ background: c }}
+            style={{ background: c, position: 'relative' }}
             onClick={() => onChangeColor(c)}
             aria-label={`Chọn màu ${c}`}
-          />
+          >
+            <span className="key-hint">{i === 0 ? 'Z' : i === 1 ? 'X' : 'C'}</span>
+          </button>
         ))}
       </div>
     </div>

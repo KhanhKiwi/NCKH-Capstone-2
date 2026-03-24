@@ -5,6 +5,7 @@ import TaskBadge from '../../../components/making_mats/Screen3/Phase2/TaskBadge'
 import ColorSelector from '../../../components/making_mats/Screen3/Phase2/ColorSelector'
 import Board from '../../../components/making_mats/Screen3/Phase2/Board'
 import ProgressFooter from '../../../components/making_mats/Screen3/Phase2/ProgressFooter'
+import GuideDialog from '../../../util/shared/GuideDialog'
 
 type Reed = {
   id: number
@@ -41,6 +42,7 @@ export default function Phase2({ onExit }: { onExit?: () => void }) {
   const lastRef = useRef<number | null>(null)
   const selectedColorRef = useRef<string | null>(null)
   const countedIdsRef = useRef<Set<number>>(new Set())
+  const selectShouldCenterRef = useRef<boolean>(true)
 
   const swatchColors = useMemo(() => ['#e74c3c', '#f1c40f', '#27ae60'], [])
   
@@ -217,13 +219,37 @@ export default function Phase2({ onExit }: { onExit?: () => void }) {
     }
   }, [])
 
-  function handleSelect(color: string) {
+  function handleSelect(color: string, center = true) {
+    selectShouldCenterRef.current = center
     setSelectedColor(color)
     setDragEnabled(false)
     setHideSegmentsUntilCatch(true)
     const cont = containerRef.current
-    if (cont) setPaddleX((cont.clientWidth - 80) / 2)
+    if (center && cont) setPaddleX((cont.clientWidth - 80) / 2)
   }
+
+  // If handleSelect ran before Board mounted (containerRef null), ensure paddle centers
+  useEffect(() => {
+    if (!selectedColor) return
+    if (!selectShouldCenterRef.current) return
+    const cont = containerRef.current
+    if (cont) {
+      setPaddleX((cont.clientWidth - 80) / 2)
+    }
+  }, [selectedColor])
+
+  // Keyboard shortcuts: z -> first color, x -> second, c -> third
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const k = e.key.toLowerCase()
+
+      if (k === 'z' && swatchColors[0]) handleSelect(swatchColors[0], false)
+      else if (k === 'x' && swatchColors[1]) handleSelect(swatchColors[1], false)
+      else if (k === 'c' && swatchColors[2]) handleSelect(swatchColors[2], false)
+    }
+    window.addEventListener('keydown', onKey, true)
+    return () => window.removeEventListener('keydown', onKey, true)
+  }, [swatchColors, handleSelect])
 
   function startGame() {
     setReeds([]); setCaught(0); setRunning(true); setGameResult(null); setIsPlaying(true)
@@ -248,12 +274,26 @@ export default function Phase2({ onExit }: { onExit?: () => void }) {
 
   return (
     <div className="phase2-root">
+      <div style={{position:'absolute', right:40, top:96, zIndex:40, transition: 'transform 320ms ease', transform: gameResult === 'won' ? 'translateX(0)' : 'translateX(0)'}}>
+        <GuideDialog
+          started={isPlaying}
+          showRequireStart={false}
+          win={gameResult === 'won'}
+          progress={currentPercent}
+          onNext={() => navigate('/phase3')}
+          phase="phase2"
+          message={gameResult === 'won'
+            ? 'Chúc mừng bạn đã chiến thắng — hãy vào Giai đoạn cuối nào!'
+            : (!selectedColor ? 'Tiếp tục là trò nhuộm màu — hãy click vào ô màu bất kì để xem nhiệm vụ.' : undefined)
+          }
+        />
+      </div>
       <div className="phase2-header">
         <div className="instruction-row">
           <p className="phase-instruction">Kéo các bó sợi cói đã chè vào màu tương ứng để tạo ra những <span className="beautiful-text">màu sắc tự nhiên</span></p>
           {/* missed indicator removed */}
         </div>
-        <TaskBadge text={selectedColor ? buildTaskSummary() : 'Hãy click vào ô màu để xem nhiệm vụ trò chơi'} />
+        <TaskBadge text={selectedColor ? buildTaskSummary() : 'Giai đoạn 2: Nhuộm màu'} />
       </div>
 
       {!selectedColor && (
@@ -289,11 +329,7 @@ export default function Phase2({ onExit }: { onExit?: () => void }) {
         resetGame={() => randomizeTaskCounts(10)}
         gameResult={gameResult}
       />
-      {gameResult === 'won' && (
-        <div style={{display: 'flex', justifyContent: 'center', marginTop: 12}}>
-          <button className="btn-cta" onClick={() => navigate('/phase3')}>Giai đoạn tiếp theo</button>
-        </div>
-      )}
+      {/* Removed duplicate large CTA button — navigation handled in footer */}
     </div>
   )
 }

@@ -6,6 +6,7 @@ import TopPanel from '../../../components/making_mats/Screen3/Phase1/TopPanel'
 import CenterHint from '../../../components/making_mats/Screen3/Phase1/CenterHint'
 import BoardCanvas from '../../../components/making_mats/Screen3/Phase1/BoardCanvas'
 import Controls from '../../../components/making_mats/Screen3/Phase1/Controls'
+import GuideDialog from '../../../util/shared/GuideDialog'
 
 export default function Game(){
   const navigate = useNavigate()
@@ -172,10 +173,17 @@ export default function Game(){
   const progress = Math.min(100, Math.round((slicesMade / SLICES_NEEDED) * 100));
   return (
     <div className="screen1 board-root page-wrap">
+      {/* standalone GuidePerson removed — dialog's avatar is used instead */}
+      <div style={{position:'absolute', right:40, top:96, zIndex:40, transition: 'transform 320ms ease', transform: win ? 'translateX(0)' : 'translateX(0)'}}>
+        <GuideDialog started={started} showRequireStart={showRequireStart} win={win} progress={progress} onNext={() => navigate('/phase2')} />
+      </div>
       <TopPanel progress={progress} secondsLeft={secondsLeft} />
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <CenterHint />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:6}}>
+            <div style={{background:'linear-gradient(90deg,#f7fff7,#eefef0)',padding:'15px 12px',borderRadius:20,color:'#0b6b3f',fontWeight:800}}>Giai đoạn 1: Chẻ sợi</div>
+            <CenterHint />
+          </div>
           <button
             className="start-btn"
             style={{ background: started ? 'linear-gradient(180deg,#fff7ee,#fff0df)' : 'linear-gradient(90deg,#bff3c9,#eaffef)', color: '#125b44', boxShadow: '0 2px 8px #bff3c966', cursor: (started && !gameOver && !win) ? 'not-allowed' : 'pointer', opacity: (started && !gameOver && !win) ? 0.6 : 1, transition: 'all 0.2s' }}

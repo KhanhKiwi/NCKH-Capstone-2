@@ -1,13 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../../../styles/Screen3/Phase3/game.css'
-
-const samples = [
-  { title: 'Cói Đỏ', sub: 'Đã khô' },
-  { title: 'Cói Xanh', sub: 'Đang phơi (70%)' },
-  { title: 'Cói Vàng', sub: 'Đã khô' },
-  { title: 'Cói Tím', sub: 'Đang phơi (90%)' }
-]
+/* GuidePerson standalone removed — keep GuideDialog avatar only when needed */
+import GuideDialog from '../../../util/shared/GuideDialog'
 
 export default function Phase3(){
   const weatherStates = ['rain', 'sunny', 'cloudy'] as const
@@ -24,6 +19,7 @@ export default function Phase3(){
   const [secondsLeft, setSecondsLeft] = useState<number>(() => getDuration(weather))
   const [grassesOut, setGrassesOut] = useState<boolean>(false)
   const [running, setRunning] = useState<boolean>(false)
+  const [startFlash, setStartFlash] = useState<boolean>(false)
   const navigate = useNavigate()
   const [bundles, setBundles] = useState<Array<{id:number,left:number,length:number,color:string,progress:number,stage:string,top?:number,swayAmt?:number,swaySpeed?:number}>>([])
   const bundleColors = ['#d35400','#f1c40f','#27ae60','#9b59b6']
@@ -116,10 +112,65 @@ export default function Phase3(){
     }
   }, [overall])
 
+  // Map weather -> video file (place files in `public/weather/` or use external URLs)
+  const weatherVideoMap: Record<string, string> = {
+    sunny: '/weather/sunny.mp4',
+    rain: '/weather/rain.mp4',
+    cloudy: '/weather/cloudy.mp4'
+  }
+
+  const videoSrc = weatherVideoMap[weather]
+
   return (
     <div className="phase3-root">
+      <div style={{position:'absolute', right:40, top:96, zIndex:40, transition: 'transform 320ms ease'}}>
+        {
+          (() => {
+            // compute a transient event for GuideDialog based on local state
+            let weatherEvent: string | undefined = undefined
+            if (startFlash) {
+              weatherEvent = 'started'
+            } else {
+              const nextWeather = weatherStates[(weatherIndex + 1) % weatherStates.length]
+              // if currently raining and about to finish
+              if (weather === 'rain' && secondsLeft <= 10) {
+                weatherEvent = 'soon_clear'
+              // if we are close to a weather change and next is rain
+              } else if (secondsLeft <= 10 && nextWeather === 'rain') {
+                weatherEvent = 'soon_rain'
+              // if we are close to a weather change and next is sunny
+              } else if (secondsLeft <= 10 && nextWeather === 'sunny') {
+                weatherEvent = 'sun_coming'
+              // otherwise if currently raining, show raining
+              } else if (weather === 'rain') {
+                weatherEvent = 'raining'
+              }
+            }
+
+            return (
+                <GuideDialog
+                started={running}
+                showRequireStart={false}
+                win={overall >= 100}
+                progress={overall}
+                phase="phase3"
+                weather={weather}
+                event={weatherEvent}
+                onNext={() => navigate('/phase4')}
+              />
+            )
+          })()
+        }
+      </div>
+      {/* GuidePerson removed — using GuideDialog avatar only */}
       <div className={`hero-card ${weather} ${grassesOut || bundles.length ? 'with-grasses' : ''}`}>
-        <div className="hero-media" aria-hidden />
+        <div className="hero-media" aria-hidden>
+          {videoSrc ? (
+            <video className="hero-video" src={videoSrc} autoPlay loop muted playsInline />
+          ) : (
+            <div aria-hidden />
+          )}
+        </div>
         <div className="hero-overlay" />
         {weather === 'rain' && (
           <div
@@ -150,7 +201,16 @@ export default function Phase3(){
                   <>
                     <button
                       className="btn-cta"
-                      onClick={() => setRunning(r => !r)}
+                      onClick={() => {
+                        setRunning(prev => {
+                          const next = !prev
+                          if (next) {
+                            setStartFlash(true)
+                            setTimeout(() => setStartFlash(false), 4000)
+                          }
+                          return next
+                        })
+                      }}
                       aria-pressed={running}
                     >
                       {running ? 'Tạm dừng' : 'Bắt đầu'}
@@ -209,20 +269,7 @@ export default function Phase3(){
         </div>
       </div>
 
-      <h3 className="section-title">Các loại cói đang phơi</h3>
-      <div className={`grasses-panel ${grassesOut ? 'show' : ''}`}>
-        <div className="grid-cards">
-          {samples.map((s, i) => (
-            <div className="card" key={i}>
-              <div className="card-image" style={{ backgroundPosition: 'center', backgroundSize: 'cover' }} />
-              <div className="card-body">
-                <div className="card-title">{s.title}</div>
-                <div className="card-sub">{s.sub}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* Removed static 'Các loại cói đang phơi' panel per request */}
     </div>
   )
 }
