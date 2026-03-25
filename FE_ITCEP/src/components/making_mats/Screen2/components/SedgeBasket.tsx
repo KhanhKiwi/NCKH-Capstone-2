@@ -1,5 +1,3 @@
-import { useState } from 'react'
-
 type Props = {
   total:number
   totalBundles?: number

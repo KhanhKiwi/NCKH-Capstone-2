@@ -29,11 +29,13 @@ export const useDryingGame = () => {
   const [stars, setStars] = useState(5)
   const [timeRemaining, setTimeRemaining] = useState(GAME_TIME)
   const [gameStartTime] = useState(Date.now())
-  const [completedBundles, setCompletedBundles] = useState<Set<number>>(new Set())
+  const [, setCompletedBundles] = useState<Set<number>>(new Set())
   const [harvestedCount, setHarvestedCount] = useState(0)
+  
+  // Weather tracking
+  const [, setCurrentWeatherIndex] = useState(0)
 
   // Dynamic weather system
-  const [weatherIndex, setWeatherIndex] = useState(0)
   const [weather, setWeather] = useState<string>(WEATHER_CYCLE[0])
   const [wind, setWind] = useState<string>(WIND_MAP.sunny)
   const [weatherNotification, setWeatherNotification] = useState<{
@@ -197,7 +199,7 @@ export const useDryingGame = () => {
   }, [gameStartTime])
   useEffect(() => {
     const weatherTimer = setInterval(() => {
-      setWeatherIndex(prev => {
+      setCurrentWeatherIndex(prev => {
         const nextIndex = (prev + 1) % WEATHER_CYCLE.length
         const nextWeather = WEATHER_CYCLE[nextIndex]
         const nextWind = WIND_MAP[nextWeather as keyof typeof WIND_MAP]

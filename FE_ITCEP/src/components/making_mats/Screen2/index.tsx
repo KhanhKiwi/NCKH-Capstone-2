@@ -228,7 +228,7 @@ const Screen2 = () => {
             isActive={tutorial.tutorialState.isActive}
           />
           <TutorialBlocker 
-            isActive={tutorial.currentStep?.disableOtherInteractions}
+            isActive={tutorial.currentStep?.disableOtherInteractions || false}
           />
           <TutorialOverlay
             step={tutorial.currentStep}
@@ -237,7 +237,6 @@ const Screen2 = () => {
             tutorialState={tutorial.tutorialState}
             onNext={tutorial.nextStep}
             onSkip={tutorial.skipTutorial}
-            onCompleteStep={() => tutorial.completeStep(tutorial.currentStep.id)}
           />
         </>
       )}
