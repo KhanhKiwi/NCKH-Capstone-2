@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from "react";
-import type { GameState, Plant, PlantType } from "./game.types";
+import type { GameState, Plant, PlantType } from "../../../types/making_mats/Screen1/game.types";
 
 function makePlants(): Plant[] {
   const plants: Plant[] = [];
@@ -96,6 +96,10 @@ const INIT: GameState = {
   phase: 0,
   plants: [],
   score: 0,
+  scoreB1: 0,
+  scoreB2: 0,
+  scoreB3: 0,
+  combo: 0,
   stars: 3,
   penalties: 0,
   collectedCount: 0,

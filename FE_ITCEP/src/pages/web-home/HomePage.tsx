@@ -6,20 +6,20 @@ export default function HomePage() {
   const crafts = villagesData;
 
   return (
-    <div className="min-h-screen bg-[#f5f0e8]">
+    <div id="top" className="min-h-screen bg-[#f5f0e8]">
       {/* Navigation */}
       <nav className="bg-[#d4c4a8] border-b-4 border-[#8b6f47]">
         <div className="max-w-7xl mx-auto px-8 py-4">
           <div className="flex items-center justify-center gap-12">
-            <Link to="/" className="text-[#4a3f2e] hover:text-[#6b5638] transition-colors text-lg">
+            <a href="#top" className="text-[#4a3f2e] hover:text-[#6b5638] transition-colors text-lg">
               Trang Chủ
-            </Link>
+            </a>
             <span className="text-[#6b5638]">|</span>
-            <a href="#" className="text-[#4a3f2e] hover:text-[#6b5638] transition-colors text-lg">
+            <a href="#crafts" className="text-[#4a3f2e] hover:text-[#6b5638] transition-colors text-lg">
               Các Nghề
             </a>
             <span className="text-[#6b5638]">|</span>
-            <a href="#" className="text-[#4a3f2e] hover:text-[#6b5638] transition-colors text-lg">
+            <a href="#intro" className="text-[#4a3f2e] hover:text-[#6b5638] transition-colors text-lg">
               Về Chúng Tôi
             </a>
             <span className="text-[#6b5638]">|</span>
@@ -58,7 +58,7 @@ export default function HomePage() {
       </section>
 
       {/* Introduction Section */}
-      <section className="py-16 px-8">
+      <section id="intro" className="py-16 px-8">
         <div className="max-w-4xl mx-auto text-center">
           <div className="flex items-center justify-center gap-4 mb-8">
             <div className="h-px bg-[#8b6f47] flex-1"></div>
@@ -82,7 +82,7 @@ export default function HomePage() {
       </section>
 
       {/* Traditional Crafts Section */}
-      <section className="py-16 px-8 bg-gradient-to-b from-[#f5f0e8] to-[#e8dcc8]">
+      <section id="crafts" className="py-16 px-8 bg-gradient-to-b from-[#f5f0e8] to-[#e8dcc8]">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-center gap-4 mb-6">
             <div className="h-px bg-[#8b6f47] flex-1"></div>

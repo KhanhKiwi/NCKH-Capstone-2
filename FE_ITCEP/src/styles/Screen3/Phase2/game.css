@@ -1,22 +1,22 @@
-./* Color variables aligned with Phase1 */
-:root{
-  --earth-50: #fbf7f3;
-  --earth-100: #f3e9dd;
-  --earth-200: #e7d2b8;
-  --earth-300: #d8b891;
-  --earth-400: #c99f6f;
-  --accent: #b87a34;
-  --muted: #6b5843;
-  --card-bg: rgba(255,255,255,0.9);
-  --glass-border: rgba(180,150,120,0.18);
-  --shadow: 0 12px 36px rgba(20,20,16,0.08);
-}
+
 
 /* Phase2 styles (harmonized with Phase1) */
-.phase2-root{max-width:1100px;margin:18px auto;padding:12px 18px;display:flex;flex-direction:column;gap:18px;font-family:Poppins, Inter, Arial;background:linear-gradient(180deg,var(--earth-50),#fff);color:var(--muted)}
+.phase2-root{max-width:1100px;margin:18px auto;padding:12px 18px;display:flex;flex-direction:column;font-family:Poppins, Inter, Arial;background:linear-gradient(180deg,var(--earth-50),#fff);color:var(--muted)}
 .phase2-top{display:flex;gap:36px;justify-content:center;align-items:flex-start}
-.phase2-header{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:6px}
-.phase-instruction{flex:1;color:#5f6b63;font-size:14px;line-height:1.45;max-width:820px}
+.phase2-header{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;margin-bottom:6px;text-align:center}
+/* instruction row: keep instruction left and missed indicator right on wide screens, wrap on small */
+.instruction-row{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;flex-wrap:wrap}
+.phase-instruction{flex:1;color: black;font-size:18px;line-height:1.45;max-width:820px; font-weight: bold;}
+.beautiful-text{
+  background: linear-gradient(90deg,#2fc46f,#12a85d,#16c95a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight:900;
+  text-shadow: 0 2px 14px rgba(32,120,70,0.12);
+  padding: 2px 4px;
+  border-radius: 6px;
+}
 .info-badge{background:linear-gradient(180deg,#ecfff0,#e7fff0);color:#0b7a3f;padding:10px 14px;border-radius:12px;border:1px solid rgba(18,140,60,0.08);box-shadow:0 8px 26px rgba(18,140,60,0.06);font-weight:800}
 .color-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;width:280px}
 .badge{background:#dff8e9;color:#0c6b2f;padding:6px 12px;border-radius:20px;font-weight:800;font-size:12px;box-shadow:0 8px 24px rgba(16,64,24,0.04)}
@@ -114,11 +114,36 @@
 }
 
 /* board-side palette */
-.board-side{position:absolute;right:18px;top:18px;display:flex;flex-direction:column;gap:10px;z-index:40}
+.board-side{position:absolute;left:18px;top:18px;display:flex;flex-direction:column;gap:10px;z-index:40}
 .swatch{width:56px;height:56px;border-radius:50%;border:2px solid rgba(255,255,255,0.18);box-shadow:0 8px 20px rgba(0,0,0,0.06);cursor:pointer;padding:0}
 .swatch.selected{outline:4px solid rgba(255,255,255,0.06);transform:translateY(-4px) scale(1.03);box-shadow:0 14px 30px rgba(0,0,0,0.08)}
 
+/* key hint badge shown on swatches and color circles */
+.key-hint{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  background:rgba(0,0,0,0.24);
+  color:#fff;
+  width:28px;
+  height:28px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  font-weight:800;
+  text-transform:uppercase;
+  text-shadow:0 1px 0 rgba(0,0,0,0.2);
+}
+
+/* smaller badge for compact swatches */
+.swatch .key-hint{width:20px;height:20px;font-size:12px;background:rgba(0,0,0,0.32)}
+
+.swatch{position:relative}
+
 @media(max-width:720px){
-  .board-side{right:10px;top:10px}
+  .board-side{left:10px;top:10px}
   .swatch{width:44px;height:44px;border-radius:50%}
 }

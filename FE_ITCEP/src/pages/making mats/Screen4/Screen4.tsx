@@ -1,8 +1,69 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { Star, Clock, Award, ArrowRight, Home, RotateCcw, RotateCw } from 'lucide-react';
-import { Link } from 'react-router';
+import {
+  Star,
+  StarHalf,
+  Clock,
+  Award,
+  ArrowRight,
+  Home,
+  RotateCcw,
+  RotateCw,
+} from 'lucide-react';
+import { Link, useNavigate } from 'react-router';
+
+const clampHalfStar = (n: number) =>
+  Math.max(0, Math.min(3, Math.round(n * 2) / 2));
+
+function StarScoreRow({ score }: { score: number }) {
+  const s = clampHalfStar(score);
+  const full = Math.floor(s);
+  const half = s - full >= 0.5;
+  return (
+    <div className="flex justify-center gap-2">
+      {[0, 1, 2].map((i) => {
+        if (i < full) {
+          return (
+            <Star
+              key={i}
+              className="w-10 h-10 text-[#f59e0b] fill-[#f59e0b]"
+            />
+          );
+        }
+        if (i === full && half) {
+          return (
+            <StarHalf
+              key={i}
+              className="w-10 h-10 text-[#f59e0b] fill-[#f59e0b]"
+            />
+          );
+        }
+        return <Star key={i} className="w-10 h-10 text-gray-300" />;
+      })}
+    </div>
+  );
+}
+
+function computeMiniGame1Stars(timerSec: number, hintsUsed: number) {
+  let base = 1;
+  if (timerSec < 30) base = 2;
+  if (timerSec < 15) base = 3;
+  return clampHalfStar(base - hintsUsed * 0.5);
+}
+
+function computeMiniGame2Stars(
+  wrongTries: number,
+  hintsUsed: number,
+  playSeconds: number,
+) {
+  let s = 3;
+  s -= wrongTries * 0.5;
+  s -= hintsUsed * 0.5;
+  if (playSeconds > 90) s -= 0.5;
+  if (playSeconds > 180) s -= 0.5;
+  return clampHalfStar(s);
+}
 
 interface DragItem {
   id: string;
@@ -38,7 +99,6 @@ const PUZZLE_PIECES: Omit<PuzzlePiece, 'rotation' | 'placed'>[] = [
     shape: [
       [1, 1],
       [1, 0],
-      [1, 0],
     ],
     color: '#f59e0b',
   },
@@ -46,7 +106,7 @@ const PUZZLE_PIECES: Omit<PuzzlePiece, 'rotation' | 'placed'>[] = [
     id: 'piece-2',
     name: 'Thanh ngang',
     shape: [
-      [1, 1, 1, 1],
+      [1, 1],
     ],
     color: '#d97706',
   },
@@ -54,8 +114,8 @@ const PUZZLE_PIECES: Omit<PuzzlePiece, 'rotation' | 'placed'>[] = [
     id: 'piece-3',
     name: 'Bàn đạp',
     shape: [
-      [1, 1, 1],
-      [0, 1, 0],
+      [1, 1],
+      [0, 1],
     ],
     color: '#4a7c2f',
   },
@@ -74,7 +134,7 @@ const PUZZLE_PIECES: Omit<PuzzlePiece, 'rotation' | 'placed'>[] = [
     shape: [
       [1, 0],
       [1, 1],
-      [0, 1],
+
     ],
     color: '#059669',
   },
@@ -296,20 +356,15 @@ function MiniGame1({ onComplete }: { onComplete: (stars: number) => void }) {
     setBoard(newBoard);
 
     // Update pieces
-    setPieces((prev) =>
-      prev.map((p) =>
-        p.id === pieceId ? { ...p, placed: true, position: { row, col } } : p
-      )
+    const nextPieces = pieces.map((p) =>
+      p.id === pieceId ? { ...p, placed: true, position: { row, col } } : p,
     );
+    setPieces(nextPieces);
 
-    // Check completion
-    const allTargetsFilled = newBoard.every((row) =>
-      row.every((cell) => cell.type !== 'target' || cell.occupiedBy)
-    );
-
-    if (allTargetsFilled) {
+    // Thắng khi đã đặt đủ 5 mảnh (tổng ô các mảnh < số ô target — không thể lấp hết bàn)
+    if (nextPieces.every((p) => p.placed)) {
       setCompleted(true);
-      setTimeout(() => setShowLoom(true), 1000);
+      setShowLoom(true);
     }
   };
 
@@ -356,6 +411,9 @@ function MiniGame1({ onComplete }: { onComplete: (stars: number) => void }) {
     setCompleted(false);
     setShowLoom(false);
     setPlacementHistory([]);
+    setHintsUsed(0);
+    setShowHint(false);
+    setHintPieceId(null);
   };
 
   const handleUndo = () => {
@@ -461,11 +519,12 @@ function MiniGame1({ onComplete }: { onComplete: (stars: number) => void }) {
     );
   };
 
-  const handleClickLoom = () => {
-    let stars = 1;
-    if (timer < 30) stars = 2;
-    if (timer < 15) stars = 3;
-    onComplete(stars);
+  const handleContinueToMiniGame2 = () => {
+    onComplete(computeMiniGame1Stars(timer, hintsUsed));
+  };
+
+  const handleReplayMiniGame1 = () => {
+    handleReset();
   };
 
   return (
@@ -572,52 +631,56 @@ function MiniGame1({ onComplete }: { onComplete: (stars: number) => void }) {
         </div>
       </div>
 
-      {/* Completion - Show Loom */}
+      {/* Hoàn thành MG1 — Tiếp tục / Chơi lại */}
       {showLoom && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-2xl text-center">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-6">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-2xl w-full text-center border-4 border-[#8b6f47]">
             <div className="mb-6">
               <Award className="w-20 h-20 mx-auto text-[#f59e0b]" />
             </div>
-            <h2 className="text-3xl font-bold text-[#4a3f2e] mb-4">
-              Puzzle hoàn thành!
+            <h2 className="text-3xl font-bold text-[#4a3f2e] mb-2" style={{ fontFamily: 'serif' }}>
+              Khung dệt đã sẵn sàng!
             </h2>
-            <div className="flex justify-center gap-2 mb-6">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Star
-                  key={i}
-                  className={`w-10 h-10 ${
-                    i < (timer < 15 ? 3 : timer < 30 ? 2 : 1)
-                      ? 'text-[#f59e0b] fill-[#f59e0b]'
-                      : 'text-gray-300'
-                  }`}
-                />
-              ))}
-            </div>
-            <p className="text-lg text-gray-600 mb-8">
-              Thời gian: {timer}s
+            <p className="text-gray-600 mb-4">
+              Thời gian: {timer}s · Gợi ý đã dùng: {hintsUsed}/3
+              {hintsUsed > 0 && (
+                <span className="block text-sm text-amber-700 mt-1">
+                  Mỗi gợi ý trừ 0,5 sao (tối đa 3 lần).
+                </span>
+              )}
             </p>
-
-            {/* Complete Loom Image */}
-            <div 
-              className="mb-8 mx-auto w-80 h-80 bg-cover bg-center rounded-2xl border-4 border-[#8b6f47] shadow-xl cursor-pointer hover:scale-105 transition-transform"
-              style={{
-                backgroundImage: `url('https://images.unsplash.com/photo-1694855475416-64d819d20648?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3b29kZW4lMjBsb29tJTIwd2VhdmluZyUyMGZyYW1lJTIwcGFydHN8ZW58MXx8fHwxNzczNDgwNjMxfDA&ixlib=rb-4.1.0&q=80&w=1080')`
-              }}
-              onClick={handleClickLoom}
-            >
-              <div className="w-full h-full bg-gradient-to-t from-black/60 to-transparent rounded-2xl flex items-end justify-center pb-6">
-                <p className="text-white text-xl font-bold">Click để tiếp tục</p>
-              </div>
+            <div className="mb-6">
+              <StarScoreRow score={computeMiniGame1Stars(timer, hintsUsed)} />
+              <p className="text-sm text-gray-500 mt-2">
+                Sao mini game 1: {computeMiniGame1Stars(timer, hintsUsed)}/3
+              </p>
             </div>
 
-            <button
-              onClick={handleClickLoom}
-              className="bg-gradient-to-r from-[#4a7c2f] to-[#5d9e3a] hover:from-[#5d9e3a] hover:to-[#4a7c2f] text-white px-8 py-4 rounded-full text-lg font-bold transition-all shadow-lg flex items-center gap-2 mx-auto"
-            >
-              Tiếp tục
-              <ArrowRight className="w-6 h-6" />
-            </button>
+            <div
+              className="mb-8 mx-auto max-w-md aspect-video bg-cover bg-center rounded-2xl border-4 border-[#8b6f47] shadow-xl"
+              style={{
+                backgroundImage: `url('https://images.unsplash.com/photo-1694855475416-64d819d20648?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3b29kZW4lMjBsb29tJTIwd2VhdmluZyUyMGZyYW1lJTIwcGFydHN8ZW58MXx8fHwxNzczNDgwNjMxfDA&ixlib=rb-4.1.0&q=80&w=1080')`,
+              }}
+            />
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                type="button"
+                onClick={handleContinueToMiniGame2}
+                className="bg-gradient-to-r from-[#4a7c2f] to-[#5d9e3a] hover:from-[#5d9e3a] hover:to-[#4a7c2f] text-white px-8 py-4 rounded-full text-lg font-bold transition-all shadow-lg flex items-center justify-center gap-2"
+              >
+                Tiếp tục
+                <ArrowRight className="w-6 h-6" />
+              </button>
+              <button
+                type="button"
+                onClick={handleReplayMiniGame1}
+                className="bg-gradient-to-r from-[#64748b] to-[#475569] hover:from-[#475569] hover:to-[#64748b] text-white px-8 py-4 rounded-full text-lg font-bold transition-all shadow-lg flex items-center justify-center gap-2"
+              >
+                <RotateCcw className="w-6 h-6" />
+                Chơi lại
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -656,119 +719,255 @@ interface PatternCell {
   color: string;
 }
 
-const PATTERN_COLORS = ['#d97706', '#4a7c2f', '#8b5cf6', '#f59e0b', '#059669'];
+// 3 màu tương phản để người chơi dễ ghi nhớ
+const PATTERN_COLORS = ['#f59e0b', '#ef4444', '#22c55e'];
+
+// Lưới MG2: ngang 8, dọc 3 => 3x8 (24 ô)
+const MG2_ROWS = 3;
+const MG2_COLS = 8;
+const MG2_PATTERN_LEN = 5; // 5 dòng/step
+const MG2_MEMORIZE_SEC = 8; // tăng thời xem/ghi nhớ
+const MG2_MAX_HINTS = 7;
+
+function generateOrderedPattern(
+  len: number,
+  rows: number,
+  cols: number,
+): PatternCell[] {
+  const used = new Set<string>();
+  const out: PatternCell[] = [];
+  for (let g = 0; g < 400 && out.length < len; g++) {
+    const row = Math.floor(Math.random() * rows);
+    const col = Math.floor(Math.random() * cols);
+    const key = `${row},${col}`;
+    if (used.has(key)) continue;
+    used.add(key);
+    out.push({
+      row,
+      col,
+      color: PATTERN_COLORS[Math.floor(Math.random() * PATTERN_COLORS.length)],
+    });
+  }
+  if (out.length < len) {
+    for (let r = 0; r < rows && out.length < len; r++) {
+      for (let c = 0; c < cols && out.length < len; c++) {
+        const key = `${r},${c}`;
+        if (used.has(key)) continue;
+        used.add(key);
+        out.push({
+          row: r,
+          col: c,
+          color: PATTERN_COLORS[Math.floor(Math.random() * PATTERN_COLORS.length)],
+        });
+      }
+    }
+  }
+  return out;
+}
 
 function MiniGame2({ onComplete }: { onComplete: (stars: number) => void }) {
-  const [showPattern, setShowPattern] = useState(true);
-  const [countdown, setCountdown] = useState(5);
-  const [pattern, setPattern] = useState<PatternCell[]>([]);
+  const [memorizePhase, setMemorizePhase] = useState(true);
+  const [memorizeIndex, setMemorizeIndex] = useState(0);
+  // Khởi tạo ngay — tránh pattern=[] trong vài frame khiến hết thời gian nhớ mà chưa có chuỗi
+  const [pattern, setPattern] = useState<PatternCell[]>(() =>
+    generateOrderedPattern(MG2_PATTERN_LEN, MG2_ROWS, MG2_COLS),
+  );
   const [playerPattern, setPlayerPattern] = useState<PatternCell[]>([]);
   const [currentColorIndex, setCurrentColorIndex] = useState(0);
-  const [errors, setErrors] = useState(0);
+  const [wrongTries, setWrongTries] = useState(0);
+  const [hintsUsed, setHintsUsed] = useState(0);
+  const [hintFlash, setHintFlash] = useState<PatternCell | null>(null);
+  const [playSeconds, setPlaySeconds] = useState(0);
   const [completed, setCompleted] = useState(false);
 
-  const GRID_SIZE = 8;
-
-  // Generate random pattern
   useEffect(() => {
-    const generated: PatternCell[] = [];
-    for (let i = 0; i < 16; i++) {
-      generated.push({
-        row: Math.floor(Math.random() * GRID_SIZE),
-        col: Math.floor(Math.random() * GRID_SIZE),
-        color: PATTERN_COLORS[Math.floor(Math.random() * PATTERN_COLORS.length)],
+    if (!memorizePhase || completed) return;
+    if (pattern.length === 0) return;
+
+    // Hiện từng "dòng" (1 ô) lần lượt. Tổng thời gian ghi nhớ vẫn giữ MG2_MEMORIZE_SEC.
+    const stepMs = (MG2_MEMORIZE_SEC * 1000) / MG2_PATTERN_LEN;
+    const t = window.setTimeout(() => {
+      setMemorizeIndex((i) => {
+        const next = i + 1;
+        if (next >= MG2_PATTERN_LEN) setMemorizePhase(false);
+        return next;
       });
-    }
-    setPattern(generated);
+    }, stepMs);
+
+    return () => window.clearTimeout(t);
+  }, [memorizePhase, completed, pattern.length, memorizeIndex]);
+
+  useEffect(() => {
+    if (memorizePhase || completed) return;
+    const id = window.setInterval(() => setPlaySeconds((s) => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [memorizePhase, completed]);
+
+  useEffect(() => {
+    if (!hintFlash) return;
+    const t = setTimeout(() => setHintFlash(null), 2000);
+    return () => clearTimeout(t);
+  }, [hintFlash]);
+
+  const resetMiniGame2 = useCallback(() => {
+    setPattern(generateOrderedPattern(MG2_PATTERN_LEN, MG2_ROWS, MG2_COLS));
+    setPlayerPattern([]);
+    setCurrentColorIndex(0);
+    setWrongTries(0);
+    setHintsUsed(0);
+    setHintFlash(null);
+    setPlaySeconds(0);
+    setCompleted(false);
+    setMemorizePhase(true);
+    setMemorizeIndex(0);
   }, []);
 
-  // Countdown timer
-  useEffect(() => {
-    if (showPattern && countdown > 0) {
-      const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
-      return () => clearTimeout(timer);
-    } else if (showPattern && countdown === 0) {
-      setShowPattern(false);
-    }
-  }, [showPattern, countdown]);
+  const handleHint = () => {
+    if (memorizePhase || completed) return;
+    if (hintsUsed >= MG2_MAX_HINTS) return;
+    const next = pattern[playerPattern.length];
+    if (!next) return;
+    setHintsUsed((h) => h + 1);
+    setHintFlash(next);
+  };
+
+  const handleUndo = () => {
+    if (memorizePhase || completed) return;
+    setPlayerPattern((prev) => prev.slice(0, -1));
+  };
 
   const handleCellClick = (row: number, col: number) => {
-    if (showPattern || completed) return;
+    if (memorizePhase || completed) return;
 
-    const currentColor = PATTERN_COLORS[currentColorIndex];
-    const newCell: PatternCell = { row, col, color: currentColor };
-
-    // Check if already placed
-    const exists = playerPattern.some((c) => c.row === row && c.col === col);
-    if (exists) {
-      // Remove cell
-      setPlayerPattern((prev) => prev.filter((c) => !(c.row === row && c.col === col)));
+    const idxInPlayer = playerPattern.findIndex(
+      (c) => c.row === row && c.col === col,
+    );
+    if (idxInPlayer >= 0) {
+      setPlayerPattern((prev) => prev.slice(0, idxInPlayer));
       return;
     }
 
-    // Add cell
-    setPlayerPattern((prev) => [...prev, newCell]);
+    const nextIdx = playerPattern.length;
+    if (nextIdx >= pattern.length) return;
 
-    // Check if correct
-    const isCorrect = pattern.some(
-      (c) => c.row === row && c.col === col && c.color === currentColor
-    );
-    
-    if (!isCorrect) {
-      setErrors((e) => e + 1);
+    const expected = pattern[nextIdx];
+    const chosenColor = PATTERN_COLORS[currentColorIndex];
+    const ok =
+      expected.row === row &&
+      expected.col === col &&
+      expected.color === chosenColor;
+
+    if (!ok) {
+      setWrongTries((w) => w + 1);
+      return;
     }
 
-    // Check if complete
-    if (playerPattern.length + 1 >= pattern.length) {
-      setTimeout(() => setCompleted(true), 500);
+    setPlayerPattern((prev) => [
+      ...prev,
+      { row, col, color: chosenColor },
+    ]);
+
+    if (nextIdx + 1 >= pattern.length) {
+      setCompleted(true);
     }
   };
 
   const getCellColor = (row: number, col: number) => {
-    if (showPattern) {
-      const cell = pattern.find((c) => c.row === row && c.col === col);
-      return cell ? cell.color : 'transparent';
-    } else {
-      const cell = playerPattern.find((c) => c.row === row && c.col === col);
-      return cell ? cell.color : 'transparent';
+    if (memorizePhase) {
+      const current = pattern[memorizeIndex];
+      return current && current.row === row && current.col === col
+        ? current.color
+        : 'transparent';
     }
+    const played = playerPattern.find((c) => c.row === row && c.col === col);
+    return played ? played.color : 'transparent';
   };
 
-  const handleComplete = () => {
-    let stars = 1;
-    if (errors < 3) stars = 2;
-    if (errors === 0) stars = 3;
-    onComplete(stars);
+  const finalStars = computeMiniGame2Stars(wrongTries, hintsUsed, playSeconds);
+
+  const handleFinishLevel = () => {
+    onComplete(finalStars);
   };
 
   return (
     <div className="max-w-6xl mx-auto px-8 py-8">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-wrap justify-between items-center gap-4 mb-8">
         <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-4 border-4 border-[#8b5cf6]">
-          <h2 className="text-xl font-bold text-[#4a3f2e]">
-            {showPattern ? `Ghi nhớ pattern: ${countdown}s` : 'Dệt lại pattern'}
+          <h2 className="text-xl font-bold text-[#4a3f2e]" style={{ fontFamily: 'serif' }}>
+            {memorizePhase
+              ? `Ghi nhớ dòng: ${Math.min(memorizeIndex + 1, MG2_PATTERN_LEN)}/${MG2_PATTERN_LEN}`
+              : 'Căng sợi đúng thứ tự'}
           </h2>
+          <p className="text-sm text-gray-600 mt-1">
+            {memorizePhase
+              ? `Mỗi lần hiện 1 dòng (1 ô) theo thứ tự trên lưới 3x8. Tổng ${MG2_PATTERN_LEN} dòng.`
+              : `Bước ${playerPattern.length}/${pattern.length} · Thời gian: ${playSeconds}s`}
+          </p>
         </div>
-        <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-4 border-4 border-red-500">
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-semibold text-[#4a3f2e]">Lỗi:</span>
-            <span className="text-2xl font-bold text-red-500">{errors}</span>
+        <div className="flex flex-wrap gap-3">
+          <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg px-4 py-3 border-4 border-red-400">
+            <span className="text-sm font-semibold text-[#4a3f2e]">Lần sai: </span>
+            <span className="text-2xl font-bold text-red-500">{wrongTries}</span>
+            <span className="text-xs text-gray-500 block">Mỗi lần sai trừ 0,5 sao</span>
+          </div>
+          <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg px-4 py-3 border-4 border-[#4a7c2f]">
+            <span className="text-sm font-semibold text-[#4a3f2e]">Gợi ý: </span>
+            <span className="text-xl font-bold text-[#4a7c2f]">
+              {MG2_MAX_HINTS - hintsUsed}/{MG2_MAX_HINTS}
+            </span>
           </div>
         </div>
       </div>
 
+      <div className="flex flex-wrap justify-center gap-3 mb-6">
+        <button
+          type="button"
+          onClick={handleHint}
+          disabled={memorizePhase || completed || hintsUsed >= MG2_MAX_HINTS}
+          className={`
+            px-6 py-3 rounded-full font-bold shadow-lg transition-all
+            ${memorizePhase || completed || hintsUsed >= MG2_MAX_HINTS
+              ? 'bg-gray-400 text-white cursor-not-allowed'
+              : 'bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] text-white hover:from-[#7c3aed] hover:to-[#8b5cf6]'
+            }
+          `}
+        >
+          Gợi ý (−0,5 sao / lần)
+        </button>
+        <button
+          type="button"
+          onClick={handleUndo}
+          disabled={memorizePhase || completed || playerPattern.length === 0}
+          className={`
+            px-6 py-3 rounded-full font-bold shadow-lg transition-all
+            ${memorizePhase || completed || playerPattern.length === 0
+              ? 'bg-gray-400 text-white cursor-not-allowed'
+              : 'bg-gradient-to-r from-[#64748b] to-[#475569] text-white'
+            }
+          `}
+        >
+          Hoàn tác bước
+        </button>
+        <button
+          type="button"
+          onClick={resetMiniGame2}
+          className="px-6 py-3 rounded-full font-bold shadow-lg bg-gradient-to-r from-red-500 to-red-600 text-white"
+        >
+          Chơi lại
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Color Palette */}
-        {!showPattern && (
+        {!memorizePhase && (
           <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 border-4 border-[#8b6f47]">
-            <h3 className="text-xl font-bold text-[#4a3f2e] mb-4 text-center">
-              Chọn màu
+            <h3 className="text-xl font-bold text-[#4a3f2e] mb-4 text-center" style={{ fontFamily: 'serif' }}>
+              Chọn màu sợi
             </h3>
             <div className="space-y-3">
               {PATTERN_COLORS.map((color, index) => (
                 <button
                   key={color}
+                  type="button"
                   onClick={() => setCurrentColorIndex(index)}
                   className={`
                     w-full h-16 rounded-xl transition-all duration-200
@@ -778,62 +977,78 @@ function MiniGame2({ onComplete }: { onComplete: (stars: number) => void }) {
                 />
               ))}
             </div>
+            <p className="text-xs text-gray-500 mt-4 text-center">
+              Click đúng ô + đúng màu theo thứ tự đã nhớ. Click lại ô đã chọn để xóa từ bước đó.
+            </p>
           </div>
         )}
 
-        {/* Weaving Grid */}
-        <div className={`${showPattern ? 'lg:col-span-3' : 'lg:col-span-2'} bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 border-4 border-[#8b6f47]`}>
-          <h3 className="text-2xl font-bold text-[#4a3f2e] mb-6 text-center">
-            {showPattern ? 'Hình mẫu chiếu' : 'Dệt chiếu của bạn'}
+        <div
+          className={`${memorizePhase ? 'lg:col-span-3' : 'lg:col-span-2'} bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 border-4 border-[#8b6f47]`}
+        >
+          <h3 className="text-2xl font-bold text-[#4a3f2e] mb-6 text-center" style={{ fontFamily: 'serif' }}>
+            {memorizePhase ? 'Hình mẫu (thứ tự các ô màu)' : 'Khung dệt — căng sợi'}
           </h3>
-          <div className="inline-grid gap-1 mx-auto" style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(0, 1fr))` }}>
-            {Array.from({ length: GRID_SIZE * GRID_SIZE }).map((_, i) => {
-              const row = Math.floor(i / GRID_SIZE);
-              const col = i % GRID_SIZE;
+          <div
+            className="inline-grid gap-1 mx-auto"
+            style={{ gridTemplateColumns: `repeat(${MG2_COLS}, minmax(0, 1fr))` }}
+          >
+            {Array.from({ length: MG2_ROWS * MG2_COLS }).map((_, i) => {
+              const row = Math.floor(i / MG2_COLS);
+              const col = i % MG2_COLS;
               const cellColor = getCellColor(row, col);
-              
+              const isHint =
+                hintFlash &&
+                hintFlash.row === row &&
+                hintFlash.col === col;
+          const current = memorizePhase ? pattern[memorizeIndex] : null;
+          const isCurrentCell =
+            memorizePhase && current && current.row === row && current.col === col;
+
               return (
-                <div
+                <button
                   key={i}
+                  type="button"
                   onClick={() => handleCellClick(row, col)}
                   className={`
-                    w-12 h-12 border-2 border-gray-300 rounded transition-all duration-200
-                    ${!showPattern && !completed ? 'cursor-pointer hover:scale-110' : ''}
+                    relative w-12 h-12 border-2 rounded transition-all duration-200
+                    ${!memorizePhase && !completed ? 'cursor-pointer hover:scale-110 border-gray-300' : 'border-gray-300'}
+                    ${isHint ? 'ring-4 ring-purple-500 scale-110 z-10' : ''}
                   `}
                   style={{ backgroundColor: cellColor || '#f3f4f6' }}
-                />
+                >
+                {isCurrentCell && (
+                    <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                      {memorizeIndex + 1}
+                    </span>
+                  )}
+                </button>
               );
             })}
           </div>
         </div>
       </div>
 
-      {/* Completion Modal */}
       {completed && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md text-center">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-6">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center border-4 border-[#f59e0b]">
             <div className="mb-6">
               <Award className="w-20 h-20 mx-auto text-[#f59e0b]" />
             </div>
-            <h2 className="text-3xl font-bold text-[#4a3f2e] mb-4">
-              Hoàn thành Mini Game 2!
+            <h2 className="text-3xl font-bold text-[#4a3f2e] mb-2" style={{ fontFamily: 'serif' }}>
+              Đã căng đủ sợi!
             </h2>
-            <div className="flex justify-center gap-2 mb-6">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Star
-                  key={i}
-                  className={`w-10 h-10 ${
-                    i < (errors === 0 ? 3 : errors < 3 ? 2 : 1)
-                      ? 'text-[#f59e0b] fill-[#f59e0b]'
-                      : 'text-gray-300'
-                  }`}
-                />
-              ))}
+            <p className="text-gray-600 text-sm mb-4">
+              Thời gian chơi: {playSeconds}s · Lần sai: {wrongTries} · Gợi ý: {hintsUsed}
+            </p>
+            <div className="mb-6">
+              <StarScoreRow score={finalStars} />
+              <p className="text-sm text-gray-500 mt-2">Sao mini game 2: {finalStars}/3</p>
             </div>
-            <p className="text-lg text-gray-600 mb-6">Số lỗi: {errors}</p>
             <button
-              onClick={handleComplete}
-              className="bg-gradient-to-r from-[#4a7c2f] to-[#5d9e3a] hover:from-[#5d9e3a] hover:to-[#4a7c2f] text-white px-8 py-4 rounded-full text-lg font-bold transition-all shadow-lg"
+              type="button"
+              onClick={handleFinishLevel}
+              className="bg-gradient-to-r from-[#4a7c2f] to-[#5d9e3a] hover:from-[#5d9e3a] hover:to-[#4a7c2f] text-white px-8 py-4 rounded-full text-lg font-bold transition-all shadow-lg w-full"
             >
               Hoàn thành Level
             </button>
@@ -845,21 +1060,28 @@ function MiniGame2({ onComplete }: { onComplete: (stars: number) => void }) {
 }
 
 export default function Level4Page() {
+  const navigate = useNavigate();
   const [currentMiniGame, setCurrentMiniGame] = useState<1 | 2 | 'complete'>(1);
   const [miniGame1Stars, setMiniGame1Stars] = useState(0);
   const [miniGame2Stars, setMiniGame2Stars] = useState(0);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   const handleMiniGame1Complete = (stars: number) => {
     setMiniGame1Stars(stars);
-    setTimeout(() => setCurrentMiniGame(2), 1000);
+    setCurrentMiniGame(2);
   };
 
   const handleMiniGame2Complete = (stars: number) => {
     setMiniGame2Stars(stars);
-    setTimeout(() => setCurrentMiniGame('complete'), 1000);
+    setCurrentMiniGame('complete');
   };
 
-  const finalStars = Math.round((miniGame1Stars + miniGame2Stars) / 2);
+  const finalStars = clampHalfStar((miniGame1Stars + miniGame2Stars) / 2);
+
+  const confirmExitToGameHub = () => {
+    setShowExitConfirm(false);
+    navigate('/game');
+  };
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -878,12 +1100,14 @@ export default function Level4Page() {
               <p className="text-white/90">Làng dệt chiếu Đinh Yên</p>
             </div>
             <div className="flex items-center gap-4">
-              <Link to="/craft-selection">
-                <button className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-full font-semibold transition-colors flex items-center gap-2">
-                  <Home className="w-5 h-5" />
-                  Quay lại
-                </button>
-              </Link>
+              <button
+                type="button"
+                onClick={() => setShowExitConfirm(true)}
+                className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-full font-semibold transition-colors flex items-center gap-2"
+              >
+                <Home className="w-5 h-5" />
+                Thoát
+              </button>
             </div>
           </div>
         </div>
@@ -926,40 +1150,25 @@ export default function Level4Page() {
                 
                 {/* Final Stars */}
                 <div className="mb-8">
-                  <div className="flex justify-center gap-3 mb-4">
-                    {Array.from({ length: 3 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-16 h-16 ${
-                          i < finalStars
-                            ? 'text-[#f59e0b] fill-[#f59e0b]'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
+                  <div className="flex justify-center scale-125 mb-4">
+                    <StarScoreRow score={finalStars} />
                   </div>
                   <p className="text-lg text-gray-600">
-                    Điểm tổng: {finalStars} sao
+                    Điểm tổng: {finalStars} / 3 sao (trung bình 2 mini game)
                   </p>
                 </div>
 
                 {/* Mini Games Results */}
                 <div className="grid grid-cols-2 gap-4 mb-8">
                   <div className="bg-gray-50 rounded-xl p-4">
-                    <p className="text-sm text-gray-600 mb-2">Mini Game 1</p>
-                    <div className="flex justify-center gap-1">
-                      {Array.from({ length: miniGame1Stars }).map((_, i) => (
-                        <Star key={i} className="w-6 h-6 text-[#f59e0b] fill-[#f59e0b]" />
-                      ))}
-                    </div>
+                    <p className="text-sm text-gray-600 mb-2">Mini Game 1 — Lắp khung</p>
+                    <StarScoreRow score={miniGame1Stars} />
+                    <p className="text-xs text-gray-500 mt-2 text-center">{miniGame1Stars}/3</p>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-4">
-                    <p className="text-sm text-gray-600 mb-2">Mini Game 2</p>
-                    <div className="flex justify-center gap-1">
-                      {Array.from({ length: miniGame2Stars }).map((_, i) => (
-                        <Star key={i} className="w-6 h-6 text-[#f59e0b] fill-[#f59e0b]" />
-                      ))}
-                    </div>
+                    <p className="text-sm text-gray-600 mb-2">Mini Game 2 — Căng sợi</p>
+                    <StarScoreRow score={miniGame2Stars} />
+                    <p className="text-xs text-gray-500 mt-2 text-center">{miniGame2Stars}/3</p>
                   </div>
                 </div>
 
@@ -986,6 +1195,40 @@ export default function Level4Page() {
             </div>
           )}
         </div>
+
+        {showExitConfirm && (
+          <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
+            <div
+              className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 border-4 border-[#8b6f47]"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="exit-title"
+            >
+              <h2 id="exit-title" className="text-2xl font-bold text-[#4a3f2e] mb-3" style={{ fontFamily: 'serif' }}>
+                Thoát Level 4?
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Tiến độ hiện tại sẽ không được lưu. Bạn chỉ nhận kết quả khi hoàn thành cả hai mini game.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowExitConfirm(false)}
+                  className="px-6 py-3 rounded-full font-bold border-2 border-gray-300 text-[#4a3f2e] hover:bg-gray-50"
+                >
+                  Ở lại
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmExitToGameHub}
+                  className="px-6 py-3 rounded-full font-bold bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg"
+                >
+                  Thoát về màn chờ
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </DndProvider>
   );
