@@ -26,8 +26,8 @@ function makePlants(): Plant[] {
 
     // Generate position with minimum distance check
     while (!valid && attempts < 15) {
-      xPercent = 4 + Math.random() * 90; // 4 to 94
-      yPercent = 42 + Math.random() * 26; // 42 to 68
+      xPercent = 25 + Math.random() * 50; // 25 to 75
+      yPercent = 45 + Math.random() * 40; // 45 to 85
 
       // Check minimum distance from existing plants
       valid = plants.every((p) => {
@@ -73,10 +73,10 @@ function makeDecoys(existing: Plant[]): Plant[] {
   const usedX = existing.map((p) => p.xPercent);
   const types: PlantType[] = ["young", "wilted", "young"];
   return types.map((type, i) => {
-    let x = 25 + Math.random() * 70; // right side only
+    let x = 30 + Math.random() * 40; // 30 to 70
     let tries = 0;
     while (usedX.some((u) => Math.abs(u - x) < 8) && tries < 20) {
-      x = 25 + Math.random() * 70;
+      x = 30 + Math.random() * 40;
       tries++;
     }
     usedX.push(x);
