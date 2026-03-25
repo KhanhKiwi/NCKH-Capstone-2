@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Lock, CheckCircle, Star, X, ChevronRight } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { Link } from 'react-router';
@@ -76,7 +76,7 @@ export default function CraftSelectionPage() {
     },
   ];
 
-  const levels: Level[] = [
+  const defaultLevels: Level[] = [
     { id: 1, name: 'Thu hoạch cây cói', unlocked: true, completed: false },
     { id: 2, name: 'Phơi cói', unlocked: false, completed: false },
     { id: 3, name: 'Chẻ tơ và nhuộm màu', unlocked: false, completed: false },
@@ -84,6 +84,42 @@ export default function CraftSelectionPage() {
     { id: 5, name: 'Dệt chiếu', unlocked: false, completed: false },
     { id: 6, name: 'Hoàn thiện chiếu', unlocked: false, completed: false },
   ];
+
+  const [levels, setLevels] = useState<Level[]>(() => {
+    try {
+      const all = localStorage.getItem('unlocked_all_levels')
+      if (all === '1') return defaultLevels.map(l => ({ ...l, unlocked: true }))
+      const saved = localStorage.getItem('unlocked_levels')
+      if (saved) return JSON.parse(saved) as Level[]
+    } catch (e) { }
+    return defaultLevels
+  })
+
+  const [unlockedAll, setUnlockedAll] = useState<boolean>(() => {
+    try { return localStorage.getItem('unlocked_all_levels') === '1' } catch { return false }
+  })
+
+  useEffect(() => {
+    try { localStorage.setItem('unlocked_levels', JSON.stringify(levels)) } catch (e) { }
+  }, [levels])
+
+  function unlockAllLevels() {
+    setLevels(prev => {
+      const next = prev.map(l => ({ ...l, unlocked: true }))
+      try {
+        localStorage.setItem('unlocked_all_levels', '1')
+        localStorage.setItem('unlocked_levels', JSON.stringify(next))
+      } catch (e) { }
+      return next
+    })
+    setUnlockedAll(true)
+  }
+
+  // Auto-unlock immediately so user sees all levels playable
+  useEffect(() => {
+    if (!unlockedAll) unlockAllLevels()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleCraftClick = (craft: Craft) => {
     if (craft.comingSoon) return;
@@ -252,17 +288,11 @@ export default function CraftSelectionPage() {
                       {/* Status Badge / Action Buttons */}
                       <div className="flex-shrink-0 flex gap-2">
                         {level.unlocked ? (
-                          level.id === 1 ? (
-                            <Link to="/level-1">
-                              <button className="bg-[#4a7c2f] hover:bg-[#3d6827] text-white px-6 py-2 rounded-full text-sm font-semibold shadow-lg transition-colors">
-                                Chơi ngay
-                              </button>
-                            </Link>
-                          ) : (
-                            <div className="bg-[#4a7c2f] text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
-                              Sẵn sàng
-                            </div>
-                          )
+                          <Link to={`/level-${level.id}`}>
+                            <button className="bg-[#4a7c2f] hover:bg-[#3d6827] text-white px-6 py-2 rounded-full text-sm font-semibold shadow-lg transition-colors">
+                              Chơi ngay
+                            </button>
+                          </Link>
                         ) : (
                           <>
                             <div className="bg-gray-400 text-white px-4 py-2 rounded-full text-sm font-semibold">
