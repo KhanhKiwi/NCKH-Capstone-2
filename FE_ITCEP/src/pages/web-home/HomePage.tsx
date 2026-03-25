@@ -1,25 +1,9 @@
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 import { Link } from 'react-router';
+import { villagesData } from '../../data/villagesData';
 
 export default function HomePage() {
-  const crafts = [
-    {
-      title: 'Làng Gốm',
-      image: 'https://images.unsplash.com/photo-1760894192884-37a7037200ba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aWV0bmFtZXNlJTIwcG90dGVyeSUyMG1ha2luZyUyMGNyYWZ0c21hbnxlbnwxfHx8fDE3NzA5MDAwMTh8MA&ixlib=rb-4.1.0&q=80&w=1080',
-    },
-    {
-      title: 'Làng Nón',
-      image: 'https://images.unsplash.com/photo-1767281076397-b8ced2428626?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aWV0bmFtZXNlJTIwY29uaWNhbCUyMGhhdCUyMG1ha2luZ3xlbnwxfHx8fDE3NzA5MDAwMTh8MA&ixlib=rb-4.1.0&q=80&w=1080',
-    },
-    {
-      title: 'Làng Lụa',
-      image: 'https://images.unsplash.com/photo-1569909115134-a0426936c879?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb2xvcmZ1bCUyMHNpbGslMjB0aHJlYWQlMjB3ZWF2aW5nfGVufDF8fHx8MTc3MDkwMDAxOXww&ixlib=rb-4.1.0&q=80&w=1080',
-    },
-    {
-      title: 'Làng Mây Tre',
-      image: 'https://images.unsplash.com/photo-1677142707558-b02ac0690ecb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxiYW1ib28lMjBiYXNrZXQlMjB3ZWF2aW5nJTIwY3JhZnR8ZW58MXx8fHwxNzcwOTAwMDE5fDA&ixlib=rb-4.1.0&q=80&w=1080',
-    },
-  ];
+  const crafts = villagesData;
 
   return (
     <div id="top" className="min-h-screen bg-[#f5f0e8]">
@@ -110,25 +94,27 @@ export default function HomePage() {
           <p className="text-center text-[#4a3f2e] text-lg mb-12">
             Hãy cùng khám phá những làng nghề độc đáo:
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {crafts.map((craft, index) => (
-              <div
-                key={index}
-                className="bg-[#f5ebe0] rounded-lg overflow-hidden shadow-xl transform hover:scale-105 transition-transform duration-300 border-4 border-[#8b6f47]"
-              >
-                <div className="aspect-square overflow-hidden">
-                  <ImageWithFallback
-                    src={craft.image}
-                    alt={craft.title}
-                    className="w-full h-full object-cover"
-                  />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {crafts.map((craft) => (
+              <Link to={`/village/${craft.id}`} key={craft.id} className="block group">
+                <div
+                  className="bg-[#f5ebe0] rounded-lg overflow-hidden shadow-xl transform group-hover:-translate-y-2 transition-all duration-300 border-4 border-[#8b6f47] h-full flex flex-col"
+                >
+                  <div className="aspect-square overflow-hidden relative">
+                    <ImageWithFallback
+                      src={craft.thumbnail}
+                      alt={craft.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-300"></div>
+                  </div>
+                  <div className="p-6 bg-[#f5ebe0] flex-1 flex flex-col justify-center">
+                    <h3 className="text-2xl text-center text-[#4a3f2e]" style={{ fontFamily: 'serif' }}>
+                      {craft.name}
+                    </h3>
+                  </div>
                 </div>
-                <div className="p-6 bg-[#f5ebe0]">
-                  <h3 className="text-2xl text-center text-[#4a3f2e]" style={{ fontFamily: 'serif' }}>
-                    {craft.title}
-                  </h3>
-                </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

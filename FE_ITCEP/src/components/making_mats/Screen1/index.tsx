@@ -9,10 +9,10 @@ import HUD from "./HUD";
 import HintPanel from "./HintPanel";
 import ScorePop from "./ScorePop";
 import Basket from "./Basket";
-import bg0 from "../../../assets/ChatGPT Image 23_51_53 17 thg 3, 2026.png";
+import bg0 from "../../../assets/bg0-intro.png";
 import bg1 from "../../../assets/ChatGPT Image 23_34_54 17 thg 3, 2026.png";
-import bg2 from "../../../assets/ChatGPT Image 23_25_32 17 thg 3, 2026.png";
-import bg3 from "../../../assets/ChatGPT Image 23_32_12 17 thg 3, 2026.png";
+import bg2 from "../../../assets/bg2-harvest.png";
+import bg3 from "../../../assets/bg3-collect.png";
 
 const BG: Record<number, string> = {
   0: bg0,
