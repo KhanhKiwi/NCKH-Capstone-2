@@ -10,7 +10,7 @@ const WIND_MAP = {
   rainy: "strong"
 } as const
 const BUG_COLORS = ["#8B4513", "#A0522D", "#6B4423", "#8B7355", "#556B2F", "#8B6914", "#696969", "#A0826D", "#704214"] as const
-const BUG_SPAWN_CHANCE = 0.15 // 15% chance per second to spawn a bug
+const BUG_SPAWN_CHANCE = 0.05 // 5% chance per second to spawn a bug
 const BUG_DAMAGE_RATE = 1.5 // Reduce 1.5% per second when bugs are present
 const GAME_TIME = 5 * 60 * 1000 // 5 minutes in milliseconds
 
@@ -19,6 +19,7 @@ export const useDryingGame = () => {
   const [cells, setCells] = useState<DryingCellType[]>(GRID_DATA)
   const [totalBundles] = useState(10)
   const [placedBundles, setPlacedBundles] = useState<Set<number>>(new Set())
+  const [harvestedBundles, setHarvestedBundles] = useState<Set<number>>(new Set())
   const [draggingBundleIndex, setDraggingBundleIndex] = useState<number | null>(null)
   const [draggedBundleProgress, setDraggedBundleProgress] = useState<number>(0)
   const [bundleProgress, setBundleProgress] = useState<Map<number, number>>(new Map())
@@ -29,6 +30,7 @@ export const useDryingGame = () => {
   const [timeRemaining, setTimeRemaining] = useState(GAME_TIME)
   const [gameStartTime] = useState(Date.now())
   const [completedBundles, setCompletedBundles] = useState<Set<number>>(new Set())
+  const [harvestedCount, setHarvestedCount] = useState(0)
 
   // Dynamic weather system
   const [weatherIndex, setWeatherIndex] = useState(0)
@@ -49,12 +51,14 @@ export const useDryingGame = () => {
 
     if (placedBundles.has(bundleIndex)) return
 
-    const savedProgress = bundleProgress.get(bundleIndex) ?? 0
+    // Get the progress from the target cell (to inherit during rain/swaps)
+    const targetCell = cells.find(c => c.id === cellId)
+    const cellProgress = targetCell?.hasSedge ? targetCell.progress : (bundleProgress.get(bundleIndex) ?? 0)
 
     setCells(prev =>
       prev.map(cell =>
-        cell.id === cellId && !cell.hasSedge
-          ? { ...cell, hasSedge: true, bundleIndex: bundleIndex, progress: savedProgress, status: 'drying' as const }
+        cell.id === cellId
+          ? { ...cell, hasSedge: true, bundleIndex: bundleIndex, progress: cellProgress, status: 'drying' as const }
           : cell
       )
     )
@@ -65,6 +69,9 @@ export const useDryingGame = () => {
   }
 
   const returnSedge = (cellId: number, bundleIndex: number) => {
+    // Prevent returning harvested bundles
+    if (harvestedBundles.has(bundleIndex)) return
+
     setCells(prev =>
       prev.map(cell =>
         cell.id === cellId
@@ -108,15 +115,9 @@ export const useDryingGame = () => {
       return newSet
     })
 
-    // Lưu progress vào bundle map
-    setBundleProgress(prevMap => {
-      const newMap = new Map(prevMap)
-      const currentCell = cells.find(c => c.id === cellId)
-      if (currentCell) {
-        newMap.set(bundleIndex, currentCell.progress)
-      }
-      return newMap
-    })
+    // Mark bundle as harvested and add to storage
+    setHarvestedBundles(prev => new Set([...prev, bundleIndex]))
+    setHarvestedCount(prev => prev + 1)
 
     setDraggingBundleIndex(null)
     setDraggedBundleProgress(0)
@@ -309,7 +310,8 @@ export const useDryingGame = () => {
 
   return {
     cells,
-    basket: totalBundles - placedBundles.size,
+    totalBundles,
+    basket: totalBundles - placedBundles.size - harvestedBundles.size,
     score,
     progress,
     stars,
@@ -329,6 +331,8 @@ export const useDryingGame = () => {
     draggedBundleProgress,
     setDraggedBundleProgress,
     bundleProgress,
-    setBundleProgress
+    setBundleProgress,
+    harvestedCount,
+    harvestedBundles
   }
 }

@@ -144,13 +144,15 @@ const DryingCell = ({ cell, onDrop, onHarvest, onCatchBug, weather, onDragStart,
             height: '80px',
             background: cell.status === 'damaged' 
               ? 'linear-gradient(90deg, #4a3728 0%, #3d2f1f 50%, #2a1f15 100%)'
-              : 'linear-gradient(90deg, #8B7355 0%, #6B5D4F 50%, #5A4A40 100%)',
+              : cell.progress >= 90
+              ? 'linear-gradient(90deg, #fbbf24 0%, #fcd34d 30%, #22c55e 70%, #16a34a 100%)'
+              : 'linear-gradient(90deg, #22c55e 0%, #16a34a 50%, #15803d 100%)',
             borderRadius: '3px',
             position: 'relative',
             boxShadow: cell.status === 'damaged'
               ? '0 4px 12px rgba(0, 0, 0, 0.6), inset 0 0 8px rgba(0, 0, 0, 0.8)'
               : '0 4px 8px rgba(0, 0, 0, 0.3)',
-            border: cell.status === 'damaged' ? '1px solid #1a0f0a' : '1px solid #15803d',
+            border: cell.status === 'damaged' ? '1px solid #1a0f0a' : cell.progress >= 90 ? '1px solid #fbbf24' : '1px solid #15803d',
             animation: cell.status === 'damaged' ? 'shake 0.5s ease-in-out infinite' : 'none'
           }}>
             {/* SVG texture */}
@@ -165,9 +167,9 @@ const DryingCell = ({ cell, onDrop, onHarvest, onCatchBug, weather, onDragStart,
               }}
             >
               {/* Top leaves */}
-              <line x1="6" y1="0" x2="4" y2="-5" stroke={cell.status === 'damaged' ? '#8b7355' : '#8B7355'} strokeWidth="2" opacity="0.8" />
-              <line x1="17" y1="0" x2="16" y2="-6" stroke={cell.status === 'damaged' ? '#8b7355' : '#8B7355'} strokeWidth="2" opacity="0.8" />
-              <line x1="29" y1="0" x2="31" y2="-5" stroke={cell.status === 'damaged' ? '#8b7355' : '#8B7355'} strokeWidth="2" opacity="0.8" />
+              <line x1="6" y1="0" x2="4" y2="-5" stroke={cell.status === 'damaged' ? '#8b7355' : cell.progress >= 90 ? '#fcd34d' : '#22c55e'} strokeWidth="2" opacity="0.8" />
+              <line x1="17" y1="0" x2="16" y2="-6" stroke={cell.status === 'damaged' ? '#8b7355' : cell.progress >= 90 ? '#fcd34d' : '#22c55e'} strokeWidth="2" opacity="0.8" />
+              <line x1="29" y1="0" x2="31" y2="-5" stroke={cell.status === 'damaged' ? '#8b7355' : cell.progress >= 90 ? '#fcd34d' : '#22c55e'} strokeWidth="2" opacity="0.8" />
               
               {/* Texture lines */}
               <line x1="4" y1="12" x2="10" y2="40" stroke={cell.status === 'damaged' ? '#2a1f15' : '#15803d'} strokeWidth="1" opacity="0.5" />

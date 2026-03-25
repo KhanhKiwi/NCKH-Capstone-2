@@ -2,10 +2,15 @@ import WeatherStatus from "./components/WeatherStatus"
 import DryingGrid from "./components/DryingGrid"
 import SedgeBasket from "./components/SedgeBasket"
 import GuideCharacter from "./components/GuideCharacter"
+import TutorialOverlay from "./components/TutorialOverlay"
+import TutorialHighlight from "./components/TutorialHighlight"
+import TutorialBlocker from "./components/TutorialBlocker"
 import { useDryingGame } from "./hooks/useDryingGame"
+import { useTutorial } from "./hooks/useTutorial"
 
 const Screen2 = () => {
   const game = useDryingGame()
+  const tutorial = useTutorial()
 
   return (
     <div style={{
@@ -37,7 +42,7 @@ const Screen2 = () => {
           {/* Status Bar */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
+            gridTemplateColumns: 'repeat(3, 1fr)',
             gap: '15px',
             background: 'rgba(255, 255, 255, 0.8)',
             border: '2px solid #d4a574',
@@ -45,10 +50,6 @@ const Screen2 = () => {
             padding: '20px',
             marginBottom: '20px'
           }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '12px', color: '#8b6f47', fontWeight: 'bold' }}>💎 Điểm</div>
-              <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#5a4a3a' }}>{game.score}</div>
-            </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '12px', color: '#8b6f47', fontWeight: 'bold' }}>⭐ Sao</div>
               <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#CD853F' }}>
@@ -114,15 +115,17 @@ const Screen2 = () => {
           gap: '20px',
           marginBottom: '20px'
         }}>
-          <WeatherStatus
-            weather={game.weather}
-            wind={game.wind}
-            isWeatherChanging={game.isWeatherChanging}
-          />
+          <div data-tutorial="weather-status">
+            <WeatherStatus
+              weather={game.weather}
+              wind={game.wind}
+              isWeatherChanging={game.isWeatherChanging}
+            />
+          </div>
           
-          {/* Guide Message */}
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.9)',
+          {/* Harvest Storage */}
+          <div data-tutorial="harvest-storage" style={{
+            background: 'linear-gradient(135deg, #fef3c7 0%, #fcd34d 100%)',
             border: '2px solid #d4a574',
             borderRadius: '12px',
             padding: '20px',
@@ -130,48 +133,51 @@ const Screen2 = () => {
             alignItems: 'center',
             gap: '15px'
           }}>
-            <div style={{ fontSize: '48px' }}>👩‍🌾</div>
+            <div style={{ fontSize: '48px' }}>🏪</div>
             <div>
               <div style={{
                 fontWeight: 'bold',
                 color: '#5a4a3a',
                 marginBottom: '5px'
               }}>
-                Cô Ba
+                Kho Thu Hoạch
               </div>
               <div style={{
-                fontSize: '13px',
-                color: '#6b5b4b',
-                background: 'rgba(255, 255, 255, 0.7)',
-                padding: '10px 12px',
-                borderRadius: '8px',
-                borderLeft: '3px solid #d4a574'
+                fontSize: '28px',
+                fontWeight: 'bold',
+                color: '#7a6a5a'
               }}>
-                Kéo cối vào đây khi trời mưa để bảo vệ
+                {game.harvestedCount} bộ ✨
               </div>
             </div>
           </div>
         </div>
 
         {/* Drying Grid */}
-        <DryingGrid
-          cells={game.cells}
-          dropSedge={game.dropSedge}
-          onBundleDragStart={game.setDraggedBundleProgress}
-          onHarvest={game.harvestSedge}
-          onCatchBug={game.catchBug}
-          weather={game.weather}
-        />
+        <div data-tutorial="drying-grid">
+          <DryingGrid
+            cells={game.cells}
+            dropSedge={game.dropSedge}
+            onBundleDragStart={game.setDraggedBundleProgress}
+            onHarvest={game.harvestSedge}
+            onCatchBug={game.catchBug}
+            weather={game.weather}
+          />
+        </div>
 
         {/* Sedge Basket */}
-        <SedgeBasket
-          total={game.basket + game.placedBundles.size}
-          placedBundles={game.placedBundles}
-          draggingBundleIndex={game.draggingBundleIndex}
-          draggedBundleProgress={game.draggedBundleProgress}
-          setDraggingBundleIndex={game.setDraggingBundleIndex}
-          onReturn={game.returnSedge}
-        />
+        <div data-tutorial="sedge-basket">
+          <SedgeBasket
+            total={game.basket}
+            totalBundles={game.totalBundles}
+            placedBundles={game.placedBundles}
+            harvestedBundles={game.harvestedBundles}
+            draggingBundleIndex={game.draggingBundleIndex}
+            draggedBundleProgress={game.draggedBundleProgress}
+            setDraggingBundleIndex={game.setDraggingBundleIndex}
+            onReturn={game.returnSedge}
+          />
+        </div>
 
       </div>
 
@@ -180,7 +186,61 @@ const Screen2 = () => {
         weather={game.weather}
         progress={game.progress}
         weatherNotification={game.weatherNotification}
+        harvestedCount={game.harvestedCount}
       />
+
+      {/* Tutorial Button */}
+      <button
+        onClick={tutorial.restartTutorial}
+        style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          backgroundColor: '#3b82f6',
+          color: 'white',
+          border: 'none',
+          padding: '12px 20px',
+          borderRadius: '8px',
+          fontSize: '14px',
+          fontWeight: 'bold',
+          cursor: 'pointer',
+          zIndex: 100,
+          transition: 'all 0.2s',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#2563eb'
+          e.currentTarget.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.15)'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = '#3b82f6'
+          e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)'
+        }}
+      >
+        ❓ Hướng dẫn
+      </button>
+
+      {/* Tutorial Components */}
+      {tutorial.tutorialState.isActive && (
+        <>
+          <TutorialHighlight 
+            step={tutorial.currentStep} 
+            isActive={tutorial.tutorialState.isActive}
+          />
+          <TutorialBlocker 
+            isActive={tutorial.currentStep?.disableOtherInteractions}
+          />
+          <TutorialOverlay
+            step={tutorial.currentStep}
+            stepIndex={tutorial.tutorialState.currentStepIndex}
+            totalSteps={tutorial.allSteps.length}
+            tutorialState={tutorial.tutorialState}
+            onNext={tutorial.nextStep}
+            onSkip={tutorial.skipTutorial}
+            onCompleteStep={() => tutorial.completeStep(tutorial.currentStep.id)}
+          />
+        </>
+      )}
     </div>
   )
 }

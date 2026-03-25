@@ -2,7 +2,9 @@ import { useState } from 'react'
 
 type Props = {
   total:number
+  totalBundles?: number
   placedBundles?: Set<number>
+  harvestedBundles?: Set<number>
   draggingBundleIndex?: number | null
   draggedBundleProgress?: number
   setDraggingBundleIndex?: (index: number | null) => void
@@ -11,7 +13,7 @@ type Props = {
   onDragStart?: (e: React.DragEvent, index: number) => void
 }
 
-const SedgeBasket = ({ total, placedBundles = new Set(), draggingBundleIndex, draggedBundleProgress = 0, setDraggingBundleIndex, setBundleProgress, onReturn, onDragStart }: Props) => {
+const SedgeBasket = ({ total, totalBundles = 10, placedBundles = new Set(), harvestedBundles = new Set(), draggingBundleIndex, draggedBundleProgress = 0, setDraggingBundleIndex, setBundleProgress, onReturn, onDragStart }: Props) => {
   // Tạo các vị trí ngẫu nhiên cho các bó cói - phân tán khắp nơi
   const getRandomPosition = (index: number) => {
     const cols = 5
@@ -135,9 +137,9 @@ const SedgeBasket = ({ total, placedBundles = new Set(), draggingBundleIndex, dr
         </svg>
 
         {/* Bundles */}
-        {Array.from({ length: total || 10 })
+        {Array.from({ length: totalBundles })
           .map((_, i) => i)
-          .filter(i => !placedBundles.has(i) || draggingBundleIndex === i)
+          .filter(i => (!placedBundles.has(i) && !harvestedBundles.has(i)) || draggingBundleIndex === i)
           .map((i) => {
             const isDragging = draggingBundleIndex === i
             return (
@@ -153,7 +155,7 @@ const SedgeBasket = ({ total, placedBundles = new Set(), draggingBundleIndex, dr
               dragImage.style.position = 'absolute'
               dragImage.style.width = '45px'
               dragImage.style.height = '100px'
-              dragImage.style.background = 'linear-gradient(90deg, #8B7355 0%, #6B5D4F 50%, #5A4A40 100%)'
+              dragImage.style.background = 'linear-gradient(90deg, #22c55e 0%, #16a34a 50%, #15803d 100%)'
               dragImage.style.borderRadius = '3px'
               dragImage.style.border = '2px solid #15803d'
               dragImage.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.5)'
@@ -182,7 +184,7 @@ const SedgeBasket = ({ total, placedBundles = new Set(), draggingBundleIndex, dr
               style={{
                 width: '45px',
                 height: '100px',
-                background: 'linear-gradient(90deg, #8B7355 0%, #6B5D4F 50%, #5A4A40 100%)',
+                background: 'linear-gradient(90deg, #22c55e 0%, #16a34a 50%, #15803d 100%)',
                 borderRadius: '3px',
                 position: 'relative',
                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.4), inset -2px 0 4px rgba(0, 0, 0, 0.2)',

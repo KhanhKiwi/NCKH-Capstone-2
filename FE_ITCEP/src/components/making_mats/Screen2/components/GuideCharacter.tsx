@@ -7,12 +7,14 @@ interface GuideCharacterProps {
     message: string
     timestamp: number
   } | null
+  harvestedCount?: number
 }
 
 const GuideCharacter = ({ 
   weather, 
   progress, 
-  weatherNotification 
+  weatherNotification,
+  harvestedCount = 0
 }: GuideCharacterProps) => {
   const [message, setMessage] = useState('Chào mừng!')
   const [showBubble, setShowBubble] = useState(true)
@@ -65,7 +67,14 @@ const GuideCharacter = ({
           newMessage = cloudyMessages[Math.floor(Math.random() * cloudyMessages.length)]
         }
 
-        if (progress >= 90) {
+        if (harvestedCount > 0) {
+          const harvestMessages = [
+            `🎉 Tuyệt vời! Đã lưu trữ ${harvestedCount} bộ cối!`,
+            `✨ Kho có ${harvestedCount} bộ rồi!`,
+            `🏪 Hoạch được ${harvestedCount} bộ cói!`,
+          ]
+          newMessage = harvestMessages[Math.floor(Math.random() * harvestMessages.length)]
+        } else if (progress >= 90) {
           const completeMessages = [
             '🎉 Tuyệt vời! Xong rồi!',
             '✨ Bạn làm tốt lắm!',
@@ -102,7 +111,7 @@ const GuideCharacter = ({
     return () => {
       if (messageInterval) clearInterval(messageInterval)
     }
-  }, [weather, progress, hasNewWeatherNotification])
+  }, [weather, progress, hasNewWeatherNotification, harvestedCount])
 
   const handleClose = () => {
     setShowBubble(false)
