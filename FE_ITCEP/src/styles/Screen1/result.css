@@ -1,0 +1,145 @@
+/* RESULT */
+.resultCard {
+  position: absolute;
+  top: 50%;
+  left: 55%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 253, 231, 0.97);
+  border: 3px solid #f9a825;
+  border-radius: 24px;
+  padding: 26px 34px;
+  max-width: 400px;
+  width: 88%;
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.22);
+  text-align: center;
+  z-index: 20;
+  animation: fadeScene 0.5s ease-out;
+}
+
+.resultTitle {
+  font-size: 24px;
+  font-weight: 800;
+  color: #f57f17;
+}
+
+.resultScore {
+  font-size: 56px;
+  font-weight: 800;
+  color: #f57f17;
+  line-height: 1;
+}
+
+.resultScoreSub {
+  font-size: 14px;
+  color: #a1887f;
+  margin-bottom: 6px;
+}
+
+.resultStars {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.resultStats {
+  font-family: "Nunito", sans-serif;
+  font-size: 13px;
+  color: #5d4037;
+  margin-bottom: 12px;
+}
+
+.knowledgeTitle {
+  font-size: 15px;
+  font-weight: 800;
+  color: #3e2723;
+  margin-bottom: 10px;
+}
+
+.cards {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+/* FLIP CARDS */
+.flipCard {
+  width: 105px;
+  height: 105px;
+  perspective: 600px;
+  cursor: pointer;
+}
+
+.flipInner {
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.5s;
+  position: relative;
+}
+
+.flipCard:hover .flipInner {
+  transform: rotateY(180deg);
+}
+
+.flipFront,
+.flipBack {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  gap: 5px;
+  font-family: "Nunito", sans-serif;
+}
+
+.flipFront {
+  background: #e8f5e9;
+}
+
+.flipBack {
+  background: #c8e6c9;
+  transform: rotateY(180deg);
+  color: #1b5e20;
+}
+
+/* RESULT BUTTONS */
+.resultBtns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btnRetry {
+  background: #e8f5e9;
+  border: 2px solid #66bb6a;
+  border-radius: 24px;
+  padding: 10px 22px;
+  font-family: "Baloo 2", cursive;
+  font-size: 14px;
+  font-weight: 700;
+  color: #2e7d32;
+  cursor: pointer;
+}
+
+.btnRetry:hover {
+  background: #c8e6c9;
+}
+
+.btnNext {
+  background: linear-gradient(135deg, #f9a825, #f57f17);
+  border: none;
+  border-radius: 24px;
+  padding: 10px 22px;
+  font-family: "Baloo 2", cursive;
+  font-size: 14px;
+  font-weight: 700;
+  color: #3e2723;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #e65100;
+}

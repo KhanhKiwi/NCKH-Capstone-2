@@ -1,0 +1,250 @@
+/* ── KEYFRAMES ── */
+@keyframes fadeScene {
+  from {
+    opacity: 0;
+    transform: scale(1.03);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes sway {
+  0% {
+    transform: rotate(-2.5deg) translateY(0);
+  }
+  50% {
+    transform: rotate(2.5deg) translateY(-3px);
+  }
+  100% {
+    transform: rotate(-2.5deg) translateY(0);
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scaleY(1) translateY(0);
+  }
+  50% {
+    transform: scaleY(1.025) translateY(-5px);
+  }
+}
+
+@keyframes talk {
+  from {
+    transform: translateY(0) rotate(-1deg);
+  }
+  to {
+    transform: translateY(-6px) rotate(1deg);
+  }
+}
+
+@keyframes jump {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-28px) rotate(4deg);
+  }
+  70% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes bigJump {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  35% {
+    transform: translateY(-42px) rotate(6deg);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(-8deg);
+  }
+  75% {
+    transform: rotate(8deg);
+  }
+}
+
+@keyframes bubblePop {
+  0% {
+    transform: scale(0.15);
+    opacity: 0;
+    transform-origin: bottom left;
+  }
+  65% {
+    transform: scale(1.07);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes popUp {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.8);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-22px) scale(1.25);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-58px) scale(0.9);
+  }
+}
+
+@keyframes badgePop {
+  0% {
+    transform: translateX(-50%) scale(0);
+  }
+  70% {
+    transform: translateX(-50%) scale(1.2);
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+@keyframes ringSpinn {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+@keyframes starPop {
+  0% {
+    transform: scale(0);
+  }
+  65% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes basketPulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 6px rgba(255, 213, 79, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 18px rgba(255, 213, 79, 0.9));
+  }
+}
+
+/* Plant fall animation */
+@keyframes plantFall {
+  0% {
+    transform: translateX(-50%) rotate(0deg) translateY(0);
+  }
+  40% {
+    transform: translateX(-50%) rotate(55deg) translateY(18px);
+  }
+  100% {
+    transform: translateX(-50%) rotate(90deg) translateY(45px);
+  }
+}
+
+/* Override bundleGrow to work as inline style */
+@keyframes bundleGrow {
+  0% {
+    transform: scale(0.72);
+    opacity: 0.7;
+  }
+  55% {
+    transform: scale(1.16);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Rope shake rejection */
+@keyframes ropeShake {
+  0%,
+  100% {
+    transform: translateX(-50%) rotate(0deg);
+  }
+  25% {
+    transform: translateX(-50%) rotate(-4deg);
+  }
+  75% {
+    transform: translateX(-50%) rotate(4deg);
+  }
+}
+
+/* Plant bounce back */
+@keyframes plantBounce {
+  0% {
+    transform: translateX(var(--bx)) translateY(var(--by));
+  }
+  50% {
+    transform: translateX(calc(var(--bx) * 0.4))
+      translateY(calc(var(--by) * 0.4));
+  }
+  100% {
+    transform: translateX(0) translateY(0);
+  }
+}
+
+/* Sickle pulse (when not held) */
+@keyframes sicklePulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 6px #ffd54f) drop-shadow(0 0 2px #ffd54f);
+  }
+  50% {
+    filter: drop-shadow(0 0 20px #ffd54f)
+      drop-shadow(0 0 8px rgba(255, 213, 79, 0.6));
+  }
+}
+
+/* Plant glow when selected */
+@keyframes plantGlow {
+  0% {
+    filter: drop-shadow(0 0 4px #00e676) brightness(1.05);
+  }
+  50% {
+    filter: drop-shadow(0 0 16px #00e676) brightness(1.15);
+  }
+  100% {
+    filter: drop-shadow(0 0 12px #00e676) brightness(1.15);
+  }
+}
