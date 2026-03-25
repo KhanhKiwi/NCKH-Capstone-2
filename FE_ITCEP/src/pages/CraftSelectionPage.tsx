@@ -268,7 +268,7 @@ export default function CraftSelectionPage() {
                             <div className="bg-gray-400 text-white px-4 py-2 rounded-full text-sm font-semibold">
                               Đã khóa
                             </div>
-                            {([2,3,4,5] as number[]).includes(level.id) && (
+                            {([2,3,4,5,6] as number[]).includes(level.id) && (
                               <Link to={`/level-${level.id}`}>
                                 <button className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg transition-colors">
                                   Try
