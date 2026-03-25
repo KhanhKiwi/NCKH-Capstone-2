@@ -1,0 +1,15 @@
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Nunito:wght@400;600;700&display=swap");
+@import url("./animations.css");
+@import url("./game.css");
+@import url("./farmer.css");
+@import url("./bubble.css");
+@import url("./hud.css");
+@import url("./ui.css");
+@import url("./plants.css");
+@import url("./sickle.css");
+@import url("./progress.css");
+@import url("./basket.css");
+@import url("./rope.css");
+@import url("./result.css");
+
+/* This file imports all Screen1 styles organized by component */

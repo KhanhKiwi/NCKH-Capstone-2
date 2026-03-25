@@ -1,0 +1,74 @@
+/* SICKLE */
+.sickleContainer {
+  position: absolute;
+  left: 220px;
+  bottom: 140px;
+  z-index: 15;
+  cursor: grab;
+  user-select: none;
+}
+
+.sickleContainer:active {
+  cursor: grabbing;
+}
+
+.sickleSVG {
+  filter: drop-shadow(0 0 6px #ffd54f);
+  animation: sicklePulse 1.5s ease-in-out infinite;
+  transition: transform 0.1s;
+}
+
+.sickleLabel {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #ffd54f;
+  font-family: "Baloo 2", cursive;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  animation: blink 2s infinite;
+}
+
+.sickleGhost {
+  position: fixed;
+  pointer-events: none;
+  z-index: 250;
+  filter: drop-shadow(0 0 12px #ffd54f);
+  transform: rotate(-20deg);
+}
+
+.sickleFloat {
+  position: absolute;
+  cursor: grab;
+  animation: sicklePulse 1.5s ease-in-out infinite;
+  transition: filter 0.2s;
+  user-select: none;
+}
+
+.sickleCursor {
+  position: fixed;
+  pointer-events: none;
+  z-index: 200;
+  transform: rotate(-20deg);
+  filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.5));
+}
+
+.sickleHint {
+  position: absolute;
+  bottom: 155px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.62);
+  color: #f9a825;
+  border: 1.5px solid #f9a825;
+  border-radius: 20px;
+  padding: 8px 22px;
+  font-family: "Baloo 2", cursive;
+  font-size: 14px;
+  font-weight: 700;
+  z-index: 15;
+  animation: pulse 2s ease-in-out infinite;
+  white-space: nowrap;
+}
