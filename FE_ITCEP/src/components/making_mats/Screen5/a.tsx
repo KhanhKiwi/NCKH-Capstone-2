@@ -1,3 +1,3 @@
-import GameplayScreen from "./GameplayScreen";
+// Screen5 entry point
+export { default } from './index';
 
-export default GameplayScreen;
