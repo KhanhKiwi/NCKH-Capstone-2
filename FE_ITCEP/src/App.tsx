@@ -24,8 +24,7 @@ function App() {
         <Route path="/level6/success" element={<SuccessScreen6 />} />
         <Route path="/level6/fail" element={<FailScreen6 />} />
         
-        {/* Screen 3 - Phase 1 */}
-        <Route path="/screen3" element={<Phase1 />} />
+
       </Routes>
     </Router>
   )
