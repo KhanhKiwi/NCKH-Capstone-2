@@ -156,7 +156,7 @@ export default function Phase3(){
                 phase="phase3"
                 weather={weather}
                 event={weatherEvent}
-                onNext={() => navigate('/phase4')}
+                onNext={() => navigate('/level-3/phase4')}
               />
             )
           })()
@@ -190,12 +190,12 @@ export default function Phase3(){
             </div>
               <div style={{display:'flex',gap:8,alignItems:'center'}}>
                 {overall === 100 ? (
-                  <button className="btn-cta" onClick={() => {
+                    <button className="btn-cta" onClick={() => {
                     try {
                       localStorage.setItem('phase3_stars', String(3))
                       localStorage.setItem('phase3_overall', String(overall))
                     } catch (e) { }
-                    navigate('/phase4')
+                    navigate('/level-3/phase4')
                   }}>Màn tiếp theo</button>
                 ) : (
                   <>

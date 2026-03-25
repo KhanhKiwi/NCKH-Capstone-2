@@ -175,7 +175,7 @@ export default function Game(){
     <div className="screen1 board-root page-wrap">
       {/* standalone GuidePerson removed — dialog's avatar is used instead */}
       <div style={{position:'absolute', right:40, top:96, zIndex:40, transition: 'transform 320ms ease', transform: win ? 'translateX(0)' : 'translateX(0)'}}>
-        <GuideDialog started={started} showRequireStart={showRequireStart} win={win} progress={progress} onNext={() => navigate('/phase2')} />
+        <GuideDialog started={started} showRequireStart={showRequireStart} win={win} progress={progress} onNext={() => navigate('/level-3/phase2')} />
       </div>
       <TopPanel progress={progress} secondsLeft={secondsLeft} />
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
@@ -190,7 +190,7 @@ export default function Game(){
             disabled={started && !gameOver && !win}
             onClick={() => {
               if (win) {
-                navigate('/phase2')
+                navigate('/level-3/phase2')
                 return
               }
               if (gameOver) {

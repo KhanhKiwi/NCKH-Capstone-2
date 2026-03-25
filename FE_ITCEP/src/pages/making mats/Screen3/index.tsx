@@ -7,11 +7,11 @@ import Phase4 from './Phase4'
 export default function Screen3() {
   return (
     <Routes>
-      <Route path="/" element={<Phase1 />} />
-      <Route path="/phase2" element={<Phase2 />} />
-      <Route path="/phase3" element={<Phase3 />} />
-      <Route path="/phase4" element={<Phase4 />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route index element={<Phase1 />} />
+      <Route path="phase2" element={<Phase2 />} />
+      <Route path="phase3" element={<Phase3 />} />
+      <Route path="phase4" element={<Phase4 />} />
+      <Route path="*" element={<Navigate to="." replace />} />
     </Routes>
   )
 }
