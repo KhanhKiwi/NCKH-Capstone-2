@@ -50,7 +50,7 @@ export default function CraftSelectionPage() {
       name: 'Làng dệt chiếu Đinh Yên',
       location: 'Đồng Tháp',
       image: 'https://images.unsplash.com/photo-1710559055621-451811ff73ad?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0cmFkaXRpb25hbCUyMG1hdCUyMHdlYXZpbmclMjBzZWRnZXxlbnwxfHx8fDE3NzMzMDg4NzV8MA&ixlib=rb-4.1.0&q=80&w=1080',
-      unlocked: false,
+      unlocked: true,
     },
     {
       id: 'phu-cau',
@@ -252,9 +252,17 @@ export default function CraftSelectionPage() {
                       {/* Status Badge / Action Buttons */}
                       <div className="flex-shrink-0 flex gap-2">
                         {level.unlocked ? (
-                          <div className="bg-[#4a7c2f] text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
-                            Sẵn sàng
-                          </div>
+                          level.id === 1 ? (
+                            <Link to="/level-1">
+                              <button className="bg-[#4a7c2f] hover:bg-[#3d6827] text-white px-6 py-2 rounded-full text-sm font-semibold shadow-lg transition-colors">
+                                Chơi ngay
+                              </button>
+                            </Link>
+                          ) : (
+                            <div className="bg-[#4a7c2f] text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
+                              Sẵn sàng
+                            </div>
+                          )
                         ) : (
                           <>
                             <div className="bg-gray-400 text-white px-4 py-2 rounded-full text-sm font-semibold">
