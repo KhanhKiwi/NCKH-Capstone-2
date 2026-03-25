@@ -1,0 +1,48 @@
+/* FARMER */
+.farmerWrap {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+  display: flex;
+  align-items: flex-end;
+  background: transparent;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.farmerImg {
+  height: 300px;
+  width: auto;
+  object-fit: contain;
+  background: transparent !important;
+  mix-blend-mode: multiply;
+  filter: drop-shadow(4px 6px 14px rgba(0, 0, 0, 0.5));
+  transition:
+    filter 0.3s,
+    transform 0.3s;
+  transform-origin: bottom center;
+}
+
+.farmer_idle .farmerImg {
+  animation: breathe 2.5s ease-in-out infinite;
+}
+
+.farmer_talking .farmerImg {
+  animation: talk 0.45s ease-in-out infinite alternate;
+}
+
+.farmer_happy .farmerImg {
+  animation: jump 0.55s ease-out 2;
+}
+
+.farmer_excited .farmerImg {
+  animation: bigJump 0.6s ease-out 3;
+}
+
+.farmer_sad .farmerImg {
+  animation: shake 0.55s ease-in-out;
+  filter: saturate(0.6) drop-shadow(4px 6px 14px rgba(0, 0, 0, 0.5));
+}
