@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import '../../../styles/Screen3/Phase4/game.css'
 
 export default function Phase4(){

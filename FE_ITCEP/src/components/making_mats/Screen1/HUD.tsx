@@ -19,11 +19,13 @@ const COUNTER = (s: GameState) => [
 export default function HUD({
   state,
   onToggleHint,
-  onBack,
+  onBack = () => {
+    window.history.back();
+  },
 }: {
   state: GameState;
   onToggleHint: () => void;
-  onBack: () => void;
+  onBack?: () => void;
 }) {
   const counter = COUNTER(state)[state.phase];
   return (

@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router";
 import CraftSelectionPage from "../pages/CraftSelectionPage";
 import GamePage from "../pages/GamePage";
-import Screen4 from "../pages/making mats/Screen4";
+import Screen4 from "../pages/making mats/Screen4/Screen4";
 import HomePage from "../pages/web-home/HomePage";
 
 export const router = createBrowserRouter([

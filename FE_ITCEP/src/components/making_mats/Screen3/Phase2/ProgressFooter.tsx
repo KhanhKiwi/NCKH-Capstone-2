@@ -1,5 +1,5 @@
 // 1. Định nghĩa Interface cho các Props
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 interface ProgressFooterProps {
   selectedColor: string | null;

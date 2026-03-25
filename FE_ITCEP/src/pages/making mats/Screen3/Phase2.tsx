@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import '../../../styles/Screen3/Phase2/game.css'
 import TaskBadge from '../../../components/making_mats/Screen3/Phase2/TaskBadge'
 import ColorSelector from '../../../components/making_mats/Screen3/Phase2/ColorSelector'

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import '../../../styles/Screen3/Phase1/game.css'
 import TopPanel from '../../../components/making_mats/Screen3/Phase1/TopPanel'
