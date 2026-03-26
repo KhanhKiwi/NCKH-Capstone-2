@@ -1,40 +1,35 @@
 import { Facebook, Instagram, Youtube, Mail, MessageSquare, AlertCircle } from 'lucide-react';
+import styles from './Footer.module.css';
 
 export default function Footer() {
   return (
-    <footer className="relative w-full bg-[#2C2419] text-[#F5EDE4] overflow-hidden">
+    <footer className={styles.footer}>
       {/* Subtle Vietnamese Pattern Background */}
-      <div
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l5 10-5 10-5-10zm0 40l5 10-5 10-5-10zM0 30l10-5 10 5-10 5zm40 0l10-5 10 5-10 5z' fill='%23F0D4B0' fill-opacity='1'/%3E%3C/svg%3E")`,
-          backgroundSize: '60px 60px'
-        }}
-      />
+      <div className={styles.patternBackground} />
 
       {/* Main Footer Content */}
-      <div className="relative w-full px-8 md:px-16 lg:px-20 py-20 md:py-28">
-        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 lg:gap-16">
+      <div className={styles.mainContent}>
+        <div className={styles.gridContainer}>
 
           {/* Column 1: Brand */}
-          <div className="space-y-6 lg:col-span-1">
-            <h2 className="text-7xl font-bold text-[#F0D4B0] tracking-wide leading-tight">
+          <div className={`${styles.column} ${styles.brandColumn}`}>
+            <h2 className={styles.brandTitle}>
               CraftSteps
             </h2>
-            <p className="text-2xl text-[#E8C39E] italic leading-relaxed font-medium">
+            <p className={styles.brandDescription}>
               Trải nghiệm làng nghề Việt Nam qua từng bước chân
             </p>
-            <p className="text-xl text-[#F5EDE4]/85 leading-relaxed">
+            <p className={styles.brandSubText}>
               Game tương tác giúp học và bảo tồn nghề thủ công truyền thống
             </p>
           </div>
 
           {/* Column 2: Quick Links */}
-          <div className="space-y-6">
-            <h3 className="text-3xl font-bold text-[#F0D4B0] pb-2">
+          <div className={styles.column}>
+            <h3 className={styles.sectionHeading}>
               Khám phá
             </h3>
-            <ul className="space-y-4">
+            <ul className={styles.linkList}>
               {[
                 'Trang chủ',
                 'Các Level',
@@ -42,10 +37,10 @@ export default function Footer() {
                 'Tiến độ của tôi',
                 'Về làng nghề'
               ].map((item) => (
-                <li key={item}>
+                <li key={item} className={styles.linkItem}>
                   <a
                     href="#"
-                    className="text-xl text-[#F5EDE4]/90 hover:text-[#F0D4B0] transition-colors duration-300 inline-block hover:translate-x-2 transform"
+                    className={styles.link}
                   >
                     {item}
                   </a>
@@ -55,65 +50,65 @@ export default function Footer() {
           </div>
 
           {/* Column 3: Project Info */}
-          <div className="space-y-6">
-            <h3 className="text-3xl font-bold text-[#F0D4B0] pb-2">
+          <div className={styles.column}>
+            <h3 className={styles.sectionHeading}>
               Dự án
             </h3>
-            <ul className="space-y-4 text-xl text-[#F5EDE4]/90">
-              <li className="flex items-start gap-3">
-                <span className="text-[#E8C39E] mt-1 flex-shrink-0">•</span>
+            <ul className={styles.projectList}>
+              <li className={styles.projectItem}>
+                <span className={styles.projectBullet}>•</span>
                 <span>Capstone Project 2026</span>
               </li>
-              <li className="flex items-start gap-3">
-                <span className="text-[#E8C39E] mt-1 flex-shrink-0">•</span>
+              <li className={styles.projectItem}>
+                <span className={styles.projectBullet}>•</span>
                 <span>International School<br/>Đại học Duy Tân</span>
               </li>
-              <li className="flex items-start gap-3">
-                <span className="text-[#E8C39E] mt-1 flex-shrink-0">•</span>
+              <li className={styles.projectItem}>
+                <span className={styles.projectBullet}>•</span>
                 <span>Mentor: TS. Nguyễn Đức Mẫn</span>
               </li>
-              <li className="flex items-start gap-3">
-                <span className="text-[#E8C39E] mt-1 flex-shrink-0">•</span>
+              <li className={styles.projectItem}>
+                <span className={styles.projectBullet}>•</span>
                 <span>Phát triển bởi Team C2SE.02</span>
               </li>
             </ul>
           </div>
 
           {/* Column 4: Contact & Social */}
-          <div className="space-y-6">
-            <h3 className="text-3xl font-bold text-[#F0D4B0] pb-2">
+          <div className={styles.column}>
+            <h3 className={styles.sectionHeading}>
               Liên hệ
             </h3>
-            <div className="space-y-5">
+            <div className={styles.contactSection}>
               <a
                 href="mailto:craftsteps.dt@gmail.com"
-                className="flex items-center gap-3 text-xl text-[#F5EDE4]/90 hover:text-[#F0D4B0] transition-colors duration-300 group"
+                className={styles.contactLink}
               >
-                <Mail className="w-5 h-5 group-hover:scale-125 transition-transform flex-shrink-0" />
-                <span className="break-all text-xl">craftsteps.dt@gmail.com</span>
+                <Mail className={styles.contactIcon} />
+                <span className="break-all">craftsteps.dt@gmail.com</span>
               </a>
 
-              <div className="flex flex-col gap-4 text-xl">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <a
                   href="#"
-                  className="flex items-center gap-2 text-[#F5EDE4]/90 hover:text-[#F0D4B0] transition-colors duration-300"
+                  className={styles.contactLink}
                 >
-                  <MessageSquare className="w-5 h-5 flex-shrink-0" />
+                  <MessageSquare className={styles.contactIcon} />
                   <span>Gửi phản hồi</span>
                 </a>
                 <a
                   href="#"
-                  className="flex items-center gap-2 text-[#F5EDE4]/90 hover:text-[#F0D4B0] transition-colors duration-300"
+                  className={styles.contactLink}
                 >
-                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                  <AlertCircle className={styles.contactIcon} />
                   <span>Báo lỗi</span>
                 </a>
               </div>
 
               {/* Social Media Icons */}
-              <div className="pt-6 border-t border-[#F5EDE4]/10">
-                <p className="text-lg text-[#F5EDE4]/60 mb-4 font-medium">Theo dõi chúng tôi</p>
-                <div className="flex gap-4">
+              <div style={{ paddingTop: '1.5rem', borderTop: '1px solid rgba(245, 237, 228, 0.1)' }}>
+                <p className={styles.socialLabel}>Theo dõi chúng tôi</p>
+                <div className={styles.socialIcons}>
                   {[
                     { Icon: Facebook, label: 'Facebook' },
                     { Icon: Instagram, label: 'Instagram' },
@@ -127,7 +122,7 @@ export default function Footer() {
                     <a
                       key={label}
                       href="#"
-                      className="w-11 h-11 rounded-full bg-[#3A2F22] flex items-center justify-center text-[#E8C39E] hover:bg-[#F0D4B0] hover:text-[#2C2419] transition-all duration-300 hover:scale-125 hover:shadow-lg hover:shadow-[#F0D4B0]/30"
+                      className={styles.socialIcon}
                       aria-label={label}
                     >
                       <Icon className="w-5 h-5" />
@@ -141,34 +136,34 @@ export default function Footer() {
       </div>
 
       {/* Bottom Bar */}
-      <div className="relative bg-[#1F1A15] border-t-2 border-[#F0D4B0]/20 mt-6 md:mt-8">
-        <div className="w-full px-8 md:px-16 lg:px-20 py-8 md:py-10">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-lg md:text-xl text-[#F5EDE4]/70">
-            <div className="flex flex-col md:flex-row items-center gap-3 md:gap-6 text-center md:text-left order-2 md:order-1">
-              <p className="font-medium">© 2026 CraftSteps. All rights reserved.</p>
-              <span className="hidden md:inline text-[#F5EDE4]/30">|</span>
-              <div className="flex gap-4 md:gap-6">
-                <a href="#" className="hover:text-[#F0D4B0] transition-colors duration-300 font-medium">
+      <div className={styles.bottomBar}>
+        <div className={styles.bottomContent}>
+          <div className={styles.bottomGrid}>
+            <div className={`${styles.copyrightSection}`}>
+              <p className={styles.copyrightText}>© 2026 CraftSteps. All rights reserved.</p>
+              <span className={`${styles.separator} hidden md:inline`}>|</span>
+              <div className={styles.copyrightLinks}>
+                <a href="#" className={styles.copyrightLink}>
                   Chính sách bảo mật
                 </a>
-                <span className="text-[#F5EDE4]/30">|</span>
-                <a href="#" className="hover:text-[#F0D4B0] transition-colors duration-300 font-medium">
+                <span className={styles.separator}>|</span>
+                <a href="#" className={styles.copyrightLink}>
                   Điều khoản dịch vụ
                 </a>
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 order-1 md:order-2">
-              <p className="flex items-center gap-2 text-center">
-                Made with <span className="text-red-400 text-2xl">❤️</span> vì Di sản Văn hóa Việt Nam
+            <div className={styles.creditsSection}>
+              <p className={styles.creditsText}>
+                Made with <span className={styles.heart}>❤️</span> vì Di sản Văn hóa Việt Nam
               </p>
-              <span className="hidden md:inline text-[#F5EDE4]/30">|</span>
-              <div className="flex gap-1 bg-[#2C2419] rounded-lg p-1">
-                <button className="px-3 py-1 rounded hover:bg-[#F0D4B0] hover:text-[#2C2419] transition-colors duration-300 text-[#F0D4B0] font-semibold text-sm">
+              <span className={`${styles.separator} hidden md:inline`}>|</span>
+              <div className={styles.languageToggle}>
+                <button className={`${styles.languageBtn} ${styles.languageBtnActive}`}>
                   VN
                 </button>
-                <span className="text-[#F5EDE4]/40">/</span>
-                <button className="px-3 py-1 rounded hover:bg-[#F0D4B0] hover:text-[#2C2419] transition-colors duration-300 text-[#F5EDE4]/70 font-semibold text-sm">
+                <span className={styles.separator}>/</span>
+                <button className={styles.languageBtn}>
                   EN
                 </button>
               </div>
