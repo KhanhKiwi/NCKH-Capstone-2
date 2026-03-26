@@ -27,3 +27,5 @@ export const router = createBrowserRouter([
   { path: "/level-6/*", Component: Screen6 },
   { path: "/village/:id", Component: VillageDetailPage },
 ]);
+
+export default router;
