@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Lock, CheckCircle, Star, X, ChevronRight } from 'lucide-react';
+import { Lock, CheckCircle, Star, X } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { Link } from 'react-router';
 
