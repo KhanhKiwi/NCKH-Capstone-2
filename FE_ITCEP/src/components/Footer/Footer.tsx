@@ -3,7 +3,7 @@ import styles from './Footer.module.css';
 
 export default function Footer() {
   return (
-    <footer className={styles.footer}>
+    <footer id="footer" className={styles.footer}>
       {/* Subtle Vietnamese Pattern Background */}
       <div className={styles.patternBackground} />
 

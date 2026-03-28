@@ -1,3 +1,4 @@
+import React from 'react';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 import { Link } from 'react-router';
 import { villagesData } from '../../data/villagesData';
@@ -31,6 +32,12 @@ export default function HomePage() {
     }, []);
   const crafts = villagesData;
 
+    const scrollTo = (id: string) => (e: React.MouseEvent) => {
+      e.preventDefault();
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
   return (
     <>
       <div id="top" className="min-h-screen bg-[#f5f0e8] pt-24">
@@ -40,22 +47,30 @@ export default function HomePage() {
           <div className="relative flex items-center justify-between">
             {/* Menu trái */}
             <div className="flex items-center gap-12">
-              <a href="#top" className="flex flex-col items-center group">
+              <a href="#top" onClick={scrollTo('top')} className="flex flex-col items-center group">
                 <span className="text-[#4a3f2e] group-hover:text-[#b48a3c] transition-colors text-2xl font-extrabold tracking-widest drop-shadow-md uppercase" style={{fontFamily:'serif'}}>CraftSteps</span>
                 <span className="block w-0 group-hover:w-10 h-1 bg-gradient-to-r from-[#b48a3c] to-[#8b6f47] rounded-full transition-all duration-300 mt-1"></span>
               </a>
               <span className="text-[#b48a3c] text-3xl font-black">·</span>
-              <a href="#crafts" className="flex flex-col items-center group">
+              <a href="#crafts" onClick={scrollTo('crafts')} className="flex flex-col items-center group">
                 <span className="text-[#4a3f2e] group-hover:text-[#b48a3c] transition-colors text-2xl font-extrabold tracking-widest drop-shadow-md uppercase" style={{fontFamily:'serif'}}>Các Nghề</span>
                 <span className="block w-0 group-hover:w-10 h-1 bg-gradient-to-r from-[#b48a3c] to-[#8b6f47] rounded-full transition-all duration-300 mt-1"></span>
               </a>
               <span className="text-[#b48a3c] text-3xl font-black">·</span>
-              <a href="#intro" className="flex flex-col items-center group">
+              <a href="#intro" onClick={scrollTo('intro')} className="flex flex-col items-center group">
                 <span className="text-[#4a3f2e] group-hover:text-[#b48a3c] transition-colors text-2xl font-extrabold tracking-widest drop-shadow-md uppercase" style={{fontFamily:'serif'}}>Về Chúng Tôi</span>
                 <span className="block w-0 group-hover:w-10 h-1 bg-gradient-to-r from-[#b48a3c] to-[#8b6f47] rounded-full transition-all duration-300 mt-1"></span>
               </a>
               <span className="text-[#b48a3c] text-3xl font-black">·</span>
-              <a href="#" className="flex flex-col items-center group">
+              <a
+                href="#footer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  const el = document.getElementById('footer');
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
+                className="flex flex-col items-center group"
+              >
                 <span className="text-[#4a3f2e] group-hover:text-[#b48a3c] transition-colors text-2xl font-extrabold tracking-widest drop-shadow-md uppercase" style={{fontFamily:'serif'}}>Liên Hệ</span>
                 <span className="block w-0 group-hover:w-10 h-1 bg-gradient-to-r from-[#b48a3c] to-[#8b6f47] rounded-full transition-all duration-300 mt-1"></span>
               </a>
