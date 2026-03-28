@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { villagesData } from '../../data/villagesData';
 import { useRef, useEffect } from 'react';
 import { useState } from 'react';
+import Footer from '../../components/Footer/Footer';
 
 export default function HomePage() {
       // Danh sách ảnh nền
@@ -31,7 +32,8 @@ export default function HomePage() {
   const crafts = villagesData;
 
   return (
-    <div id="top" className="min-h-screen bg-[#f5f0e8] pt-24">
+    <>
+      <div id="top" className="min-h-screen bg-[#f5f0e8] pt-24">
       {/* Navigation */}
       <nav className="fixed top-0 left-0 w-full z-50 shadow-2xl backdrop-blur-xl bg-gradient-to-r from-[#e8dcc8]/90 via-[#d4c4a8]/95 to-[#f5f0e8]/90 border-b-4 border-[#b48a3c] rounded-b-3xl animate-fade-in">
         <div className="max-w-7xl mx-auto px-0 py-2">
@@ -241,6 +243,9 @@ export default function HomePage() {
 
       {/* Decorative Footer Background */}
       <div className="h-32 bg-gradient-to-b from-[#e8dcc8] to-[#d4c4a8]"></div>
-    </div>
+      </div>
+
+      <Footer />
+    </>
   );
 }
