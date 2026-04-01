@@ -56,7 +56,7 @@ export default function BackgroundMusic() {
                   const audio = audioRef.current;
                   try {
                     audio?.load();
-                    if (audio) audio.volume = 0.6;
+                    if (audio) audio.volume = 0.2;
                     await audio?.play();
                     setPlaying(true);
                     setShowEnablePrompt(false);

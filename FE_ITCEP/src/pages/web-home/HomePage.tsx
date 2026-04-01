@@ -1,12 +1,11 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
-import { Link } from 'react-router';
+import { useNavigate, Link } from 'react-router-dom';
 import { villagesData } from '../../data/villagesData';
-import { useRef, useEffect } from 'react';
-import { useState } from 'react';
 import Footer from '../../components/Footer/Footer';
 
 export default function HomePage() {
+  const navigate = useNavigate();
       // Danh sách ảnh nền
       const bgImages = [
         '/picture/lamchieu.png',
@@ -38,54 +37,59 @@ export default function HomePage() {
       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
 
+  // Modal state
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showGuestWarn, setShowGuestWarn] = useState(false);
+
   return (
     <>
       <div id="top" className="min-h-screen bg-[#f5f0e8] pt-24">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 w-full z-50 shadow-2xl backdrop-blur-xl bg-gradient-to-r from-[#e8dcc8]/90 via-[#d4c4a8]/95 to-[#f5f0e8]/90 border-b-4 border-[#b48a3c] rounded-b-3xl animate-fade-in">
-        <div className="max-w-7xl mx-auto px-0 py-2">
-          <div className="relative flex items-center justify-between">
-            {/* Menu trái */}
-            <div className="flex items-center gap-12">
-              <a href="#top" onClick={scrollTo('top')} className="flex flex-col items-center group">
-                <span className="text-[#4a3f2e] group-hover:text-[#b48a3c] transition-colors text-2xl font-extrabold tracking-widest drop-shadow-md uppercase" style={{fontFamily:'serif'}}>CraftSteps</span>
-                <span className="block w-0 group-hover:w-10 h-1 bg-gradient-to-r from-[#b48a3c] to-[#8b6f47] rounded-full transition-all duration-300 mt-1"></span>
-              </a>
-              <span className="text-[#b48a3c] text-3xl font-black">·</span>
-              <a href="#crafts" onClick={scrollTo('crafts')} className="flex flex-col items-center group">
-                <span className="text-[#4a3f2e] group-hover:text-[#b48a3c] transition-colors text-2xl font-extrabold tracking-widest drop-shadow-md uppercase" style={{fontFamily:'serif'}}>Các Nghề</span>
-                <span className="block w-0 group-hover:w-10 h-1 bg-gradient-to-r from-[#b48a3c] to-[#8b6f47] rounded-full transition-all duration-300 mt-1"></span>
-              </a>
-              <span className="text-[#b48a3c] text-3xl font-black">·</span>
-              <a href="#intro" onClick={scrollTo('intro')} className="flex flex-col items-center group">
-                <span className="text-[#4a3f2e] group-hover:text-[#b48a3c] transition-colors text-2xl font-extrabold tracking-widest drop-shadow-md uppercase" style={{fontFamily:'serif'}}>Về Chúng Tôi</span>
-                <span className="block w-0 group-hover:w-10 h-1 bg-gradient-to-r from-[#b48a3c] to-[#8b6f47] rounded-full transition-all duration-300 mt-1"></span>
-              </a>
-              <span className="text-[#b48a3c] text-3xl font-black">·</span>
-              <a
-                href="#footer"
-                onClick={(e) => {
+        {/* Navigation */}
+        <nav className="fixed top-0 left-0 w-full z-50 shadow-2xl backdrop-blur-xl bg-gradient-to-r from-[#e8dcc8]/90 via-[#d4c4a8]/95 to-[#f5f0e8]/90 border-b-4 border-[#b48a3c] rounded-b-3xl animate-fade-in">
+          <div className="max-w-7xl mx-auto px-0 py-2">
+            <div className="flex items-center justify-center w-full">
+              <div className="flex items-center gap-12 mx-auto">
+              {[{
+                label: 'CRAFTSTEPS',
+                href: '#top',
+                onClick: scrollTo('top')
+              }, {
+                label: 'CÁC NGHỀ',
+                href: '#crafts',
+                onClick: scrollTo('crafts')
+              }, {
+                label: 'VỀ CHÚNG TÔI',
+                href: '#intro',
+                onClick: scrollTo('intro')
+              }, {
+                label: 'LIÊN HỆ',
+                href: '#footer',
+                onClick: (e: React.MouseEvent) => {
                   e.preventDefault();
                   const el = document.getElementById('footer');
                   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }}
-                className="flex flex-col items-center group"
-              >
-                <span className="text-[#4a3f2e] group-hover:text-[#b48a3c] transition-colors text-2xl font-extrabold tracking-widest drop-shadow-md uppercase" style={{fontFamily:'serif'}}>Liên Hệ</span>
-                <span className="block w-0 group-hover:w-10 h-1 bg-gradient-to-r from-[#b48a3c] to-[#8b6f47] rounded-full transition-all duration-300 mt-1"></span>
-              </a>
+                }
+              }].map((item, idx, arr) => (
+                <React.Fragment key={item.label}>
+                  <a
+                    href={item.href}
+                    onClick={item.onClick}
+                    className="flex flex-col items-center group"
+                  >
+                    <span className="text-[#4a3f2e] group-hover:text-[#b48a3c] transition-colors text-2xl font-extrabold tracking-widest drop-shadow-md uppercase" style={{fontFamily:'serif'}}>{item.label}</span>
+                    <span className="block w-0 group-hover:w-10 h-1 bg-gradient-to-r from-[#b48a3c] to-[#8b6f47] rounded-full transition-all duration-300 mt-1"></span>
+                  </a>
+                  {idx < arr.length - 1 && (
+                    <span className="text-[#b48a3c] text-3xl font-black">·</span>
+                  )}
+                </React.Fragment>
+              ))}
+              </div>
             </div>
             {/* ...bỏ logo/icon giữa... */}
-            {/* Đăng nhập bên phải */}
-            <button className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-[#b48a3c] to-[#8b6f47] text-white font-bold rounded-full shadow-lg hover:scale-105 hover:from-[#c9a44c] hover:to-[#a07c3c] transition-all duration-200 text-lg absolute right-0 top-1/2 -translate-y-1/2">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25v-1.5A2.25 2.25 0 016.75 16.5h10.5a2.25 2.25 0 012.25 2.25v1.5" />
-              </svg>
-              Đăng nhập
-            </button>
+            {/* Đã xóa nút Đăng nhập bên phải */}
           </div>
-        </div>
-      </nav>
+        </nav>
 
       {/* Hero Section */}
       <section className="relative">
@@ -134,12 +138,69 @@ export default function HomePage() {
               </span>
             </p>
             <div className="flex gap-8 mt-2 animate-float">
-              <Link to="/game">
-                <button className="flex items-center gap-3 bg-gradient-to-r from-[#4a7c2f] to-[#7bc043] hover:from-[#3d6827] hover:to-[#5fa32d] text-white px-12 py-5 rounded-full text-2xl font-bold shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-[#fffbe8]">
-                  <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#fffbe8"/><path d="M10 8l6 4-6 4V8z" fill="#4a7c2f"/></svg>
-                  Bắt đầu chơi
-                </button>
-              </Link>
+              <button
+                className="flex items-center gap-3 bg-gradient-to-r from-[#4a7c2f] to-[#7bc043] hover:from-[#3d6827] hover:to-[#5fa32d] text-white px-12 py-5 rounded-full text-2xl font-bold shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-[#fffbe8]"
+                onClick={() => setShowAuthModal(true)}
+              >
+                <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#fffbe8"/><path d="M10 8l6 4-6 4V8z" fill="#4a7c2f"/></svg>
+                Bắt đầu chơi
+              </button>
+                    {/* Modal xác thực đăng nhập/chơi khách */}
+                    {showAuthModal && (
+                      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+                        <div className="bg-white rounded-2xl p-8 w-full max-w-md text-center border border-yellow-300 shadow-2xl">
+                          <h3 className="text-2xl font-bold mb-2 text-yellow-700">Đăng nhập để lưu tiến trình</h3>
+                          <p className="mb-4 text-gray-700">Bạn cần đăng nhập để lưu lại tiến trình chơi và thành tích của mình.</p>
+                          <div className="flex items-center justify-center gap-4 mt-6">
+                            <button
+                              className="px-6 py-2 bg-yellow-600 text-white rounded-full shadow hover:scale-105 transition-transform"
+                              onClick={() => {
+                                setShowAuthModal(false);
+                                // TODO: Chuyển hướng sang trang đăng nhập thực tế
+                                navigate('/login');
+                              }}
+                            >
+                              Đăng nhập
+                            </button>
+                            <button
+                              className="px-5 py-2 bg-white border border-yellow-300 text-yellow-700 rounded-full shadow"
+                              onClick={() => {
+                                setShowAuthModal(false);
+                                setShowGuestWarn(true);
+                              }}
+                            >
+                              Chơi khách
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {/* Modal cảnh báo chơi khách */}
+                    {showGuestWarn && (
+                      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+                        <div className="bg-white rounded-2xl p-8 w-full max-w-md text-center border border-red-300 shadow-2xl">
+                          <h3 className="text-2xl font-bold mb-2 text-red-700">Tiến trình sẽ không được lưu</h3>
+                          <p className="mb-4 text-gray-700">Nếu tiếp tục chơi với tư cách khách, mọi thành tích và tiến trình sẽ bị mất khi thoát game.</p>
+                          <div className="flex items-center justify-center gap-4 mt-6">
+                            <button
+                              className="px-6 py-2 bg-red-600 text-white rounded-full shadow hover:scale-105 transition-transform"
+                              onClick={() => {
+                                setShowGuestWarn(false);
+                                navigate('/game');
+                              }}
+                            >
+                              Tiếp tục
+                            </button>
+                            <button
+                              className="px-5 py-2 bg-white border border-red-300 text-red-700 rounded-full shadow"
+                              onClick={() => setShowGuestWarn(false)}
+                            >
+                              Hủy
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
               <button className="flex items-center gap-3 bg-gradient-to-r from-[#ffe9b0] to-[#d4c4a8] hover:from-[#fffbe8] hover:to-[#b48a3c] text-[#4a3f2e] px-12 py-5 rounded-full text-2xl font-bold shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-[#fffbe8]">
                 <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#b48a3c"/><path d="M12 8v4l3 3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 Tìm hiểu thêm
