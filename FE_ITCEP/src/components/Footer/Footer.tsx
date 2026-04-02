@@ -1,5 +1,6 @@
 import { Facebook, Instagram, Youtube, Mail, MessageSquare, AlertCircle } from 'lucide-react';
 import styles from './Footer.module.css';
+import FooterReviewForm from '../Reviews/FooterReviewForm';
 
 export default function Footer() {
   return (
@@ -24,32 +25,7 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Column 2: Quick Links */}
-          <div className={styles.column}>
-            <h3 className={styles.sectionHeading}>
-              Khám phá
-            </h3>
-            <ul className={styles.linkList}>
-              {[
-                'Trang chủ',
-                'Các Level',
-                'Hướng dẫn chơi',
-                'Tiến độ của tôi',
-                'Về làng nghề'
-              ].map((item) => (
-                <li key={item} className={styles.linkItem}>
-                  <a
-                    href="#"
-                    className={styles.link}
-                  >
-                    {item}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Column 3: Project Info */}
+          {/* Column 2: Project Info */}
           <div className={styles.column}>
             <h3 className={styles.sectionHeading}>
               Dự án
@@ -74,7 +50,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 4: Contact & Social */}
+          {/* Column 3: Contact & Social */}
           <div className={styles.column}>
             <h3 className={styles.sectionHeading}>
               Liên hệ
@@ -131,6 +107,11 @@ export default function Footer() {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Column 4: Review Form đẹp CUỐI CÙNG */}
+          <div className={styles.column}>
+            <FooterReviewForm />
           </div>
         </div>
       </div>

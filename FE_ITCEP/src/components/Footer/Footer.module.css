@@ -23,9 +23,7 @@
 .mainContent {
   position: relative;
   width: 100%;
-  padding: 1.25rem;
   padding-top: 1.875rem;
-  padding-bottom: 1.875rem;
 }
 
 @media (min-width: 768px) {
@@ -33,7 +31,6 @@
     padding-left: 2rem;
     padding-right: 2rem;
     padding-top: 2.75rem;
-    padding-bottom: 2.75rem;
   }
 }
 
@@ -42,7 +39,6 @@
     padding-left: 2.5rem;
     padding-right: 2.5rem;
     padding-top: 3.5rem;
-    padding-bottom: 3.5rem;
   }
 }
 
