@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 
 export default function FooterReviewForm() {
   const [form, setForm] = useState({ name: '', content: '' });
+  const [rating, setRating] = useState<number>(0);
+  const [hoverRating, setHoverRating] = useState<number>(0);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -13,8 +15,8 @@ export default function FooterReviewForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.content.trim()) {
-      setError('Vui lòng nhập tên và nội dung đánh giá.');
+    if (!form.name.trim() || !form.content.trim() || rating <= 0) {
+      setError('Vui lòng nhập tên, nội dung đánh giá và chọn số sao.');
       return;
     }
     setSubmitting(true);
@@ -22,6 +24,8 @@ export default function FooterReviewForm() {
       setSubmitting(false);
       setSuccess(true);
       setForm({ name: '', content: '' });
+      setRating(0);
+      setHoverRating(0);
       setTimeout(() => setSuccess(false), 2000);
     }, 900);
   };
@@ -44,6 +48,28 @@ export default function FooterReviewForm() {
         maxLength={32}
         required
       />
+
+      <div className="flex flex-col items-center gap-3">
+        <div className="sr-only">Chọn số sao</div>
+        <div className="flex items-center gap-2 justify-center">
+          {[1,2,3,4,5].map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => setRating(s)}
+              onMouseEnter={() => setHoverRating(s)}
+              onMouseLeave={() => setHoverRating(0)}
+              className="p-1"
+              aria-label={`${s} sao`}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z" fill={(hoverRating||rating) >= s ? '#ffe9b0' : '#3a2f25'} stroke="#b48a3c"/>
+              </svg>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <textarea
         name="content"
         placeholder="Nội dung đánh giá..."

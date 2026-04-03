@@ -3,6 +3,7 @@ import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 import { useNavigate, Link } from 'react-router-dom';
 import { villagesData } from '../../data/villagesData';
 import Footer from '../../components/Footer/Footer';
+import RecentReviewList from '../../components/Reviews/RecentReviewList';
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -315,10 +316,14 @@ export default function HomePage() {
             </button>
           </div>
         </div>
+        
+        {/* Recent reviews inserted to keep background continuous */}
+        <div className="py-16">
+          <RecentReviewList />
+        </div>
       </section>
 
-      {/* Decorative Footer Background */}
-      <div className="h-32 bg-gradient-to-b from-[#e8dcc8] to-[#d4c4a8]"></div>
+      {/* Footer follows immediately after reviews */}
       </div>
 
       <Footer />
