@@ -11,8 +11,13 @@ import HomePage from '../pages/web-home/HomePage'
 import VillageDetailPage from '../pages/VillageDetailPage'
 import Screen1 from '../components/making_mats/Screen1'
 import RootLayout from './RootLayout'
+import { LoginPage } from '../components/log'
 
 export const router = createBrowserRouter([
+  {
+    path: '/login',
+    Component: LoginPage,
+  },
   {
     path: '/',
     element: <RootLayout />,
