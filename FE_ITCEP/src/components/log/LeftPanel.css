@@ -1,0 +1,52 @@
+/* Swaying animations for crafts */
+@keyframes sway-1 {
+  0%, 100% {
+    transform: rotate(-6deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes sway-2 {
+  0%, 100% {
+    transform: rotate(3deg);
+  }
+  50% {
+    transform: rotate(-2deg);
+  }
+}
+
+@keyframes sway-3 {
+  0%, 100% {
+    transform: rotate(2deg);
+  }
+  50% {
+    transform: rotate(-1deg);
+  }
+}
+
+@keyframes sway-4 {
+  0%, 100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(1deg);
+  }
+}
+
+.animate-sway-1 {
+  animation: sway-1 3s ease-in-out infinite;
+}
+
+.animate-sway-2 {
+  animation: sway-2 3.5s ease-in-out infinite;
+}
+
+.animate-sway-3 {
+  animation: sway-3 2.8s ease-in-out infinite;
+}
+
+.animate-sway-4 {
+  animation: sway-4 3.2s ease-in-out infinite;
+}

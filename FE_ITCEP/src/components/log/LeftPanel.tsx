@@ -1,5 +1,6 @@
 import { Compass } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
+import './LeftPanel.css';
 
 export default function LeftPanel() {
   return (
@@ -39,7 +40,7 @@ export default function LeftPanel() {
           </svg>
 
           {/* Craft Image 1 - Pottery */}
-          <div className="absolute top-12 left-12 w-72 h-72 rounded-3xl overflow-hidden shadow-2xl transform -rotate-6 hover:rotate-0 transition-transform duration-500 z-20 border-4 border-white">
+          <div className="absolute top-12 left-12 w-72 h-72 rounded-3xl overflow-hidden shadow-2xl z-20 border-4 border-white animate-sway-1">
             <ImageWithFallback
               src="https://images.unsplash.com/photo-1768478563698-6b0b87724edd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw0fHxWaWV0bmFtZXNlJTIwdHJhZGl0aW9uYWwlMjBjcmFmdHMlMjBwb3R0ZXJ5JTIwd2VhdmluZyUyMGJhbWJvb3xlbnwxfHx8fDE3NzUxNDAxODF8MA&ixlib=rb-4.1.0&q=80&w=1080"
               alt="Làm gốm truyền thống"
@@ -51,7 +52,7 @@ export default function LeftPanel() {
           </div>
 
           {/* Craft Image 2 - Basket Weaving */}
-          <div className="absolute top-32 right-24 w-64 h-64 rounded-3xl overflow-hidden shadow-2xl transform rotate-3 hover:rotate-0 transition-transform duration-500 z-20 border-4 border-white">
+          <div className="absolute top-32 right-24 w-64 h-64 rounded-3xl overflow-hidden shadow-2xl z-20 border-4 border-white animate-sway-2">
             <ImageWithFallback
               src="https://images.unsplash.com/photo-1677146340134-9725223bf913?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxWaWV0bmFtZXNlJTIwdHJhZGl0aW9uYWwlMjBjcmFmdHMlMjBwb3R0ZXJ5JTIwd2VhdmluZyUyMGJhbWJvb3xlbnwxfHx8fDE3NzUxNDAxODF8MA&ixlib=rb-4.1.0&q=80&w=1080"
               alt="Đan lát tre"
@@ -63,7 +64,7 @@ export default function LeftPanel() {
           </div>
 
           {/* Craft Image 3 - Bamboo Crafts */}
-          <div className="absolute bottom-24 left-32 w-80 h-56 rounded-3xl overflow-hidden shadow-2xl transform rotate-2 hover:rotate-0 transition-transform duration-500 z-20 border-4 border-white">
+          <div className="absolute bottom-24 left-32 w-80 h-56 rounded-3xl overflow-hidden shadow-2xl z-20 border-4 border-white animate-sway-3">
             <ImageWithFallback
               src="https://images.unsplash.com/photo-1677146339793-ad2f6e8bf64f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw1fHxWaWV0bmFtZXNlJTIwdHJhZGl0aW9uYWwlMjBjcmFmdHMlMjBwb3R0ZXJ5JTIwd2VhdmluZyUyMGJhbWJvb3xlbnwxfHx8fDE3NzUxNDAxODF8MA&ixlib=rb-4.1.0&q=80&w=1080"
               alt="Nghề tre"
@@ -75,7 +76,7 @@ export default function LeftPanel() {
           </div>
 
           {/* Craft Image 4 - Traditional Crafts */}
-          <div className="absolute bottom-8 right-32 w-72 h-72 rounded-3xl overflow-hidden shadow-2xl transform -rotate-3 hover:rotate-0 transition-transform duration-500 z-20 border-4 border-white">
+          <div className="absolute bottom-8 right-32 w-72 h-72 rounded-3xl overflow-hidden shadow-2xl z-20 border-4 border-white animate-sway-4">
             <ImageWithFallback
               src="https://images.unsplash.com/photo-1768478563756-1c5c52008a46?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw5fHxWaWV0bmFtZXNlJTIwdHJhZGl0aW9uYWwlMjBjcmFmdHMlMjBwb3R0ZXJ5JTIwd2VhdmluZyUyMGJhbWJvb3xlbnwxfHx8fDE3NzUxNDAxODF8MA&ixlib=rb-4.1.0&q=80&w=1080"
               alt="Nghề thủ công truyền thống"
