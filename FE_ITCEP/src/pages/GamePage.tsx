@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Play, GraduationCap, Trophy } from 'lucide-react';
 import { Link } from 'react-router';
 import { Logo } from '../components/Game/Logo';
@@ -7,6 +8,38 @@ import { Achievements } from '../components/Game/Achievements';
 import { GameCard } from '../components/Game/GameCard';
 
 export default function GamePage() {
+  // Danh sách ảnh nền
+  const bgImages = [
+    '/picture/lamchieu.png',
+    '/picture/lamgom.png',
+    '/picture/lamhuong.png',
+    '/picture/lamlua.png',
+    '/picture/lamsonmai.png',
+    '/picture/lamtranhdongho.png',
+  ];
+  
+  const [bgIndex, setBgIndex] = useState(0);
+  const [loadedImages, setLoadedImages] = useState(new Set<number>());
+
+  // Preload images
+  useEffect(() => {
+    bgImages.forEach((src, index) => {
+      const img = new Image();
+      img.onload = () => {
+        setLoadedImages((prev) => new Set([...prev, index]));
+      };
+      img.src = src;
+    });
+  }, []);
+
+  // Auto update background mỗi 3 giây
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBgIndex((prev) => (prev + 1) % bgImages.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
   const gameCards = [
     {
       icon: Play,
@@ -29,16 +62,21 @@ export default function GamePage() {
   ];
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Background with Village Scene */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1760939399262-d4d30d78a291?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aWV0bmFtZXNlJTIwdHJhZGl0aW9uYWwlMjBtYXQlMjB3ZWF2aW5nJTIwdmlsbGFnZXxlbnwxfHx8fDE3NzMyNDE0Mzh8MA&ixlib=rb-4.1.0&q=80&w=1080')`,
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/60"></div>
-      </div>
+    <div className="min-h-screen relative overflow-hidden bg-black">
+      {/* Background with Village Scene - Auto rotate */}
+      {bgImages.map((src, i) => (
+        <div
+          key={src}
+          className={`absolute inset-0 bg-cover bg-center pointer-events-none select-none transition-opacity duration-1000 ${
+            i === bgIndex && loadedImages.has(i) ? 'opacity-100' : 'opacity-0'
+          }`}
+          style={{
+            backgroundImage: `url('${src}')`,
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/60"></div>
+        </div>
+      ))}
 
       {/* Player Info & Achievements */}
       <PlayerInfo />
