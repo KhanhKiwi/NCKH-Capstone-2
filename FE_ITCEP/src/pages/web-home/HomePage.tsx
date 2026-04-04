@@ -149,7 +149,14 @@ export default function HomePage() {
                     {/* Modal xác thực đăng nhập/chơi khách */}
                     {showAuthModal && (
                       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-                        <div className="bg-white rounded-2xl p-8 w-full max-w-md text-center border border-yellow-300 shadow-2xl">
+                        <div className="bg-white rounded-2xl p-8 w-full max-w-md text-center border border-yellow-300 shadow-2xl relative">
+                          <button
+                            aria-label="Đóng"
+                            className="absolute right-4 top-4 w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center"
+                            onClick={() => setShowAuthModal(false)}
+                          >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="#444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          </button>
                           <h3 className="text-2xl font-bold mb-2 text-yellow-700">Đăng nhập để lưu tiến trình</h3>
                           <p className="mb-4 text-gray-700">Bạn cần đăng nhập để lưu lại tiến trình chơi và thành tích của mình.</p>
                           <div className="flex items-center justify-center gap-4 mt-6">
@@ -157,7 +164,6 @@ export default function HomePage() {
                               className="px-6 py-2 bg-yellow-600 text-white rounded-full shadow hover:scale-105 transition-transform"
                               onClick={() => {
                                 setShowAuthModal(false);
-                                // TODO: Chuyển hướng sang trang đăng nhập thực tế
                                 navigate('/login');
                               }}
                             >
@@ -179,7 +185,14 @@ export default function HomePage() {
                     {/* Modal cảnh báo chơi khách */}
                     {showGuestWarn && (
                       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-                        <div className="bg-white rounded-2xl p-8 w-full max-w-md text-center border border-red-300 shadow-2xl">
+                        <div className="bg-white rounded-2xl p-8 w-full max-w-md text-center border border-red-300 shadow-2xl relative">
+                          <button
+                            aria-label="Đóng"
+                            className="absolute right-4 top-4 w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center"
+                            onClick={() => setShowGuestWarn(false)}
+                          >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="#444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          </button>
                           <h3 className="text-2xl font-bold mb-2 text-red-700">Tiến trình sẽ không được lưu</h3>
                           <p className="mb-4 text-gray-700">Nếu tiếp tục chơi với tư cách khách, mọi thành tích và tiến trình sẽ bị mất khi thoát game.</p>
                           <div className="flex items-center justify-center gap-4 mt-6">
@@ -194,9 +207,12 @@ export default function HomePage() {
                             </button>
                             <button
                               className="px-5 py-2 bg-white border border-red-300 text-red-700 rounded-full shadow"
-                              onClick={() => setShowGuestWarn(false)}
+                              onClick={() => {
+                                setShowGuestWarn(false);
+                                navigate('/login');
+                              }}
                             >
-                              Hủy
+                              Đăng nhập
                             </button>
                           </div>
                         </div>

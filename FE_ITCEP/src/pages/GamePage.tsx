@@ -1,4 +1,4 @@
-import { Play, GraduationCap, Settings } from 'lucide-react';
+import { Play, GraduationCap, Trophy } from 'lucide-react';
 import { Link } from 'react-router';
 import { Logo } from '../components/Game/Logo';
 import { PlayButton } from '../components/Game/PlayButton';
@@ -21,9 +21,9 @@ export default function GamePage() {
       delay: 0.4
     },
     {
-      icon: Settings,
-      title: "Cài đặt",
-      description: "Tùy chỉnh game",
+      icon: Trophy,
+      title: "Thử thách",
+      description: "Tìm thử thách và thi đấu",
       delay: 0.5
     }
   ];

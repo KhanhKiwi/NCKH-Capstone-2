@@ -37,17 +37,28 @@ export default function FooterReviewForm() {
       onSubmit={handleSubmit}
     >
       <h3 className="text-xl font-extrabold text-[#ffe9b0] text-center mb-2 drop-shadow-lg tracking-wide" style={{ fontFamily: 'serif' }}>Đánh giá của bạn</h3>
-      <input
-        type="text"
-        name="name"
-        placeholder="Tên của bạn"
-        className="px-4 py-2 rounded-lg border-2 border-[#ffe9b0] bg-[#232218] text-[#ffe9b0] focus:border-[#b48a3c] outline-none text-base font-medium shadow-sm transition placeholder:text-[#b48a3c]/60"
-        value={form.name}
-        onChange={handleChange}
+      <button
+        type="button"
+        onClick={() => {
+          setError('');
+          setForm((f) => ({ ...f, name: f.name === 'Ẩn danh' ? '' : 'Ẩn danh' }));
+        }}
+        aria-pressed={form.name === 'Ẩn danh'}
+        className={`w-full flex items-center justify-between px-4 py-2 rounded-xl border-2 ${form.name === 'Ẩn danh' ? 'border-[#b48a3c] bg-[#15381f]' : 'border-[#b88f4b] bg-[#232218]'} text-[#ffe9b0] focus:outline-none text-base font-medium shadow-[0_6px_18px_rgba(0,0,0,0.25)] transition-all duration-200 hover:scale-[1.01]`}
         disabled={submitting}
-        maxLength={32}
-        required
-      />
+        title="Nhấn để đăng ẩn danh"
+      >
+        <span className="select-none text-lg pl-1">Ẩn danh</span>
+        <span className="ml-3 flex items-center justify-center">
+          {form.name === 'Ẩn danh' ? (
+            <span className="w-7 h-7 rounded-full bg-[#0f2b19] border-2 border-[#b48a3c] flex items-center justify-center shadow-inner">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </span>
+          ) : (
+            <span className="w-7 h-7 rounded-full border-2 border-[#7a663c] bg-transparent flex items-center justify-center" />
+          )}
+        </span>
+      </button>
 
       <div className="flex flex-col items-center gap-3">
         <div className="sr-only">Chọn số sao</div>
