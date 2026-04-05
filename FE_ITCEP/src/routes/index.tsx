@@ -8,6 +8,7 @@ import Screen3 from '../pages/making mats/Screen3'
 import Screen5 from '../pages/making mats/Screen5'
 import Screen6 from '../pages/making mats/Screen6'
 import HomePage from '../pages/web-home/HomePage'
+import BatTrangLevel0 from '../pages/making_ceramics/Screen0/screen0'
 import VillageDetailPage from '../pages/VillageDetailPage'
 import Screen1 from '../components/making_mats/Screen1'
 import RootLayout from './RootLayout'
@@ -37,6 +38,8 @@ export const router = createBrowserRouter([
       { path: 'level-5/*', Component: Screen5 },
       { path: 'level-6/*', Component: Screen6 },
       { path: 'village/:id', Component: VillageDetailPage },
+      // Bát Tràng craft level 0 (history/story)
+      { path: 'bat-trang/level-0', Component: BatTrangLevel0 },
     ],
   },
 ])
