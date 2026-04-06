@@ -6,6 +6,12 @@ import { log } from 'console';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Enable CORS for frontend
+  app.enableCors({
+    origin: ['http://localhost:5173', 'http://localhost:3000'],
+    credentials: true,
+  });
+
   const config = new DocumentBuilder()
     .setTitle('ITCEP API')
     .setDescription('API documentation for ITCEP backend')

@@ -1,17 +1,43 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import LeftPanel from './LeftPanel';
 import AuthPanel from './AuthPanel';
+import { authService } from '../../services/authService';
 
 export default function LoginPage() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', { activeTab, email, password, name });
-    // TODO: Implement login/register logic here
+    setError('');
+    setIsLoading(true);
+
+    try {
+      if (activeTab === 'login') {
+        const response = await authService.login(email, password);
+        authService.saveToken(response.access_token);
+        console.log('Login successful');
+        navigate('/');
+      } else {
+        await authService.register(email, password, name);
+        console.log('Registration successful');
+        const loginResponse = await authService.login(email, password);
+        authService.saveToken(loginResponse.access_token);
+        navigate('/');
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      setError(errorMessage);
+      console.error('Auth error:', errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -46,6 +72,8 @@ export default function LoginPage() {
           name={name}
           setName={setName}
           onSubmit={handleSubmit}
+          isLoading={isLoading}
+          error={error}
         />
       </div>
     </div>

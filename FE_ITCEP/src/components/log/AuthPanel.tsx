@@ -10,6 +10,8 @@ interface AuthPanelProps {
   name: string;
   setName: (name: string) => void;
   onSubmit: (e: React.FormEvent) => void;
+  isLoading?: boolean;
+  error?: string;
 }
 
 export default function AuthPanel({
@@ -22,6 +24,8 @@ export default function AuthPanel({
   name,
   setName,
   onSubmit,
+  isLoading = false,
+  error = '',
 }: AuthPanelProps) {
   return (
     <div className="w-[40%] flex items-center justify-center p-8">
@@ -69,6 +73,13 @@ export default function AuthPanel({
             />
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-700 text-sm font-medium">{error}</p>
+            </div>
+          )}
+
           {/* Form */}
           <form onSubmit={onSubmit} className="space-y-5">
             {activeTab === 'register' && (
@@ -79,7 +90,8 @@ export default function AuthPanel({
                   placeholder="Tên của bạn"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-amber-500 focus:outline-none transition-all duration-300 bg-white/50"
+                  disabled={isLoading}
+                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-amber-500 focus:outline-none transition-all duration-300 bg-white/50 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
             )}
@@ -91,7 +103,8 @@ export default function AuthPanel({
                 placeholder="Email của bạn"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-amber-500 focus:outline-none transition-all duration-300 bg-white/50"
+                disabled={isLoading}
+                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-amber-500 focus:outline-none transition-all duration-300 bg-white/50 disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
 
@@ -102,7 +115,8 @@ export default function AuthPanel({
                 placeholder="Mật khẩu"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-amber-500 focus:outline-none transition-all duration-300 bg-white/50"
+                disabled={isLoading}
+                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-amber-500 focus:outline-none transition-all duration-300 bg-white/50 disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
 
@@ -120,10 +134,17 @@ export default function AuthPanel({
             {/* Submit Button */}
             <button
               type="submit"
-              className="group w-full bg-gradient-to-r from-amber-500 via-yellow-500 to-green-500 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-2"
+              disabled={isLoading}
+              className={`group w-full bg-gradient-to-r from-amber-500 via-yellow-500 to-green-500 text-white py-3 rounded-xl font-semibold shadow-lg transition-all duration-300 flex items-center justify-center gap-2 ${
+                isLoading 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:shadow-xl hover:scale-[1.02]'
+              }`}
             >
               <span>
-                {activeTab === 'login' ? 'Tiếp tục hành trình' : 'Bắt đầu khám phá'}
+                {isLoading
+                  ? activeTab === 'login' ? 'Đang đăng nhập...' : 'Đang đăng ký...'
+                  : activeTab === 'login' ? 'Tiếp tục hành trình' : 'Bắt đầu khám phá'}
               </span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>

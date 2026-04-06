@@ -13,6 +13,9 @@ export class User {
   @Column({ length: 255, nullable: true })
   password: string;
 
+  @Column({ length: 100, nullable: true })
+  name: string;
+
   @OneToMany(() => UserProgress, (progress) => progress.user)
   progress: UserProgress[];
 
