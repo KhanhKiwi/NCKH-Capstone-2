@@ -15,10 +15,11 @@ export default function FooterReviewForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.content.trim() || rating <= 0) {
-      setError('Vui lòng nhập tên, nội dung đánh giá và chọn số sao.');
+    if (rating <= 0) {
+      setError('Vui lòng chọn số sao.');
       return;
     }
+    setError('');
     setSubmitting(true);
     setTimeout(() => {
       setSubmitting(false);
@@ -67,7 +68,7 @@ export default function FooterReviewForm() {
             <button
               key={s}
               type="button"
-              onClick={() => setRating(s)}
+              onClick={() => { setRating(s); setError(''); }}
               onMouseEnter={() => setHoverRating(s)}
               onMouseLeave={() => setHoverRating(0)}
               className="p-1"
@@ -89,7 +90,6 @@ export default function FooterReviewForm() {
         onChange={handleChange}
         disabled={submitting}
         maxLength={300}
-        required
         style={{ overflow: 'hidden' }}
       />
       {error && <div className="text-red-400 text-sm font-semibold text-center">{error}</div>}

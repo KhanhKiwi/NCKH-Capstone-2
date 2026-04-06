@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { villagesData } from '../../data/villagesData';
 import Footer from '../../components/Footer/Footer';
 import RecentReviewList from '../../components/Reviews/RecentReviewList';
@@ -31,6 +30,63 @@ export default function HomePage() {
       }
     }, []);
   const crafts = villagesData;
+    const [activeIndex, setActiveIndex] = useState<number>(0);
+  const [previewVisible, setPreviewVisible] = useState<boolean>(true);
+
+  // Trigger a fade/scale animation on preview whenever activeIndex changes
+  useEffect(() => {
+    setPreviewVisible(false);
+    const t = setTimeout(() => setPreviewVisible(true), 60);
+    return () => clearTimeout(t);
+  }, [activeIndex]);
+
+  // Autoplay progress and tilt state
+  const AUTOPLAY_MS = 7000;
+  const [progress, setProgress] = useState<number>(0);
+  const autoplayRef = useRef<number | null>(null);
+  const progressRef = useRef<number>(0);
+  const pausedRef = useRef(false);
+  const previewRef = useRef<HTMLDivElement | null>(null);
+  const [tilt, setTilt] = useState({ rx: 0, ry: 0 });
+
+  useEffect(() => {
+    // cleanup any previous
+    if (autoplayRef.current) window.clearInterval(autoplayRef.current);
+    progressRef.current = 0;
+    setProgress(0);
+
+    autoplayRef.current = window.setInterval(() => {
+      if (pausedRef.current) return;
+      progressRef.current += 100 / (AUTOPLAY_MS / 100);
+      setProgress(progressRef.current);
+      if (progressRef.current >= 100) {
+        progressRef.current = 0;
+        setProgress(0);
+        setActiveIndex((s) => (crafts && crafts.length ? (s + 1) % crafts.length : s));
+      }
+    }, 100);
+
+    return () => {
+      if (autoplayRef.current) window.clearInterval(autoplayRef.current);
+    };
+  }, [crafts]);
+
+  // pause autoplay on preview hover
+  const handlePreviewEnter = () => { pausedRef.current = true; };
+  const handlePreviewLeave = () => { pausedRef.current = false; };
+
+  const handlePreviewMove = (e: React.MouseEvent) => {
+    const el = previewRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = e.clientX - rect.left; // x position within element
+    const y = e.clientY - rect.top; // y position within element
+    const rx = ((y - rect.height / 2) / rect.height) * -6; // rotateX
+    const ry = ((x - rect.width / 2) / rect.width) * 8; // rotateY
+    setTilt({ rx, ry });
+  };
+
+  const resetTilt = () => setTilt({ rx: 0, ry: 0 });
 
     const scrollTo = (id: string) => (e: React.MouseEvent) => {
       e.preventDefault();
@@ -260,82 +316,125 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Traditional Crafts Section */}
-      <section id="crafts" className="py-20 px-4 bg-gradient-to-b from-[#f5f0e8] to-[#e8dcc8]">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-center gap-4 mb-10">
-            <div className="h-px bg-[#b48a3c] flex-1"></div>
-            <h2 className="text-5xl font-extrabold text-[#b48a3c] drop-shadow-lg tracking-wide flex items-center gap-3" style={{ fontFamily: 'serif' }}>
-              <svg width="38" height="38" fill="none" viewBox="0 0 24 24"><path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z" fill="#ffe9b0"/></svg>
-              Nghề truyền thống
-              <svg width="38" height="38" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#b48a3c"/><path d="M8 12l2 2 4-4" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </h2>
-            <div className="h-px bg-[#b48a3c] flex-1"></div>
+      {/* Traditional Crafts Section - Redesigned */}
+      <section id="crafts" className="py-20 px-4 bg-gradient-to-b from-[#f5f0e8] to-[#f9f6ef]">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-center gap-4 mb-6">
+            <div className="flex-1 h-px bg-[#b48a3c] opacity-60"></div>
+            <h3 className="text-5xl md:text-6xl font-extrabold text-[#b48a3c] drop-shadow-lg tracking-wide flex items-center gap-3 px-6" style={{ fontFamily: 'serif' }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z" fill="#ffe9b0"/></svg>
+              Khám phá các làng nghề
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#b48a3c"/><path d="M8 12l2 2 4-4" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </h3>
+            <div className="flex-1 h-px bg-[#b48a3c] opacity-60"></div>
           </div>
-          <p className="text-center text-[#4a3f2e] text-xl mb-14 max-w-3xl mx-auto font-medium">
-            Hãy cùng khám phá những làng nghề truyền thống đặc sắc của Việt Nam, nơi lưu giữ tinh hoa văn hóa và bàn tay tài hoa của người Việt qua bao thế hệ!
-          </p>
-          <div className="relative">
-            <button
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-[#fffbe8] border border-[#b48a3c] rounded-full shadow px-3 py-2 hover:bg-[#ffe9b0] transition"
-              onClick={() => {
-                sliderRef.current?.scrollBy({ left: -350, behavior: 'smooth' });
-              }}
-              aria-label="Trượt sang trái"
-            >
-              <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke="#b48a3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </button>
-            <div
-              ref={sliderRef}
-              className="flex gap-10 overflow-x-auto scroll-smooth pb-2 hide-scrollbar"
-              style={{ scrollbarWidth: 'none' }}
-            >
-              {crafts.map((craft) => (
-                <Link to={`/village/${craft.id}`} key={craft.id} className="block group focus:outline-none min-w-[340px] max-w-[340px]">
-                  <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-[#b48a3c] bg-[#fffbe8] hover:scale-[1.03] hover:shadow-[0_8px_40px_rgba(180,138,60,0.18)] transition-all duration-500 flex flex-col h-full">
-                    <div className="aspect-[4/3] md:aspect-square relative overflow-hidden">
-                      <ImageWithFallback
-                        src={craft.thumbnail}
-                        alt={craft.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#b48a3c]/70 via-transparent to-transparent opacity-80 group-hover:opacity-60 transition-all duration-500"></div>
-                      <div className="absolute top-3 left-3 bg-[#fffbe8]/80 px-4 py-1 rounded-full text-[#b48a3c] font-bold text-lg shadow-md border border-[#b48a3c]">
-                        <svg className="inline-block mr-1 -mt-1" width="22" height="22" fill="none" viewBox="0 0 24 24"><path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z" fill="#b48a3c"/></svg>
-                        {craft.name}
+          <div className="text-center mb-6">
+            <p className="text-[#4a3f2e]">Chọn một làng nghề để xem thông tin chi tiết. Ảnh sẽ phóng to khi bạn chọn.</p>
+          </div>
+
+          {/* Hide browser scrollbars for the thumbnail list and enable preview animations */}
+          <style>{`
+            .hide-scrollbar::-webkit-scrollbar{display:none}
+            .hide-scrollbar{ -ms-overflow-style: none; scrollbar-width: none; }
+            .preview-fade-enter{ opacity:0; transform:scale(0.98); }
+            .preview-fade-enter-active{ opacity:1; transform:scale(1); transition: all 600ms cubic-bezier(.2,.9,.2,1); }
+            .preview-fade-exit{ opacity:1; transform:scale(1); }
+            .preview-fade-exit-active{ opacity:0; transform:scale(0.98); transition: all 280ms ease-in; }
+
+            @keyframes captionSlideUp { from { transform: translateY(12px); opacity:0 } to { transform: translateY(0); opacity:1 } }
+            .caption-animate { animation: captionSlideUp 560ms cubic-bezier(.2,.9,.2,1) both; }
+
+            @keyframes fadeUp { from { transform: translateY(10px); opacity:0 } to { transform: translateY(0); opacity:1 } }
+
+            .thumb-hover { transition: transform 280ms cubic-bezier(.2,.9,.2,1), box-shadow 280ms; }
+            .thumb-hover:hover{ transform: translateY(-6px) scale(1.02); box-shadow: 0 10px 30px rgba(0,0,0,0.12); }
+            .thumb-active { box-shadow: 0 18px 50px rgba(90,67,40,0.18); transform: scale(1.01); }
+
+            .preview-parallax { transform-origin: center; transition: transform 900ms cubic-bezier(.2,.9,.2,1); }
+            .preview-parallax:hover{ transform: scale(1.02) translateY(-6px); }
+
+            /* CTA button animations */
+            .btn-cta{ display:inline-flex; align-items:center; gap:0.6rem; padding:0.65rem 1.2rem; border-radius:999px; background-size:200% 100%; background-position:0% 50%; transition: transform 260ms cubic-bezier(.2,.9,.2,1), background-position 420ms ease, box-shadow 260ms; }
+            .btn-cta:hover{ transform: translateY(-4px) scale(1.02); background-position:100% 50%; box-shadow:0 10px 30px rgba(80,60,30,0.12); }
+            .btn-cta .btn-icon{ display:inline-flex; align-items:center; justify-content:center; transition: transform 260ms cubic-bezier(.2,.9,.2,1); }
+            .btn-cta:hover .btn-icon{ transform: translateX(6px); }
+            .btn-cta:active{ transform: translateY(-1px) scale(0.995); }
+          `}</style>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+            <div className="md:col-span-2">
+              <div className="rounded-2xl overflow-visible">
+                <div className="p-1 rounded-2xl" style={{ background: 'conic-gradient(from 0deg, #f9e9c4, #e6c787, #b48a3c, #f9e9c4)', borderRadius: 18 }}>
+                  <div
+                    ref={previewRef}
+                    onMouseEnter={handlePreviewEnter}
+                    onMouseLeave={() => { handlePreviewLeave(); resetTilt(); }}
+                    onMouseMove={handlePreviewMove}
+                    className="rounded-2xl overflow-hidden bg-white shadow-2xl border border-[#e8dcc8]"
+                    style={{ transform: `perspective(900px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`, transition: 'transform 260ms cubic-bezier(.2,.9,.2,1)' }}
+                  >
+                    <div className="relative h-0" style={{ paddingBottom: '66.66%' }}>
+                      <img src={crafts[activeIndex] && crafts[activeIndex].thumbnail} alt={crafts[activeIndex] && crafts[activeIndex].name} className={`absolute inset-0 w-full h-full object-cover preview-parallax transition-all duration-700 ${previewVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/32 to-transparent pointer-events-none"></div>
+                      <div className="absolute left-6 bottom-6 text-white max-w-2xl">
+                        <div className="inline-flex items-center gap-3 bg-[#fffbe8]/90 text-[#5a4328] px-4 py-2 rounded-full font-bold shadow caption-animate">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z" fill="#b48a3c"/></svg>
+                          {crafts[activeIndex] && crafts[activeIndex].name}
+                        </div>
+                        <p className="mt-4 text-[#fffdf6] text-lg leading-relaxed drop-shadow-lg caption-animate">{crafts[activeIndex] && crafts[activeIndex].description}</p>
+                        <div className="mt-6">
+                          <button onClick={() => navigate(`/village/${crafts[activeIndex] && crafts[activeIndex].id}`)} className="btn-cta" style={{ background: 'linear-gradient(90deg,#b48a3c,#ffe9b0)' }}>
+                            <span className="btn-label text-[#4a3f2e] font-bold">Xem chi tiết</span>
+                            <span className="btn-icon">
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="#4a3f2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* progress bar */}
+                      <div className="absolute left-0 right-0 bottom-0 h-1 bg-white/30">
+                        <div className="h-full bg-gradient-to-r from-[#b48a3c] to-[#ffe9b0] transition-all" style={{ width: `${progress}%` }} />
                       </div>
                     </div>
-                    <div className="flex-1 flex flex-col justify-between p-6 bg-[#fffbe8]">
-                      <p className="text-[#4a3f2e] text-base md:text-lg mb-4 line-clamp-3 min-h-[60px]">
-                        {craft.description || 'Khám phá quy trình, lịch sử và nét đẹp độc đáo của làng nghề truyền thống này!'}
-                      </p>
-                      <div className="flex justify-end">
-                        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#b48a3c] to-[#ffe9b0] text-[#4a3f2e] font-bold shadow hover:from-[#ffe9b0] hover:to-[#b48a3c] transition-all duration-300">
-                          Xem chi tiết
-                          <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke="#4a3f2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                        </span>
-                      </div>
-                    </div>
-                    <div className="absolute inset-0 rounded-3xl border-2 border-transparent group-hover:border-[#ffe9b0] transition-all duration-500 pointer-events-none"></div>
                   </div>
-                </Link>
-              ))}
+                </div>
+              </div>
             </div>
-            <button
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-[#fffbe8] border border-[#b48a3c] rounded-full shadow px-3 py-2 hover:bg-[#ffe9b0] transition"
-              onClick={() => {
-                sliderRef.current?.scrollBy({ left: 350, behavior: 'smooth' });
-              }}
-              aria-label="Trượt sang phải"
-            >
-              <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke="#b48a3c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </button>
+
+            <div>
+              <div className="flex flex-col gap-4 max-h-[560px] overflow-y-auto pr-2 hide-scrollbar" style={{ scrollbarWidth: 'none' }}>
+                {crafts.map((c, i) => (
+                  <button
+                    key={c.id}
+                    onClick={() => setActiveIndex(i)}
+                    className={`w-full flex items-center gap-4 p-3 rounded-xl transition-all ${i === activeIndex ? 'bg-[#fff3df] shadow-lg thumb-active' : 'bg-white/80'} thumb-hover`}
+                    style={{ animation: `fadeUp 360ms ease forwards`, animationDelay: `${i * 60}ms`, opacity: 0 }}
+                  >
+                    <img src={c.thumbnail} alt={c.name} className={`w-20 h-20 object-cover rounded-md flex-shrink-0 ${i === activeIndex ? 'scale-105' : ''}`} />
+                    <div className="text-left">
+                      <div className="text-sm font-bold text-[#5a4328]">{c.name}</div>
+                      <div className="text-xs text-[#6b5a46] line-clamp-2">{c.description}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-6 flex items-center justify-between">
+                <button onClick={() => setActiveIndex((s) => Math.max(0, s - 1))} className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 19l-7-7 7-7" stroke="#5a4328" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </button>
+                <div className="text-sm text-[#6b5a46]">{activeIndex + 1} / {crafts ? crafts.length : 0}</div>
+                <button onClick={() => setActiveIndex((s) => Math.min((crafts ? crafts.length : 1) - 1, s + 1))} className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="#5a4328" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-        
-        {/* Recent reviews inserted to keep background continuous */}
-        <div className="py-16">
-          <RecentReviewList />
+
+          <div className="py-12">
+            <RecentReviewList />
+          </div>
         </div>
       </section>
 
