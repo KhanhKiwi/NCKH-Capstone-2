@@ -19,7 +19,7 @@ export default function BatTrangLevel1Screen1() {
   const [index, setIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [feedback, setFeedback] = useState<string | null>(null)
-  const [progressPct, setProgressPct] = useState(0)
+  // progress state removed — UI no longer shows progress bar
   const [shakeId, setShakeId] = useState<string | null>(null)
   const [correctId, setCorrectId] = useState<string | null>(null)
   const [confetti, setConfetti] = useState<number[]>([])
@@ -37,9 +37,7 @@ export default function BatTrangLevel1Screen1() {
       setCorrectId(choiceId)
       setConfetti(Array.from({ length: 18 }, (_, i) => i))
       setTimeout(() => setConfetti([]), 1400)
-      // progress
-      if (index === questions.length - 1) setProgressPct(100)
-      else setProgressPct(Math.round(((index + 1) / questions.length) * 100))
+      // progress updates removed (UI no longer shows a progress bar)
       setTimeout(() => setCorrectId(null), 800)
     } else {
       setFeedback('Sai — vui lòng thử lại')
@@ -64,7 +62,6 @@ export default function BatTrangLevel1Screen1() {
     if (index < questions.length - 1) {
       const nextIdx = index + 1
       setIndex(nextIdx)
-      setProgressPct(Math.round(((nextIdx) / questions.length) * 100))
       return
     }
 
@@ -79,18 +76,36 @@ export default function BatTrangLevel1Screen1() {
       localStorage.setItem('unlocked_levels_bat-trang', JSON.stringify(arr))
     } catch {}
 
-    navigate('/bat-trang/level-1')
+    navigate('/bat-trang/level-1/phase2')
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white py-12">
-      <div className="max-w-3xl mx-auto px-6">
-        <header className="mb-6">
-          <h1 className="text-2xl font-bold">Level 1 — Màn 1: Nhào và xử lý đất</h1>
-          <p className="text-sm text-gray-600">5 câu về nhào và xử lý đất — hoàn thành để tiếp tục.</p>
+    <div className="h-screen overflow-hidden bg-gradient-to-b from-amber-50 to-white py-6">
+      <div className="max-w-3xl mx-auto px-6 h-full flex flex-col">
+        <header className="mb-8">
+          <style>{`
+            .fade-in-up { animation: fadeInUp 520ms cubic-bezier(.2,.9,.2,1) both }
+            @keyframes fadeInUp { from { transform: translateY(8px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+          `}</style>
+          <div className="fade-in-up bg-gradient-to-r from-amber-50 via-white to-white rounded-2xl p-6 sm:p-8 shadow-lg border border-amber-100">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-md">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                    <path d="M12 2c2.5 0 4 1.5 4 3.5S14.5 9 12 9s-4-2-4-3.5S9.5 2 12 2z" fill="rgba(255,255,255,0.95)" />
+                    <path d="M4 12c0 4 3 8 8 8s8-4 8-8c0-1.2-.9-2-2-2H6c-1.1 0-2 .8-2 2z" fill="rgba(255,255,255,0.85)" />
+                  </svg>
+                </div>
+              </div>
+              <div>
+                <h1 className="text-3xl sm:text-4xl font-extrabold text-amber-900 leading-tight" style={{ textShadow: '0 6px 18px rgba(34,34,34,0.06)' }}>Level 1 — Màn 1: Chọn đất sét</h1>
+                <p className="mt-1 text-sm sm:text-base text-amber-700 max-w-xl">5 câu về nhào và xử lý đất — hoàn thành để tiếp tục.</p>
+              </div>
+            </div>
+          </div>
         </header>
 
-        <main className="bg-white rounded-xl shadow border p-6 overflow-hidden relative">
+        <main className="bg-white rounded-xl shadow border p-6 overflow-y-auto overflow-x-hidden relative flex-1">
           <style>{`
             .q-enter { animation: slideIn 420ms cubic-bezier(.2,.9,.2,1); }
             @keyframes slideIn { from { transform: translateY(8px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
@@ -100,7 +115,6 @@ export default function BatTrangLevel1Screen1() {
             @keyframes pop { 0% { transform: scale(.9); opacity: 0 } 60% { transform: scale(1.08); opacity: 1 } 100% { transform: scale(1); opacity: 1 } }
             .confetti-piece { position: absolute; width: 8px; height: 12px; opacity: 0.95; transform-origin: center; border-radius: 2px; }
             @keyframes confettiFall { to { transform: translateY(260px) rotate(540deg); opacity: 0 } }
-            .progress-anim { transition: width 700ms cubic-bezier(.2,.9,.2,1); }
             .correct-badge { display:inline-flex; align-items:center; gap:8px; background:linear-gradient(90deg,#ecfccb,#bbf7d0); padding:6px 10px; border-radius:999px; color:#065f46; font-weight:600 }
           `}</style>
 
@@ -144,11 +158,7 @@ export default function BatTrangLevel1Screen1() {
             </div>
           </div>
 
-          <div className="mt-4">
-            <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-              <div className="h-2 bg-amber-500 rounded-full progress-anim" style={{ width: `${progressPct}%` }} />
-            </div>
-          </div>
+          {/* progress bar removed per design — progress is tracked internally */}
 
           {confetti.length > 0 && (
             <div style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, pointerEvents: 'none' }}>
