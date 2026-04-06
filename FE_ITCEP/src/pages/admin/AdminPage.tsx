@@ -20,6 +20,7 @@ export default function AdminPage() {
 
   const [stats, setStats] = useState({ visits: 0, views: 0 })
   const [users, setUsers] = useState<User[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([])
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editValues, setEditValues] = useState<{ name: string; email: string }>({ name: '', email: '' })
@@ -243,10 +244,8 @@ export default function AdminPage() {
                       <input
                         placeholder="Search users by name or email"
                         className="px-3 py-2 rounded-md border w-80"
-                        onChange={(e) => {
-                          const q = e.target.value.toLowerCase()
-                          if (!q) return setUsers((s) => s)
-                        }}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                       />
                       <div className="text-sm text-slate-500">{users.length} users</div>
                     </div>
@@ -259,42 +258,48 @@ export default function AdminPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {users.map((u) => (
-                      <tr key={u.id} className="border-t">
-                        <td className="py-3">
-                          {editingId === u.id ? (
-                            <input className="w-64 px-2 py-1 border rounded" value={editValues.name} onChange={(e) => setEditValues((s) => ({ ...s, name: e.target.value }))} />
-                          ) : (
-                            u.name
-                          )}
-                        </td>
-                        <td className="py-3 text-slate-600">
-                          {editingId === u.id ? (
-                            <input className="w-64 px-2 py-1 border rounded" value={editValues.email} onChange={(e) => setEditValues((s) => ({ ...s, email: e.target.value }))} />
-                          ) : (
-                            u.email
-                          )}
-                        </td>
-                        <td className="py-3">
-                          {editingId === u.id ? (
-                            <div className="flex items-center gap-2">
-                              <button onClick={() => saveEdit(u.id)} className="px-3 py-1 rounded-md text-sm font-medium bg-emerald-600 text-white">Lưu</button>
-                              <button onClick={cancelEdit} className="px-3 py-1 rounded-md text-sm font-medium bg-slate-200">Hủy</button>
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              <button onClick={() => startEdit(u)} className="px-3 py-1 rounded-md text-sm font-medium bg-indigo-600 text-white">Sửa</button>
-                              <button
-                                onClick={() => deleteUser(u.id)}
-                                className="px-3 py-1 rounded-md text-sm font-medium bg-red-500 text-white"
-                              >
-                                Xóa
-                              </button>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
+                    {(() => {
+                      const q = searchQuery.trim().toLowerCase()
+                      const filtered = q
+                        ? users.filter((u) => (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q))
+                        : users
+                      return filtered.map((u) => (
+                        <tr key={u.id} className="border-t">
+                          <td className="py-3">
+                            {editingId === u.id ? (
+                              <input className="w-64 px-2 py-1 border rounded" value={editValues.name} onChange={(e) => setEditValues((s) => ({ ...s, name: e.target.value }))} />
+                            ) : (
+                              u.name
+                            )}
+                          </td>
+                          <td className="py-3 text-slate-600">
+                            {editingId === u.id ? (
+                              <input className="w-64 px-2 py-1 border rounded" value={editValues.email} onChange={(e) => setEditValues((s) => ({ ...s, email: e.target.value }))} />
+                            ) : (
+                              u.email
+                            )}
+                          </td>
+                          <td className="py-3">
+                            {editingId === u.id ? (
+                              <div className="flex items-center gap-2">
+                                <button onClick={() => saveEdit(u.id)} className="px-3 py-1 rounded-md text-sm font-medium bg-emerald-600 text-white">Lưu</button>
+                                <button onClick={cancelEdit} className="px-3 py-1 rounded-md text-sm font-medium bg-slate-200">Hủy</button>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2">
+                                <button onClick={() => startEdit(u)} className="px-3 py-1 rounded-md text-sm font-medium bg-indigo-600 text-white">Sửa</button>
+                                <button
+                                  onClick={() => deleteUser(u.id)}
+                                  className="px-3 py-1 rounded-md text-sm font-medium bg-red-500 text-white"
+                                >
+                                  Xóa
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    })()}
                   </tbody>
                 </table>
               </section>
