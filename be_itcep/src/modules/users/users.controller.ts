@@ -10,6 +10,7 @@ export class UsersController {
 	@Post()
 	@ApiOperation({ summary: 'Create user' })
 	create(@Body() dto: any) {
+		console.log('[UsersController] create', dto)
 		return this.usersService.create(dto);
 	}
 
@@ -26,11 +27,13 @@ export class UsersController {
 
 	@Patch(':id')
 	update(@Param('id', ParseIntPipe) id: number, @Body() dto: any) {
+		console.log('[UsersController] update', id, dto)
 		return this.usersService.update(id, dto);
 	}
 
 	@Delete(':id')
 	remove(@Param('id', ParseIntPipe) id: number) {
+		console.log('[UsersController] remove', id)
 		return this.usersService.remove(id);
 	}
 }

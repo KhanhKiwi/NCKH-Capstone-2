@@ -13,6 +13,12 @@ export class CraftVillage {
   @Column('text', { nullable: true })
   description: string;
 
+  @Column({ length: 512, nullable: true })
+  image: string;
+
+  @Column({ length: 255, nullable: true })
+  city: string;
+
   @OneToMany(() => Media, (media) => media.village)
   media: Media[];
 
@@ -27,4 +33,7 @@ export class CraftVillage {
 
   @DeleteDateColumn()
   deleted_at: Date;
+
+  @Column({ type: 'boolean', default: true })
+  is_open: boolean;
 }

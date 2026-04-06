@@ -25,6 +25,7 @@ export class UsersService {
 	}
 
 	remove(id: number) {
-		return this.repo.softDelete(id);
+		console.log('[UsersService] delete', id);
+		return this.repo.delete(id);
 	}
 }

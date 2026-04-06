@@ -28,6 +28,15 @@ export class VillagesController {
 		return this.villagesService.update(id, dto);
 	}
 
+	@Patch(':id/open')
+	@ApiOperation({ summary: 'Set village open/closed status' })
+	setOpen(
+		@Param('id', ParseIntPipe) id: number,
+		@Body('open') open: boolean,
+	) {
+		return this.villagesService.setOpenStatus(id, open);
+	}
+
 	@Delete(':id')
 	remove(@Param('id', ParseIntPipe) id: number) {
 		return this.villagesService.remove(id);

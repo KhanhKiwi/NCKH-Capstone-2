@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LeftPanel from './LeftPanel';
 import AuthPanel from './AuthPanel';
-import { authService } from '../../services/authService';
+import { authService } from '../../api/services/authService';
 
 export default function LoginPage() {
   const navigate = useNavigate();
