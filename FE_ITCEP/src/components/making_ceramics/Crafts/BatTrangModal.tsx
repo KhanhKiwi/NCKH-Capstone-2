@@ -7,16 +7,25 @@ interface Level { id: number; name: string; unlocked: boolean; completed: boolea
 export default function BatTrangModal({ open = true, onClose }: { open?: boolean; onClose: () => void }) {
   const defaultLevels: Level[] = [
     { id: 0, name: 'Giới thiệu làng & hướng dẫn', unlocked: true, completed: false },
-    { id: 1, name: 'Chuẩn bị đất và nung', unlocked: false, completed: false },
-    { id: 2, name: 'Tạo hình cơ bản', unlocked: false, completed: false },
-    { id: 3, name: 'Trang trí và tráng men', unlocked: false, completed: false },
-    { id: 4, name: 'Hoàn thiện sản phẩm', unlocked: false, completed: false },
+    { id: 1, name: 'Chuẩn bị đất', unlocked: false, completed: false },
+    { id: 2, name: 'Tạo hình', unlocked: false, completed: false },
+    { id: 3, name: 'Phơi khô', unlocked: false, completed: false },
+    { id: 4, name: 'Trang trí & tráng men', unlocked: false, completed: false },
+    { id: 5, name: 'Nung & hoàn thiện', unlocked: false, completed: false },
   ]
 
   const [levels, setLevels] = useState<Level[]>(() => {
     try {
       const saved = localStorage.getItem('unlocked_levels_bat-trang')
-      if (saved) return JSON.parse(saved) as Level[]
+      if (saved) {
+        const parsed = JSON.parse(saved) as Level[]
+        // merge saved with defaults so newly added levels appear
+        const byId = new Map(parsed.map(l => [l.id, l]))
+        return defaultLevels.map(d => {
+          const s = byId.get(d.id)
+          return s ? { ...d, unlocked: s.unlocked ?? d.unlocked, completed: s.completed ?? d.completed } : d
+        })
+      }
     } catch {
       /* ignore parsing errors */
     }
