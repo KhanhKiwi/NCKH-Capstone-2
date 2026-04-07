@@ -26,18 +26,52 @@ export const authService = {
     return response.json();
   },
 
-  async register(email: string, password: string, name?: string): Promise<RegisterResponse> {
+  async register(email: string, password: string, name?: string, username?: string): Promise<RegisterResponse> {
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email, password, name }),
+      body: JSON.stringify({ email, password, name, username }),
     });
 
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || 'Registration failed');
+    }
+
+    return response.json();
+  },
+
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to send reset email');
+    }
+
+    return response.json();
+  },
+
+  async resetPassword(token: string, password: string): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token, password }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to reset password');
     }
 
     return response.json();

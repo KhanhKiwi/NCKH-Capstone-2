@@ -1,21 +1,55 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import LeftPanel from './LeftPanel';
 import AuthPanel from './AuthPanel';
 import { authService } from '../../services/authService';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const token = params.get('token');
+    if (token) {
+      authService.saveToken(token);
+      navigate('/');
+    }
+  }, [location, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setMessage('');
+
+    if (isForgotPassword) {
+      setIsLoading(true);
+      try {
+        await authService.forgotPassword(email);
+        setMessage('Liên kết đặt lại mật khẩu đã được gửi vào email của bạn');
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
+    if (activeTab === 'register' && password !== confirmPassword) {
+      setError('Mật khẩu nhập lại không khớp');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -25,7 +59,7 @@ export default function LoginPage() {
         console.log('Login successful');
         navigate('/');
       } else {
-        await authService.register(email, password, name);
+        await authService.register(email, password, name, username);
         console.log('Registration successful');
         const loginResponse = await authService.login(email, password);
         authService.saveToken(loginResponse.access_token);
@@ -65,15 +99,22 @@ export default function LoginPage() {
         <AuthPanel
           activeTab={activeTab}
           setActiveTab={setActiveTab}
+          isForgotPassword={isForgotPassword}
+          setIsForgotPassword={setIsForgotPassword}
           email={email}
           setEmail={setEmail}
+          username={username}
+          setUsername={setUsername}
           password={password}
           setPassword={setPassword}
+          confirmPassword={confirmPassword}
+          setConfirmPassword={setConfirmPassword}
           name={name}
           setName={setName}
           onSubmit={handleSubmit}
           isLoading={isLoading}
           error={error}
+          message={message}
         />
       </div>
     </div>

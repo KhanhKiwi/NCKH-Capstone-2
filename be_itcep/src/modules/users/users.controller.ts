@@ -1,36 +1,105 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiBody,
+} from '@nestjs/swagger';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { GetUser } from '../../auth/get-user.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
-	constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) {}
 
-	@Post()
-	@ApiOperation({ summary: 'Create user' })
-	create(@Body() dto: any) {
-		return this.usersService.create(dto);
-	}
+  @Get('profile')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiResponse({ status: 200, description: 'Profile retrieved successfully' })
+  getProfile(@GetUser() user: any) {
+    return this.usersService.findOne(user.userId);
+  }
 
-	@Get()
-	@ApiOperation({ summary: 'List users' })
-	findAll() {
-		return this.usersService.findAll();
-	}
+  @Patch('profile')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update current user profile (name, avatar URL)' })
+  @ApiResponse({ status: 200, description: 'Profile updated successfully' })
+  updateProfile(@GetUser() user: any, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(user.userId, updateUserDto);
+  }
 
-	@Get(':id')
-	findOne(@Param('id', ParseIntPipe) id: number) {
-		return this.usersService.findOne(id);
-	}
+  @Post('profile/avatar')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Upload avatar for current user' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        avatar: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: diskStorage({
+        destination: './uploads/avatars',
+        filename: (req, file, cb) => {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          cb(null, `${randomName}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
+  async uploadAvatar(@GetUser() user: any, @UploadedFile() file: any) {
+    const avatarUrl = `http://localhost:3000/uploads/avatars/${file.filename}`;
+    return this.usersService.update(user.userId, { avatar: avatarUrl });
+  }
 
-	@Patch(':id')
-	update(@Param('id', ParseIntPipe) id: number, @Body() dto: any) {
-		return this.usersService.update(id, dto);
-	}
+  @Get()
+  @ApiOperation({ summary: 'List all users' })
+  findAll() {
+    return this.usersService.findAll();
+  }
 
-	@Delete(':id')
-	remove(@Param('id', ParseIntPipe) id: number) {
-		return this.usersService.remove(id);
-	}
+  @Get(':id')
+  @ApiOperation({ summary: 'Get user by ID' })
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.findOne(id);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete user' })
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.remove(id);
+  }
 }

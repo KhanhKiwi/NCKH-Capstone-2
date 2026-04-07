@@ -19,6 +19,16 @@ export class UsersService {
 		return this.repo.findOne({ where: { user_id: id } });
 	}
 
+	findByEmailOrUsername(identifier: string) {
+		return this.repo.findOne({
+			where: [
+				{ email: identifier },
+				{ username: identifier },
+				{ name: identifier }
+			]
+		});
+	}
+
 	async update(id: number, dto: Partial<User>) {
 		await this.repo.update(id, dto);
 		return this.findOne(id);
