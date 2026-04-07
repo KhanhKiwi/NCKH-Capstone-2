@@ -3,12 +3,13 @@ import { Lock, CheckCircle, Star, X } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { Link } from 'react-router';
 import BatTrangModal from '../components/making_ceramics/Crafts/BatTrangModal';
+import { villagesService } from '../api/villages/villagesService'
 
 interface Craft {
-  id: string;
+  id: number;
   name: string;
-  location: string;
-  image: string;
+  location?: string;
+  image?: string;
   unlocked: boolean;
   comingSoon?: boolean;
 }
@@ -24,59 +25,26 @@ export default function CraftSelectionPage() {
   const [selectedCraft, setSelectedCraft] = useState<Craft | null>(null);
   const [showLevelModal, setShowLevelModal] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [crafts, setCrafts] = useState<Craft[]>([])
 
-  const crafts: Craft[] = [
-    {
-      id: 'bat-trang',
-      name: 'Làng gốm Bát Tràng',
-      location: 'Hà Nội',
-      image: 'https://images.unsplash.com/photo-1734600891288-e762b5128851?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aWV0bmFtZXNlJTIwYmF0JTIwdHJhbmclMjBwb3R0ZXJ5JTIwY2VyYW1pY3N8ZW58MXx8fHwxNzczMzA4ODc0fDA&ixlib=rb-4.1.0&q=80&w=1080',
-      unlocked: true,
-    },
-    {
-      id: 'dong-ho',
-      name: 'Làng tranh Đông Hồ',
-      location: 'Bắc Ninh',
-      image: 'https://images.unsplash.com/photo-1671468158321-93fa8aa3fdf2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb25nJTIwaG8lMjBmb2xrJTIwcGFpbnRpbmclMjB2aWV0bmFtfGVufDF8fHx8MTc3MzMwODg3NHww&ixlib=rb-4.1.0&q=80&w=1080',
-      unlocked: false,
-    },
-    {
-      id: 'van-phuc',
-      name: 'Làng lụa Vạn Phúc',
-      location: 'Hà Nội',
-      image: 'https://images.unsplash.com/photo-1643309053949-99eb896aec0a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aWV0bmFtZXNlJTIwc2lsayUyMHdlYXZpbmclMjB0aHJlYWR8ZW58MXx8fHwxNzczMzA4ODc0fDA&ixlib=rb-4.1.0&q=80&w=1080',
-      unlocked: true,
-    },
-    {
-      id: 'dinh-yen',
-      name: 'Làng dệt chiếu Đinh Yên',
-      location: 'Đồng Tháp',
-      image: 'https://images.unsplash.com/photo-1710559055621-451811ff73ad?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0cmFkaXRpb25hbCUyMG1hdCUyMHdlYXZpbmclMjBzZWRnZXxlbnwxfHx8fDE3NzMzMDg4NzV8MA&ixlib=rb-4.1.0&q=80&w=1080',
-      unlocked: true,
-    },
-    {
-      id: 'phu-cau',
-      name: 'Làng hương Quảng Phú Cầu',
-      location: 'Hà Nội',
-      image: 'https://images.unsplash.com/photo-1486056997767-09578eee7de1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbmNlbnNlJTIwc3RpY2tzJTIwbWFraW5nJTIwdmlldG5hbXxlbnwxfHx8fDE3NzMzMDg4NzV8MA&ixlib=rb-4.1.0&q=80&w=1080',
-      unlocked: false,
-    },
-    {
-      id: 'ha-thai',
-      name: 'Làng sơn mài Hà Thái',
-      location: 'Hà Nội',
-      image: 'https://images.unsplash.com/photo-1569909115134-a0426936c879?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb2xvcmZ1bCUyMHNpbGslMjB0aHJlYWQlMjB3ZWF2aW5nfGVufDF8fHx8MTc3MDkwMDAxOXww&ixlib=rb-4.1.0&q=80&w=1080',
-      unlocked: false,
-    },
-    {
-      id: 'coming-soon',
-      name: 'Sắp ra mắt',
-      location: '???',
-      image: '',
-      unlocked: false,
-      comingSoon: true,
-    },
-  ];
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await villagesService.getAll()
+        const mapped = (data || []).map((v: any) => ({
+          id: Number(v.village_id ?? v.id),
+          name: v.name ?? '',
+          location: v.city ?? v.location ?? '',
+          image: v.image ?? '',
+          unlocked: !!v.is_open,
+          comingSoon: false,
+        }))
+        setCrafts(mapped)
+      } catch (e) {
+        console.error('Failed to load villages from API', e)
+      }
+    })()
+  }, [])
 
   const defaultLevels: Level[] = [
     { id: 1, name: 'Thu hoạch cây cói', unlocked: true, completed: false },
@@ -130,6 +98,7 @@ export default function CraftSelectionPage() {
 
   const handleCraftClick = (craft: Craft) => {
     if (craft.comingSoon) return;
+    if (!craft.unlocked) return; // do not open locked crafts
     setSelectedCraft(craft);
     setShowLevelModal(true);
   };
@@ -218,11 +187,11 @@ export default function CraftSelectionPage() {
         </div>
       </div>
 
-      {showLevelModal && selectedCraft && selectedCraft.id === 'bat-trang' && (
+      {showLevelModal && selectedCraft && selectedCraft.name?.includes('Bát Tràng') && (
         <BatTrangModal onClose={() => setShowLevelModal(false)} />
       )}
 
-      {showLevelModal && selectedCraft && selectedCraft.id !== 'bat-trang' && (
+      {showLevelModal && selectedCraft && !selectedCraft.name?.includes('Bát Tràng') && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-6">
           <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden border border-gray-100">
             <div className="p-6 bg-gradient-to-r from-amber-600 to-emerald-600 text-white relative">
