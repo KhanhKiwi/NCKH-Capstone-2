@@ -1,11 +1,38 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { User } from 'lucide-react';
+import { authService } from '../../api/services/authService';
 import { villagesData } from '../../data/villagesData';
 import Footer from '../../components/Footer/Footer';
 import RecentReviewList from '../../components/Reviews/RecentReviewList';
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(!!authService.getToken());
+  const [user, setUser] = useState<{ name?: string; avatar?: string } | null>(null);
+
+  
+
+  useEffect(() => {
+    const token = authService.getToken();
+    if (!token) return;
+    let mounted = true;
+    authService
+      .getProfile()
+      .then((p) => {
+        if (!mounted) return;
+        setUser({ name: p.name || p.fullName || p.username, avatar: p.avatar });
+        setIsLoggedIn(true);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setIsLoggedIn(false);
+        setUser(null);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
       // Danh sách ảnh nền
       const bgImages = [
         '/picture/lamchieu.png',
@@ -104,7 +131,7 @@ export default function HomePage() {
         {/* Navigation */}
         <nav className="fixed top-0 left-0 w-full z-50 shadow-2xl backdrop-blur-xl bg-gradient-to-r from-[#e8dcc8]/90 via-[#d4c4a8]/95 to-[#f5f0e8]/90 border-b-4 border-[#b48a3c] rounded-b-3xl animate-fade-in">
           <div className="max-w-7xl mx-auto px-0 py-2">
-            <div className="flex items-center justify-center w-full">
+              <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-12 mx-auto">
               {[{
                 label: 'CRAFTSTEPS',
@@ -144,7 +171,35 @@ export default function HomePage() {
               </div>
             </div>
             {/* ...bỏ logo/icon giữa... */}
-            {/* Đã xóa nút Đăng nhập bên phải */}
+            <div className="absolute right-6 top-1/2 -translate-y-1/2">
+              {!isLoggedIn ? (
+                <button
+                  onClick={() => navigate('/login')}
+                  aria-label="Đăng nhập"
+                  className="inline-flex items-center gap-3 bg-gradient-to-r from-[#f6b96b] via-[#f5a623] to-[#7bc043] text-white px-4 py-2 rounded-full text-lg font-semibold shadow-2xl ring-1 ring-white/20 transform transition-transform hover:-translate-y-0.5 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                >
+                  <span className="p-1.5 rounded-full bg-white/20 flex items-center justify-center">
+                    <User className="w-4 h-4 text-white" />
+                  </span>
+                  <span className="select-none">Đăng nhập</span>
+                  <svg className="w-4 h-4 opacity-90" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 6l6 6-6 6" stroke="rgba(255,255,255,0.9)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </button>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => navigate('/profile')}
+                    className="inline-flex items-center bg-white/0 text-amber-700 px-2 py-1 rounded-full text-md font-semibold hover:scale-105 transition-transform"
+                  >
+                    {user && user.avatar ? (
+                      <img src={user.avatar} alt={user.name || 'avatar'} className="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm" />
+                    ) : (
+                      <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold">{(user && user.name) ? user.name.charAt(0).toUpperCase() : 'A'}</div>
+                    )}
+                    <span className="ml-2 hidden sm:inline text-amber-800 font-semibold">{user?.name || 'Người dùng'}</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </nav>
 
@@ -197,7 +252,13 @@ export default function HomePage() {
             <div className="flex gap-8 mt-2 animate-float">
               <button
                 className="flex items-center gap-3 bg-gradient-to-r from-[#4a7c2f] to-[#7bc043] hover:from-[#3d6827] hover:to-[#5fa32d] text-white px-12 py-5 rounded-full text-2xl font-bold shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-[#fffbe8]"
-                onClick={() => setShowAuthModal(true)}
+                onClick={() => {
+                  if (authService.getToken()) {
+                    navigate('/game');
+                  } else {
+                    setShowAuthModal(true);
+                  }
+                }}
               >
                 <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#fffbe8"/><path d="M10 8l6 4-6 4V8z" fill="#4a7c2f"/></svg>
                 Bắt đầu chơi
@@ -397,6 +458,8 @@ export default function HomePage() {
                         <div className="h-full bg-gradient-to-r from-[#b48a3c] to-[#ffe9b0] transition-all" style={{ width: `${progress}%` }} />
                       </div>
                     </div>
+
+                    {/* floating login/profile removed here so it's only in the header */}
                   </div>
                 </div>
               </div>

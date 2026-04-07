@@ -1,12 +1,12 @@
 import { useParams, Link } from 'react-router';
 import { villagesData } from '../data/villagesData';
-import { ChevronLeft, MapPin, Play, Image as ImageIcon, BookOpen } from 'lucide-react';
+import { ChevronLeft, MapPin, Play, Image as ImageIcon } from 'lucide-react';
 import { useState } from 'react';
 
 export default function VillageDetailPage() {
   const { id } = useParams<{ id: string }>();
   const village = villagesData.find(v => v.id === id);
-  const [activeTab, setActiveTab] = useState<'info' | 'video' | 'gallery'>('info');
+  const [activeTab, setActiveTab] = useState<'video' | 'gallery'>('video');
 
   if (!village) {
     return (
@@ -57,12 +57,7 @@ export default function VillageDetailPage() {
         
         {/* Tabs */}
         <div className="flex flex-wrap shadow-xl rounded-2xl bg-white overflow-hidden mb-12">
-          <button 
-            onClick={() => setActiveTab('info')}
-            className={`flex-1 py-5 px-6 font-semibold flex items-center justify-center gap-3 transition-colors ${activeTab === 'info' ? 'bg-[#4a7c2f] text-white' : 'text-[#6b5638] hover:bg-gray-50'}`}
-          >
-            <BookOpen size={20} /> Giới Thiệu
-          </button>
+          {/* 'Giới Thiệu' removed per request */}
           <button 
             onClick={() => setActiveTab('video')}
             className={`flex-1 py-5 px-6 font-semibold flex items-center justify-center gap-3 transition-colors ${activeTab === 'video' ? 'bg-[#4a7c2f] text-white' : 'text-[#6b5638] hover:bg-gray-50'}`}
@@ -80,30 +75,7 @@ export default function VillageDetailPage() {
         {/* Tab Content */}
         <div className="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-[#e4d5b7]">
           
-          {/* Info Tab */}
-          {activeTab === 'info' && (
-            <div className="space-y-10 animate-fade-in">
-              <section>
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-2 h-8 bg-[#4a7c2f] rounded-full"></div>
-                  <h2 className="text-3xl text-[#4a3f2e] font-bold" style={{ fontFamily: 'serif' }}>Câu chuyện Làng Nghề</h2>
-                </div>
-                <p className="text-lg text-[#5a4a35] leading-relaxed">
-                  {village.description}
-                </p>
-              </section>
-
-              <section>
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-2 h-8 bg-[#8b6f47] rounded-full"></div>
-                  <h2 className="text-3xl text-[#4a3f2e] font-bold" style={{ fontFamily: 'serif' }}>Lịch sử hình thành</h2>
-                </div>
-                <p className="text-lg text-[#5a4a35] leading-relaxed bg-[#fbf9f4] p-6 rounded-2xl border border-[#e4d5b7]">
-                  {village.history}
-                </p>
-              </section>
-            </div>
-          )}
+          {/* Info tab removed */}
 
           {/* Video Tab */}
           {activeTab === 'video' && (

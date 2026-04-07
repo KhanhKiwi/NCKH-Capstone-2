@@ -17,6 +17,7 @@ import Screen1 from '../components/making_mats/Screen1'
 import RootLayout from './RootLayout'
 import { LoginPage } from '../components/log'
 import ResetPasswordPage from '../pages/ResetPasswordPage'
+import ProfilePage from '../pages/ProfilePage'
 
 export const router = createBrowserRouter([
   {
@@ -50,6 +51,7 @@ export const router = createBrowserRouter([
       { path: 'bat-trang/level-1/phase2', Component: BatTrangLevel1Phase2 },
       { path: 'bat-trang/level-0', Component: BatTrangLevel0 },
       { path: 'admin', Component: AdminPage },
+      { path: 'profile', Component: ProfilePage },
     ],
   },
 ])

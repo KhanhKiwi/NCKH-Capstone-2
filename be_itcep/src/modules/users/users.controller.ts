@@ -50,6 +50,16 @@ export class UsersController {
     return this.usersService.update(user.userId, updateUserDto);
   }
 
+  @Patch('profile/password')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Change current user password' })
+  @ApiResponse({ status: 200, description: 'Password changed successfully' })
+  async changePassword(@GetUser() user: any, @Body() body: { currentPassword: string; newPassword: string }) {
+    const { currentPassword, newPassword } = body;
+    return this.usersService.changePassword(user.userId, currentPassword, newPassword);
+  }
+
   @Post('profile/avatar')
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()

@@ -1,4 +1,5 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const CONFIG_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = import.meta.env.DEV ? '' : CONFIG_BASE;
 
 export interface LoginResponse {
   access_token: string;
@@ -91,5 +92,83 @@ export const authService = {
 
   logout(): void {
     this.removeToken();
+  },
+
+  async getProfile(): Promise<any> {
+    const token = this.getToken();
+    if (!token) throw new Error('No token');
+    const response = await fetch(`${API_BASE_URL}/users/profile`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || 'Failed to fetch profile');
+    }
+
+    return response.json();
+  },
+  async updateProfile(update: { name?: string; avatar?: string }): Promise<any> {
+    const token = this.getToken();
+    if (!token) throw new Error('No token');
+    const response = await fetch(`${API_BASE_URL}/users/profile`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(update),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || 'Failed to update profile');
+    }
+
+    return response.json();
+  },
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<any> {
+    const token = this.getToken();
+    if (!token) throw new Error('No token');
+    const response = await fetch(`${API_BASE_URL}/users/profile/password`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || 'Failed to change password');
+    }
+
+    return response.json();
+  },
+  async uploadAvatar(file: File): Promise<any> {
+    const token = this.getToken();
+    if (!token) throw new Error('No token');
+
+    const form = new FormData();
+    form.append('avatar', file);
+
+    const response = await fetch(`${API_BASE_URL}/users/profile/avatar`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: form,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || 'Failed to upload avatar');
+    }
+
+    return response.json();
   },
 };
