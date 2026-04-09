@@ -1,0 +1,32 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AppModule = void 0;
+const common_1 = require("@nestjs/common");
+const analytics_module_1 = require("./modules/analytics/analytics.module");
+const logs_module_1 = require("./modules/logs/logs.module");
+const sessions_module_1 = require("./modules/sessions/sessions.module");
+const progress_module_1 = require("./modules/progress/progress.module");
+const media_module_1 = require("./modules/media/media.module");
+const villages_module_1 = require("./modules/villages/villages.module");
+const crafts_module_1 = require("./modules/crafts/crafts.module");
+const steps_module_1 = require("./modules/steps/steps.module");
+const levels_module_1 = require("./modules/levels/levels.module");
+const auth_module_1 = require("./auth/auth.module");
+const users_module_1 = require("./modules/users/users.module");
+const database_module_1 = require("./common/database.module");
+const feedback_module_1 = require("./modules/feedback/feedback.module");
+let AppModule = class AppModule {
+};
+exports.AppModule = AppModule;
+exports.AppModule = AppModule = __decorate([
+    (0, common_1.Module)({
+        imports: [database_module_1.DatabaseModule, users_module_1.UsersModule, auth_module_1.AuthModule, levels_module_1.LevelsModule, steps_module_1.StepsModule, crafts_module_1.CraftsModule, villages_module_1.VillagesModule, media_module_1.MediaModule, progress_module_1.ProgressModule, sessions_module_1.SessionsModule, logs_module_1.LogsModule, analytics_module_1.AnalyticsModule, feedback_module_1.FeedbackModule],
+    })
+], AppModule);
+//# sourceMappingURL=app.module.js.map
