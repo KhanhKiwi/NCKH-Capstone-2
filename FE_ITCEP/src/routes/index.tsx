@@ -17,7 +17,7 @@ import Screen1 from '../components/making_mats/Screen1'
 import RootLayout from './RootLayout'
 import { LoginPage } from '../components/log'
 import ResetPasswordPage from '../pages/ResetPasswordPage'
-import ProfilePage from '../pages/ProfilePage'
+import ProfilePage from '../pages/profile/ProfilePage'
 
 export const router = createBrowserRouter([
   {

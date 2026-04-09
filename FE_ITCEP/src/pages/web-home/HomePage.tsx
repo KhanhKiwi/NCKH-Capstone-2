@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { User } from 'lucide-react';
 import { authService } from '../../api/services/authService';
 import { villagesData } from '../../data/villagesData';
+import { villagesService } from '../../api/villages/villagesService';
 import Footer from '../../components/Footer/Footer';
 import RecentReviewList from '../../components/Reviews/RecentReviewList';
 
@@ -56,8 +57,33 @@ export default function HomePage() {
         sliderRef.current.scrollLeft = 0;
       }
     }, []);
-  const crafts = villagesData;
+  const [crafts, setCrafts] = useState<any[]>(villagesData);
     const [activeIndex, setActiveIndex] = useState<number>(0);
+
+  useEffect(() => {
+    let mounted = true;
+    villagesService
+      .getAll()
+      .then((data) => {
+        if (!mounted) return;
+        if (Array.isArray(data) && data.length) {
+          const normalized = data.map((v: any) => ({
+            id: v.id ?? v.village_id ?? v._id ?? v.name,
+            name: v.name ?? v.title ?? v.city ?? 'Làng nghề',
+            description: v.description ?? v.desc ?? '',
+            thumbnail: v.thumbnail ?? v.image ?? v.media?.[0]?.url ?? '/picture/default-village.jpg',
+            city: v.city ?? v.location ?? '',
+          }));
+          setCrafts(normalized);
+        }
+      })
+      .catch((err) => {
+        console.warn('Failed to load villages:', err);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
   const [previewVisible, setPreviewVisible] = useState<boolean>(true);
 
   // Trigger a fade/scale animation on preview whenever activeIndex changes

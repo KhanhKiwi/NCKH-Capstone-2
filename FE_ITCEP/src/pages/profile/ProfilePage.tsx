@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../api/services/authService';
+import { authService } from '../../api/services/authService';
 
 export default function ProfilePage() {
   const navigate = useNavigate();

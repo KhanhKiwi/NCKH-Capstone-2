@@ -18,6 +18,12 @@ export class MediaController {
 		return this.mediaService.findAll();
 	}
 
+	@Get('village/:villageId')
+	@ApiOperation({ summary: 'Get media by village id' })
+	findByVillage(@Param('villageId', ParseIntPipe) villageId: number) {
+		return this.mediaService.findByVillage(villageId);
+	}
+
 	@Get(':id')
 	findOne(@Param('id', ParseIntPipe) id: number) {
 		return this.mediaService.findOne(id);

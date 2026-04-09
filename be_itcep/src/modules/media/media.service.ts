@@ -19,6 +19,10 @@ export class MediaService {
 		return this.repo.findOne({ where: { media_id: id } });
 	}
 
+	findByVillage(villageId: number) {
+		return this.repo.find({ where: { village: { village_id: villageId } }, relations: ['village'] });
+	}
+
 	async update(id: number, dto: Partial<Media>) {
 		await this.repo.update(id, dto);
 		return this.findOne(id);

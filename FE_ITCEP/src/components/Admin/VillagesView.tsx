@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { villagesService } from '../../api/villages/villagesService'
+import { mediaService } from '../../api/media/mediaService'
 
 type Village = { id: number; name: string; description: string; image?: string; city?: string; is_open?: boolean }
 
@@ -88,6 +89,52 @@ export default function VillagesView() {
     }
   }
 
+  // Media modal state
+  const [mediaModal, setMediaModal] = useState<{ open: boolean; villageId?: number; villageName?: string }>({ open: false })
+  const [mediaList, setMediaList] = useState<Array<{ media_id?: number; url: string }>>([])
+  const [addingUrl, setAddingUrl] = useState('')
+  const [mediaLoading, setMediaLoading] = useState(false)
+
+  async function openMedia(v: Village) {
+    setMediaModal({ open: true, villageId: v.id, villageName: v.name })
+    setMediaLoading(true)
+    try {
+      const items = await mediaService.getByVillage(v.id)
+      const urls = (Array.isArray(items) ? items : []).map((m: any) => ({ media_id: m.media_id ?? m.id, url: m.url }))
+      setMediaList(urls)
+    } catch (e) {
+      console.error('load media error', e)
+      setMediaList([])
+    } finally {
+      setMediaLoading(false)
+    }
+  }
+
+  async function addMedia() {
+    if (!mediaModal.villageId) return
+    if (!addingUrl) return alert('Nhập URL ảnh')
+    try {
+      const created = await mediaService.create({ url: addingUrl, village_id: mediaModal.villageId })
+      setMediaList((s) => [{ media_id: created.media_id ?? created.id, url: created.url }, ...s])
+      setAddingUrl('')
+    } catch (e) {
+      console.error('addMedia error', e)
+      alert('Thêm ảnh thất bại')
+    }
+  }
+
+  async function removeMedia(media_id?: number) {
+    if (!media_id) return
+    if (!confirm('Xác nhận xóa ảnh?')) return
+    try {
+      await mediaService.remove(media_id)
+      setMediaList((s) => s.filter((m) => m.media_id !== media_id))
+    } catch (e) {
+      console.error('removeMedia error', e)
+      alert('Xóa ảnh thất bại')
+    }
+  }
+
   return (
     <section className="bg-white rounded-2xl p-6 shadow-sm mb-6">
       {confirmState && (
@@ -150,9 +197,46 @@ export default function VillagesView() {
                 </>
               ) : null}
             </div>
+            <div className="mt-3 flex items-center justify-end gap-3">
+              <button onClick={() => openMedia(v)} className="px-3 py-2 rounded-md bg-sky-500 text-white text-sm">Xem ảnh</button>
+            </div>
           </article>
         ))}
       </div>
+      {/* Media modal */}
+      {mediaModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => { setMediaModal({ open: false }); setMediaList([]); }} />
+          <div className="relative w-full max-w-4xl bg-white rounded-2xl p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Ảnh của {mediaModal.villageName}</h3>
+              <button onClick={() => { setMediaModal({ open: false }); setMediaList([]); }} className="px-3 py-1 rounded-md bg-slate-100">Đóng</button>
+            </div>
+
+            <div className="mb-4 flex gap-2">
+              <input className="flex-1 px-3 py-2 border rounded-md" placeholder="URL ảnh" value={addingUrl} onChange={(e) => setAddingUrl(e.target.value)} />
+              <button onClick={addMedia} className="px-4 py-2 bg-emerald-600 text-white rounded-md">Thêm</button>
+            </div>
+
+            {mediaLoading ? (
+              <div>Đang tải...</div>
+            ) : mediaList.length === 0 ? (
+              <div className="text-sm text-slate-500">Chưa có ảnh nào.</div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {mediaList.map((m) => (
+                  <div key={m.media_id ?? m.url} className="relative rounded-lg overflow-hidden border">
+                    <img src={m.url} alt="media" className="w-full h-48 object-cover" />
+                    <div className="absolute right-2 top-2 flex flex-col gap-2">
+                      <button onClick={() => removeMedia(m.media_id)} className="px-2 py-1 bg-red-500 text-white rounded">Xóa</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </section>
   )
 }

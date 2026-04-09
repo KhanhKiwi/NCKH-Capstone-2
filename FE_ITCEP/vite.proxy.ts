@@ -20,4 +20,14 @@ export const devProxy = {
     changeOrigin: true,
     secure: false,
   },
+  '/media': {
+    target: 'http://localhost:3000',
+    changeOrigin: true,
+    secure: false,
+  },
+  '/uploads': {
+    target: 'http://localhost:3000',
+    changeOrigin: true,
+    secure: false,
+  },
 }
