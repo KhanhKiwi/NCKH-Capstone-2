@@ -18,6 +18,7 @@ import RootLayout from './RootLayout'
 import { LoginPage } from '../components/log'
 import ResetPasswordPage from '../pages/ResetPasswordPage'
 import ProfilePage from '../pages/ProfilePage'
+import CatchFishGamePage from '../components/Making_Fish_Sauce/Screen1/CatchFishGamePage'
 
 export const router = createBrowserRouter([
   {
@@ -39,6 +40,7 @@ export const router = createBrowserRouter([
 
       { index: true, Component: HomePage },
       { path: 'game', Component: GamePage },
+      { path: 'game/catch-fish', Component: CatchFishGamePage },
       { path: 'craft-selection', Component: CraftSelectionPage },
       { path: 'level-1', Component: Screen1 },
       { path: 'level-2', Component: Screen2 },

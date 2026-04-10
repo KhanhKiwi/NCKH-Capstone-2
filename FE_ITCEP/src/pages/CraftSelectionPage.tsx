@@ -3,6 +3,7 @@ import { Lock, CheckCircle, Star, X } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { Link } from 'react-router';
 import BatTrangModal from '../components/making_ceramics/Crafts/BatTrangModal';
+import  MamNamOModal  from '../components/Making_Fish_Sauce/Screen1/MamNamOModal';
 import { villagesService } from '../api/villages/villagesService'
 
 interface Craft {
@@ -191,7 +192,11 @@ export default function CraftSelectionPage() {
         <BatTrangModal onClose={() => setShowLevelModal(false)} />
       )}
 
-      {showLevelModal && selectedCraft && !selectedCraft.name?.includes('Bát Tràng') && (
+      {showLevelModal && selectedCraft && selectedCraft.name?.includes('Mắm Nam Ô') && (
+        <MamNamOModal onClose={() => setShowLevelModal(false)} />
+      )}
+
+      {showLevelModal && selectedCraft && !selectedCraft.name?.includes('Bát Tràng') && !selectedCraft.name?.includes('Mắm Nam Ô') && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-6">
           <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden border border-gray-100">
             <div className="p-6 bg-gradient-to-r from-amber-600 to-emerald-600 text-white relative">
