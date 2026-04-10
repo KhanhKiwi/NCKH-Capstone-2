@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useNavigate } from 'react-router'
+import confetti from 'canvas-confetti'
+import GuideDialog from '../../../util/shared/GuideDialog'
 
 type Phase2Props = {
-	onComplete?: (result?: { smoothness?: number }) => void;
+	onComplete?: (result?: { smoothness?: number; stars?: number }) => void;
 };
 
 // Redesigned Phase2: cleaner UI, clear states, start/pause/reset, result modal.
@@ -10,9 +13,12 @@ export default function Phase2({ onComplete }: Phase2Props) {
 	const rafRef = useRef<number | null>(null);
 	const [state, setState] = useState<'idle'|'playing'|'paused'|'won'|'lost'>('idle');
 	const [progress, setProgress] = useState(0); // 0..1
-	const INITIAL_TIME = 35;
-	const INITIAL_REQUIRED = 420;
+	const INITIAL_TIME = 45; // increased from 35 to give more play time
+	const INITIAL_REQUIRED = 800; // increased from 420 so progress requires more effort
 	const [timeLeft, setTimeLeft] = useState(INITIAL_TIME);
+	const [summaryOpen, setSummaryOpen] = useState(false);
+	const [starCount, setStarCount] = useState(3);
+	const navigate = useNavigate()
 	const required = useRef(INITIAL_REQUIRED);
 	const knead = useRef(0);
 	const particles = useRef<{x:number;y:number;vx:number;vy:number;life:number}[]>([]);
@@ -24,6 +30,19 @@ export default function Phase2({ onComplete }: Phase2Props) {
 		if (!canvas) return;
 		const c = canvas as HTMLCanvasElement;
 		const ctx = c.getContext('2d')!;
+
+		// create a small noise texture once for subtle clay grain
+		const noiseSize = 200;
+		const noiseCanvas = document.createElement('canvas');
+		noiseCanvas.width = noiseSize; noiseCanvas.height = noiseSize;
+		const nctx = noiseCanvas.getContext('2d')!;
+		const nimg = nctx.createImageData(noiseSize, noiseSize);
+		for (let i=0;i<nimg.data.length;i+=4){
+			const v = 180 + Math.floor(Math.random()*60) - 30; // subtle variation
+			nimg.data[i] = v; nimg.data[i+1] = v; nimg.data[i+2] = v; nimg.data[i+3] = 12; // low alpha
+		}
+		nctx.putImageData(nimg,0,0);
+		const noisePattern = ctx.createPattern(noiseCanvas, 'repeat');
 
 		function resize() {
 			c.width = c.clientWidth;
@@ -45,22 +64,66 @@ export default function Phase2({ onComplete }: Phase2Props) {
 
 			// blob
 			const cx = w/2, cy = h/2;
-			const baseR = Math.min(w,h) * 0.16;
-			const jitter = (1-progress)*12;
+			// idle animation: soft pulsing and bob when not playing
+			const idlePulse = state === 'idle' ? (1 + Math.sin(t * 1.6) * 0.06) : 1;
+			const idleBob = state === 'idle' ? Math.sin(t * 1.2) * 8 : 0;
+			const baseR = Math.min(w,h) * 0.16 * idlePulse;
+			const jitter = state === 'idle' ? 6 : (1-progress)*12;
 			ctx.save();
 			ctx.beginPath();
 			const steps = 36;
 			for (let i=0;i<steps;i++){
 				const a = (i/steps)*Math.PI*2;
-				const r = baseR + Math.sin(t*3 + i)* (Math.random()*0.6 + jitter*0.02);
-				const x = cx + Math.cos(a)*r, y = cy + Math.sin(a)*r;
+				// add a small deterministic wobble plus a bit of random for organic look
+				const wobble = Math.sin(t*2.2 + i*0.3) * (jitter*0.01);
+				const r = baseR + Math.sin(t*3 + i) * (0.6 + jitter*0.02) * 0.6 + wobble;
+				const x = cx + Math.cos(a)*r;
+				const y = cy + Math.sin(a)*r + idleBob;
 				if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
 			}
 			ctx.closePath();
-			const grad = ctx.createRadialGradient(cx-20,cy-20,10,cx,cy,baseR*2);
-			grad.addColorStop(0,'#f8d9b8'); grad.addColorStop(0.6,'#e6b88a'); grad.addColorStop(1,'#cf8f5a');
-			ctx.fillStyle = grad; ctx.shadowColor='rgba(0,0,0,0.18)'; ctx.shadowBlur=30; ctx.fill();
-			ctx.shadowBlur=0; ctx.lineWidth=3; ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.stroke();
+			// create a richer clay radial gradient (specular + mid + rim)
+			const grad = ctx.createRadialGradient(cx - baseR*0.25, cy - baseR*0.35 + idleBob, baseR*0.08, cx, cy + idleBob, baseR*1.8);
+			// core warm tone
+			grad.addColorStop(0, state === 'idle' ? '#f6d8bb' : '#f3d1b0');
+			grad.addColorStop(0.45, '#e0ae7e');
+			grad.addColorStop(0.72, '#c98754');
+			grad.addColorStop(1, '#9b5b33');
+
+			// fill main blob
+			ctx.fillStyle = grad;
+			// soft outer shadow for depth (kept subtle to keep rim crisp)
+			ctx.shadowColor = 'rgba(0,0,0,0.18)'; ctx.shadowBlur = state === 'idle' ? 20 : 30;
+			ctx.fill();
+			ctx.shadowBlur = 0;
+
+			// overlay subtle clay grain using pattern with low alpha
+			if (noisePattern) {
+				ctx.globalAlpha = 0.06;
+				ctx.fillStyle = noisePattern;
+				ctx.fill();
+				ctx.globalAlpha = 1;
+			}
+
+			// crisp rim: inner light stroke and outer darker thin stroke for definition
+			ctx.lineWidth = 3;
+			ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+			ctx.stroke();
+			ctx.lineWidth = 4;
+			ctx.strokeStyle = 'rgba(40,20,10,0.12)';
+			ctx.stroke();
+
+			// specular highlight (small bright spot)
+			ctx.beginPath();
+			const sx = cx - baseR*0.35, sy = cy - baseR*0.45 + idleBob;
+			const sgrad = ctx.createRadialGradient(sx, sy, 0, sx, sy, baseR*0.6);
+			sgrad.addColorStop(0, 'rgba(255,255,255,0.9)');
+			sgrad.addColorStop(0.25, 'rgba(255,255,255,0.6)');
+			sgrad.addColorStop(1, 'rgba(255,255,255,0)');
+			ctx.fillStyle = sgrad;
+			ctx.arc(sx, sy, baseR*0.45, 0, Math.PI*2);
+			ctx.fill();
+
 			ctx.restore();
 
 			// particles
@@ -79,7 +142,7 @@ export default function Phase2({ onComplete }: Phase2Props) {
 		rafRef.current = requestAnimationFrame(frame);
 
 		return () => { window.removeEventListener('resize', resize); if (rafRef.current) cancelAnimationFrame(rafRef.current); };
-	}, [progress]);
+	}, [progress, state]);
 
 	// timer
 	useEffect(() => {
@@ -93,10 +156,35 @@ export default function Phase2({ onComplete }: Phase2Props) {
 		return ()=>clearInterval(id);
 	},[state]);
 
+	// confetti on win
+	useEffect(()=>{
+		if (state === 'won') {
+			try { confetti({ particleCount: 120, spread: 70, origin: { y: 0.4 } }) } catch(e){}
+		}
+	},[state]);
+
+	// compute star rating (1..3) when the player wins
+	useEffect(()=>{
+		if (state === 'won'){
+			// Star calculation based purely on time left (seconds)
+			// 3 stars: timeLeft >= 35 (covers 35-40 and above)
+			// 2 stars: 20 <= timeLeft < 35
+			// 1 star: timeLeft < 20
+			let s = 1;
+			if (timeLeft >= 35) s = 3;
+			else if (timeLeft >= 20) s = 2;
+			else s = 1;
+			setStarCount(s);
+		}
+	},[state, timeLeft]);
+
 	// keep `timeLeft` referenced (timer is hidden from UI but used for scoring)
 	useEffect(() => {
 		// intentionally empty: referencing timeLeft to avoid linter unused-var warnings
 	}, [timeLeft]);
+
+	// confetti on win
+
 
 	const spawn = useCallback((x:number,y:number,n=6)=>{
 		for (let i=0;i<n;i++){ const a=Math.random()*Math.PI*2,s=1+Math.random()*2; particles.current.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-1.2,life:0.8+Math.random()*0.6}); }
@@ -197,30 +285,90 @@ export default function Phase2({ onComplete }: Phase2Props) {
 
 
 				{state==='won' && (
-					<div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center'}}>
-						<div style={{background:'rgba(255,255,255,0.98)',padding:24,borderRadius:16,boxShadow:'0 20px 60px rgba(0,0,0,0.3)',textAlign:'center'}}>
-							<h2 style={{margin:0}}>Hoàn thành!</h2>
-							<p style={{color:'#6b4b2d'}}>Bạn đã làm mịn đất rất tốt.</p>
-							<div style={{display:'flex',gap:10,justifyContent:'center'}}>
-								<button onClick={() => { if (onComplete) { onComplete({ smoothness: 1 }); } }} style={{padding:'10px 18px',background:'#10b981',color:'white',borderRadius:12,border:'none',fontWeight:800}}>Tiếp</button>
-								<button onClick={reset} style={{padding:'10px 18px',background:'white',borderRadius:12,border:'1px solid rgba(0,0,0,0.06)'}}>Chơi lại</button>
+					<div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',zIndex:80}}>
+						<style>{`
+						@keyframes popIn { from { transform: scale(.92); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+						@keyframes floatUp { 0%{ transform: translateY(8px)} 50%{transform:translateY(0)} 100%{transform:translateY(6px)} }
+						`}</style>
+						<div style={{width:360,background:'linear-gradient(180deg,#ffffff,#f8fff7)',padding:22,borderRadius:16,boxShadow:'0 30px 90px rgba(20,30,10,0.22)',textAlign:'center',animation:'popIn 320ms cubic-bezier(.2,.9,.2,1) both',border:'1px solid rgba(0,0,0,0.06)'}}>
+							<div style={{display:'flex',alignItems:'center',justifyContent:'center',marginBottom:12}}>
+								<div style={{width:72,height:72,borderRadius:999,display:'flex',alignItems:'center',justifyContent:'center',background:'linear-gradient(180deg,#fff7f0,#fffbf6)',boxShadow:'0 10px 30px rgba(245,158,11,0.12)',marginRight:12}}>
+									<span style={{fontSize:34}}>🏅</span>
+								</div>
+								<div style={{textAlign:'left'}}>
+									<h2 style={{margin:'0 0 6px',fontSize:22,color:'#6b3f1a'}}>Hoàn thành!</h2>
+									<div style={{color:'#7a5236'}}>Bạn đã làm mịn đất rất tốt.</div>
+								</div>
+							</div>
+							<div style={{display:'flex',gap:12,justifyContent:'center',marginTop:16}}>
+								<button onClick={() => setSummaryOpen(true)} style={{padding:'10px 18px',background:'linear-gradient(90deg,#10b981,#06a86b)',color:'white',borderRadius:12,border:'none',fontWeight:800,boxShadow:'0 10px 30px rgba(16,185,129,0.18)'}}>Tổng kết</button>
+								<button onClick={reset} style={{padding:'10px 18px',background:'white',borderRadius:12,border:'1px solid rgba(0,0,0,0.06)',fontWeight:700}}>Chơi lại</button>
+							</div>
 							</div>
 						</div>
-					</div>
-				)}
+						) }
 
+					{/* Summary modal (1-3 stars) */}
+					{summaryOpen && (
+						<div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',zIndex:120}}>
+							<div style={{width:440,background:'linear-gradient(180deg,#fffef8,#fff7f0)',padding:28,borderRadius:16,boxShadow:'0 40px 120px rgba(10,20,10,0.28)',textAlign:'center',animation:'popIn 320ms cubic-bezier(.2,.9,.2,1) both',border:'1px solid rgba(0,0,0,0.06)'}}>
+								<h2 style={{margin:'0 0 8px',fontSize:22,color:'#6b3f1a'}}>Tổng kết</h2>
+								<div style={{color:'#7a5236',marginBottom:14}}>chúc mừng bạn đã hoàn thành level 1</div>
+								<div style={{display:'flex',justifyContent:'center',gap:12,marginBottom:14}}>
+										{[1,2,3].map(i=> (
+											<span key={i} style={{fontSize:46, transform: i<=starCount ? 'scale(1.06)' : 'scale(.92)', transition:'transform 260ms cubic-bezier(.2,.9,.2,1)', color: i<=starCount ? '#6b3f1a' : '#e9dfd4'}} aria-hidden>
+												{i<=starCount ? '★' : '☆'}
+											</span>
+										))}
+								</div>
+								<div style={{color:'#5b3a26',marginBottom:10}}>Độ mịn: <strong>{Math.round(progress*100)}%</strong></div>
+								<div style={{color:'#5b3a26',marginBottom:18}}>Thời gian còn lại: <strong>{timeLeft}s</strong></div>
+								<div style={{display:'flex',gap:12,justifyContent:'center'}}>
+									<button onClick={()=>{
+										try{ localStorage.setItem('phase2_stars', String(starCount)); localStorage.setItem('phase2_result','won') }catch{}
+										if (onComplete) onComplete({ smoothness: progress, stars: starCount });
+										setSummaryOpen(false);
+										navigate('/craft-selection');
+									}} style={{padding:'10px 18px',background:'linear-gradient(90deg,#10b981,#06a86b)',color:'white',borderRadius:12,border:'none',fontWeight:800}}>Hoàn tất</button>
+									<button onClick={()=>{ setSummaryOpen(false); reset(); navigate('/bat-trang/level-1'); }} style={{padding:'10px 18px',background:'white',borderRadius:12,border:'1px solid rgba(0,0,0,0.06)',fontWeight:700}}>Chơi lại</button>
+								</div>
+							</div>
+						</div>
+					)}
 				{state==='lost' && (
-					<div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center'}}>
-						<div style={{background:'rgba(255,255,255,0.98)',padding:24,borderRadius:16,boxShadow:'0 20px 60px rgba(0,0,0,0.3)',textAlign:'center'}}>
-							<h2 style={{margin:0}}>Hết thời gian</h2>
-							<p style={{color:'#6b4b2d'}}>Bạn đã hết thời gian — thử lần nữa nhé.</p>
-							<div style={{display:'flex',gap:10,justifyContent:'center'}}>
-								<button onClick={start} style={{padding:'10px 18px',background:'#f59e0b',color:'white',borderRadius:12,border:'none',fontWeight:800}}>Thử lại</button>
+					<div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',zIndex:80}}>
+						<style>{`@keyframes shakeX { 0%{ transform: translateX(0) } 25%{ transform: translateX(-6px) } 50%{ transform:translateX(6px)} 75%{transform:translateX(-4px)} 100%{transform:translateX(0)} }`}</style>
+						<div style={{width:360,background:'linear-gradient(180deg,#fff8f8,#fffafc)',padding:22,borderRadius:16,boxShadow:'0 30px 90px rgba(30,10,10,0.14)',textAlign:'center',border:'1px solid rgba(0,0,0,0.04)',animation:'popIn 320ms cubic-bezier(.2,.9,.2,1) both'}}>
+							<div style={{display:'flex',alignItems:'center',justifyContent:'center',marginBottom:12}}>
+								<div style={{width:72,height:72,borderRadius:999,display:'flex',alignItems:'center',justifyContent:'center',background:'linear-gradient(180deg,#fff,#fff)',boxShadow:'0 8px 20px rgba(0,0,0,0.06)',marginRight:12}}>
+									<span style={{fontSize:34}}>😕</span>
+								</div>
+								<div style={{textAlign:'left'}}>
+									<h2 style={{margin:'0 0 6px',fontSize:22,color:'#6b3f1a'}}>Hết thời gian</h2>
+									<div style={{color:'#7a5236'}}>Bạn đã hết thời gian — thử lại để cải thiện kỹ thuật nhé.</div>
+								</div>
+							</div>
+							<div style={{display:'flex',gap:12,justifyContent:'center',marginTop:16}}>
+								<button onClick={start} style={{padding:'10px 18px',background:'linear-gradient(90deg,#f59e0b,#f07b17)',color:'white',borderRadius:12,border:'none',fontWeight:800,boxShadow:'0 10px 30px rgba(240,120,20,0.12)'}}>Thử lại</button>
+								<button onClick={reset} style={{padding:'10px 18px',background:'white',borderRadius:12,border:'1px solid rgba(0,0,0,0.06)',fontWeight:700}}>Thoát</button>
 							</div>
 						</div>
 					</div>
 				)}
 
+			</div>
+
+			{/* Guide dialog (mimic Screen3 weaving) */}
+			<div style={{position:'absolute', right:40, top:96, zIndex:40, transition: 'transform 320ms ease'}}>
+				<GuideDialog
+					started={state === 'playing'}
+					showRequireStart={false}
+					win={state === 'won'}
+					progress={Math.round(progress * 100)}
+					onNext={() => { if (onComplete) onComplete({ smoothness: progress }); }}
+					phase="phase2"
+					message={state === 'won' ? 'Hoàn thành! Bạn đã làm mịn tốt — tiếp tục nhé.' : undefined}
+				/>
 			</div>
 		</div>
 	);

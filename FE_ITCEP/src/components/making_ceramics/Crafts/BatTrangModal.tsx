@@ -7,7 +7,7 @@ interface Level { id: number; name: string; unlocked: boolean; completed: boolea
 export default function BatTrangModal({ open = true, onClose }: { open?: boolean; onClose: () => void }) {
   const defaultLevels: Level[] = [
     { id: 0, name: 'Giới thiệu làng & hướng dẫn', unlocked: true, completed: false },
-    { id: 1, name: 'Chuẩn bị đất', unlocked: false, completed: false },
+    { id: 1, name: 'Chuẩn bị đất và làm mịn đất', unlocked: false, completed: false },
     { id: 2, name: 'Tạo hình', unlocked: false, completed: false },
     { id: 3, name: 'Phơi khô', unlocked: false, completed: false },
     { id: 4, name: 'Trang trí & tráng men', unlocked: false, completed: false },
