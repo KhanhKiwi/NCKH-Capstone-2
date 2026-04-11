@@ -77,6 +77,15 @@ export default function MamNamOModal({ onClose }: MamNamOModalProps) {
           {activeTab === 'info' && (
             <div className="p-8 md:p-12">
               <div className="max-w-3xl mx-auto">
+                {/* Banner Image */}
+                <div className="mb-8 rounded-2xl overflow-hidden shadow-lg">
+                  <img 
+                    src="https://dulichvn.org.vn/nhaptin/uploads/images/2023/Thang3/173Can-canh-lang-nghe-nuoc-mam-Nam-O-Da-Nang-6.jpg" 
+                    alt="Làng Mắm Nam Ô" 
+                    className="w-full h-auto object-contain"
+                  />
+                </div>
+
                 <div className="mb-8">
                   <h3 className="text-2xl font-bold text-[#4a3f2e] mb-4">Lịch Sử Và Truyền Thống</h3>
                   <p className="text-lg text-[#6b5638] leading-relaxed mb-4">
@@ -102,10 +111,21 @@ export default function MamNamOModal({ onClose }: MamNamOModalProps) {
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-6 rounded-2xl border border-amber-200">
-                  <p className="text-lg text-[#6b5638]">
-                    💡 <span className="font-semibold">Mẹo:</span> Trò chơi "Bắt Cá Cơm Than Tươi" dưới đây sẽ giúp bạn hiểu rõ hơn về đặc điểm cá cơm và chất lượng cá phù hợp để chế biến mắm!
-                  </p>
+                {/* Video Section */}
+                <div className="mb-8">
+                  <h3 className="text-2xl font-bold text-[#4a3f2e] mb-4">Xem Quy Trình Chế Biến Mắm</h3>
+                  <div className="rounded-2xl overflow-hidden shadow-lg bg-black">
+                    <iframe 
+                      width="100%" 
+                      height="400" 
+                      src="https://www.youtube.com/embed/8RUi3EkHu4s?t=7s" 
+                      title="Quy trình chế biến mắm Nam Ô"
+                      frameBorder="0" 
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                      allowFullScreen
+                      className="w-full"
+                    ></iframe>
+                  </div>
                 </div>
               </div>
             </div>
