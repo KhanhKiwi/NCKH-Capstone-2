@@ -7,6 +7,7 @@ export interface Village {
   history: string;
   videoUrl: string; // YouTube embed URL
   galleryImages: string[];
+  hasGame?: boolean; // Whether this village has an interactive game
 }
 
 export const villagesData: Village[] = [
@@ -93,5 +94,20 @@ export const villagesData: Village[] = [
       'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80&w=1080',
       'https://images.unsplash.com/photo-1615529182904-14819c35db37?auto=format&fit=crop&q=80&w=1080'
     ]
+  },
+  {
+    id: 'mam-nam-o',
+    name: 'Làng Mắm Nam Ô',
+    location: 'Sơ Hàng, Đà Nẵng',
+    thumbnail: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&q=80&w=1080',
+    description: 'Nam Ô là một trong những làng mắm nổi tiếng nhất của Việt Nam. Mắm Nam Ô được chế biến từ cá cơm tươi theo công thức truyền thống qua nhiều tháng lên men, tạo ra hương vị đặc trưng, mằn mặn và thơm ngon.',
+    history: 'Làng mắm Nam Ô hình thành từ thế kỷ XIX khi ngư dân địa phương phát hiện ra cách chế biến mắm từ cá cơm. Qua hơn 100 năm, làng đã giữ được bí quyết gia truyền và trở thành điểm đến du lịch nổi tiếng, nơi du khách có thể trải nghiệm quy trình làm mắm truyền thống.',
+    videoUrl: 'https://www.youtube.com/embed/w9nBN5DFGdg',
+    galleryImages: [
+      'https://images.unsplash.com/photo-1596855407944-bf87f6fdd49e?auto=format&fit=crop&q=80&w=1080',
+      'https://images.unsplash.com/photo-1535521066927-ab7cc9b129d7?auto=format&fit=crop&q=80&w=1080',
+      'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=1080'
+    ],
+    hasGame: true
   }
 ];

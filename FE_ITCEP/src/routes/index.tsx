@@ -10,7 +10,6 @@ import Screen6 from '../pages/making mats/Screen6'
 import HomePage from '../pages/web-home/HomePage'
 import BatTrangLevel0 from '../pages/making_ceramics/Screen0/screen0'
 import BatTrangLevel1Screen1 from '../pages/making_ceramics/Screen1/Phase1'
-import BatTrangLevel1Intro from '../pages/making_ceramics/Screen1/Phase0'
 import BatTrangLevel1Phase2 from '../pages/making_ceramics/Screen1/Phase2'
 import VillageDetailPage from '../pages/VillageDetailPage'
 import AdminPage from '../pages/admin/AdminPage'
@@ -18,7 +17,9 @@ import Screen1 from '../components/making_mats/Screen1'
 import RootLayout from './RootLayout'
 import { LoginPage } from '../components/log'
 import ResetPasswordPage from '../pages/ResetPasswordPage'
-import ProfilePage from '../pages/profile/ProfilePage'
+import ProfilePage from '../pages/ProfilePage'
+import CatchFishGamePage from '../components/Making_Fish_Sauce/Screen1/CatchFishGamePage'
+import WashFishScreen2 from '../components/Making_Fish_Sauce/Screen2'
 
 export const router = createBrowserRouter([
   {
@@ -40,7 +41,9 @@ export const router = createBrowserRouter([
 
       { index: true, Component: HomePage },
       { path: 'game', Component: GamePage },
+      { path: 'game/catch-fish', Component: CatchFishGamePage },
       { path: 'craft-selection', Component: CraftSelectionPage },
+      { path: 'game/wash-fish', Component: WashFishScreen2 },
       { path: 'level-1', Component: Screen1 },
       { path: 'level-2', Component: Screen2 },
       { path: 'level-3/*', Component: Screen3 },
@@ -48,8 +51,7 @@ export const router = createBrowserRouter([
       { path: 'level-5/*', Component: Screen5 },
       { path: 'level-6/*', Component: Screen6 },
       { path: 'village/:id', Component: VillageDetailPage },
-      { path: 'bat-trang/level-1', Component: BatTrangLevel1Intro },
-      { path: 'bat-trang/level-1/phase1', Component: BatTrangLevel1Screen1 },
+      { path: 'bat-trang/level-1', Component: BatTrangLevel1Screen1 },
       { path: 'bat-trang/level-1/phase2', Component: BatTrangLevel1Phase2 },
       { path: 'bat-trang/level-0', Component: BatTrangLevel0 },
       { path: 'admin', Component: AdminPage },
