@@ -22,6 +22,13 @@ const gameLevels: GameLevel[] = [
     icon: '🎣',
     route: '/game/catch-fish'
   },
+  {
+    id: 2,
+    name: 'Rửa & Làm Sạch Cá',
+    description: 'Rửa sạch cá cơm bằng nước biển tươi để chuẩn bị cho bước tiếp theo. Hãy rửa kỹ lưỡng để giữ độ tươi và vị ngọt của cá!',
+    icon: '💧',
+    route: '/game/wash-fish'
+  },
 ];
 
 export default function MamNamOModal({ onClose }: MamNamOModalProps) {
