@@ -50,3 +50,28 @@ https://i.ytimg.com/vi/h7LxBAthBFE/maxresdefault.jpg
 https://danangfantasticity.com/wp-content/uploads/2025/05/nghe-lam-nuoc-mam-nam-o-da-nang-03.jpg
 https://vnanet.vn/Data/Articles/2023/01/17/6547450/vna_potal_luu_giu_va_phat_trien_lang_nghe_truyen_thong_nuoc_mam_nam_o_da_nang_stand.jpg
 https://statics.vntrip.vn/data-v2/data-guide/img_content/1462763961_nuoc-mam-nam-o-3.jpg
+----------------------------------------------doanh=======================================================================================================================================
+INSERT INTO craft_villages (village_id, name, description, image, city, created_at, updated_at, deleted_at, is_open) VALUES
+(1, 'Làng Gốm Bát Tràng', 'Làng gốm truyền thống nổi tiếng Việt Nam, kỹ thuật chuốt tay và họa tiết tinh xảo.', 'https://images.unsplash.com/photo-1734600891288-e762b5128851?w=1200', 'Đà Nẵng', '2026-04-06 22:34:35', '2026-04-06 22:34:35', NULL, 1),
+(2, 'Làng Tranh Đông Hồ', 'Tranh khắc gỗ dân gian, màu sắc và chủ đề truyền thống.', 'https://images.unsplash.com/photo-1671468158321-93fa8aa3fdf2?w=1200', 'Bắc Ninh', '2026-04-06 22:34:35', '2026-04-06 22:34:35', NULL, 0),
+(3, 'Làng Lụa Vạn Phúc', 'Nghề dệt lụa truyền thống với hoa văn tinh tế.', 'https://images.unsplash.com/photo-1643309053949-99eb896aec0a?w=1200', 'Hà Nội', '2026-04-06 22:34:35', '2026-04-06 22:34:35', NULL, 1),
+(4, 'Làng Dệt Đinh Yên', 'Dệt chiếu truyền thống với hoa văn đặc trưng vùng miền.', 'https://images.unsplash.com/photo-1710559055621-451811ff73ad?w=1200', 'Đồng Tháp', '2026-04-06 22:34:35', '2026-04-06 22:34:35', NULL, 1),
+(5, 'Làng Hương Quảng Phú Cầu', 'Sản xuất hương truyền thống phục vụ nghi lễ và đời sống.', 'https://images.unsplash.com/photo-1486056997767-09578eee7de1?w=1200', 'Hà Nội', '2026-04-06 22:34:35', '2026-04-06 22:34:35', NULL, 0),
+(2, 'https://file.hstatic.net/200000873845/file/lich-su-lang-nghe-gom-su-viet-7_352b0809145442749aa622f53b813a8d.jpg', '2026-04-09 09:01:00', '2026-04-09 09:01:00', NULL, 1),
+(3, 'https://tse2.mm.bing.net/th/id/OIP.RopXMqdhxf3iAg0B_VqPAQHaFS?pid=Api&P=0&h=220', '2026-04-09 09:02:00', '2026-04-09 09:02:00', NULL, 1),
+
+(4, 'https://tse3.mm.bing.net/th/id/OIP.w-UQBUsTUnXjN6WeQMvuNQHaFl?pid=Api&P=0&h=220', '2026-04-09 09:10:00', '2026-04-09 09:10:00', NULL, 2),
+(5, 'https://tse3.mm.bing.net/th/id/OIP.yXtizrfZqSoxDyqf9isEUwHaEU?pid=Api&P=0&h=220', '2026-04-09 09:11:00', '2026-04-09 09:11:00', NULL, 2),
+(6, 'https://tse4.mm.bing.net/th/id/OIP.SlAUDginonsmv5UAUDK3LwHaE8?pid=Api&P=0&h=220', '2026-04-09 09:12:00', '2026-04-09 09:12:00', NULL, 2),
+
+(7, 'https://tse4.mm.bing.net/th/id/OIP.QldOvIKX9Xl-tVVQ3H2MCgHaFW?pid=Api&P=0&h=220', '2026-04-09 09:20:00', '2026-04-09 09:20:00', NULL, 4),
+(8, 'https://tse3.mm.bing.net/th/id/OIP.FhXvCa4NbrtgG8OJejcDoAHaE7?pid=Api&P=0&h=220', '2026-04-09 09:21:00', '2026-04-09 09:21:00', NULL, 4),
+(9, 'https://tse1.mm.bing.net/th/id/OIP.7D96uUprtQW1i4jwIcv1jgHaFj?pid=Api&P=0&h=220', '2026-04-09 09:22:00', '2026-04-09 09:22:00', NULL, 4),
+
+(10, 'https://tse4.mm.bing.net/th/id/OIP.v5yMDxJHHntidrKoPSmdMQHaE7?pid=Api&P=0&h=220', '2026-04-09 09:30:00', '2026-04-09 09:30:00', NULL, 3),
+(11, 'https://tse4.mm.bing.net/th/id/OIP.6P7gqJYGZJtvAnQ9OhGlpAHaFQ?pid=Api&P=0&h=220', '2026-04-09 09:31:00', '2026-04-09 09:31:00', NULL, 3),
+(12, 'https://tse2.mm.bing.net/th/id/OIP.IEL6S9tSwtr3Vv9x0swtowHaFR?pid=Api&P=0&h=220', '2026-04-09 09:32:00', '2026-04-09 09:32:00', NULL, 3),
+
+(13, 'https://tse3.mm.bing.net/th/id/OIP.HST0w-GbCZY9Ol2ywUR8WAHaKC?pid=Api&P=0&h=220', '2026-04-09 09:40:00', '2026-04-09 09:40:00', NULL, 5),
+(14, 'https://tse2.mm.bing.net/th/id/OIP.iCoiCU5_z6Yt9pWnwwa3dAHaFf?pid=Api&P=0&h=220', '2026-04-09 09:41:00', '2026-04-09 09:41:00', NULL, 5),
+(15, 'https://tse1.mm.bing.net/th/id/OIP.1xBouQ2cAgsREh28tOdTowHaE8?pid=Api&P=0&h=220', '2026-04-09 09:42:00', '2026-04-09 09:42:00', NULL, 5),
