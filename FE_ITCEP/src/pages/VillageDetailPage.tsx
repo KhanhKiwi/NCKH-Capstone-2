@@ -25,15 +25,47 @@ export default function VillageDetailPage() {
             setError('Không tìm thấy làng nghề.');
             return;
           }
+
+          // Normalize function to compare names
+          const normalize = (s: string | undefined) => {
+            if (!s) return '';
+            return String(s)
+              .toLowerCase()
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+              .replace(/[^\w\s-]/g, '')
+              .replace(/\s+/g, '-')
+              .trim();
+          };
+
+          // Try to find matching village from villagesData
+          const backendNameNorm = normalize(data.name || data.title);
+          const allLocalNames = villagesData.map(v => ({ name: v.name, normalized: normalize(v.name) }));
+          console.log('VillageDetail: backend name:', data.name, '| normalized:', backendNameNorm);
+          console.log('VillageDetail: all local names:', allLocalNames);
+          
+          const villageDataEntry = villagesData.find(v => {
+            const vNameNorm = normalize(v.name);
+            return vNameNorm === backendNameNorm || 
+                   vNameNorm.includes(backendNameNorm) || 
+                   backendNameNorm.includes(vNameNorm);
+          });
+          
+          console.log('VillageDetail: backend data:', data);
+          console.log('VillageDetail: matched villageData entry:', villageDataEntry);
+
           const normalized = {
             id: data.id ?? data.village_id ?? String(data.village_id ?? data.id),
             name: data.name ?? data.title,
             location: data.city ?? data.location ?? '',
-            thumbnail: data.thumbnail ?? data.image ?? data.media?.[0]?.url ?? '/picture/default-village.jpg',
+            thumbnail: data.thumbnail ?? data.image ?? data.media?.[0]?.url ?? villageDataEntry?.thumbnail ?? '/picture/default-village.jpg',
             description: data.description ?? '',
-            videoUrl: data.videoUrl ?? data.video_url ?? '',
-            galleryImages: data.galleryImages ?? data.gallery_images ?? data.media?.map((m: any) => m.url) ?? [],
+            videoUrl: data.videoUrl ?? data.video_url ?? villageDataEntry?.videoUrl ?? '',
+            galleryImages: data.galleryImages ?? data.gallery_images ?? data.media?.map((m: any) => m.url) ?? villageDataEntry?.galleryImages ?? [],
           };
+          console.log('VillageDetail: backend videoUrl:', data.videoUrl, 'video_url:', data.video_url);
+          console.log('VillageDetail: villageDataEntry videoUrl:', villageDataEntry?.videoUrl);
+          console.log('VillageDetail: normalized village:', normalized);
           setVillage(normalized as any);
         })
         .catch((err) => {
@@ -195,16 +227,22 @@ export default function VillageDetailPage() {
                 Khám phá bàn tay tài hoa của các nghệ nhân qua từng công đoạn tỉ mỉ để tạo ra sản phẩm.
               </p>
               <div className="aspect-video w-full rounded-2xl overflow-hidden shadow-2xl bg-black border-4 border-[#e4d5b7]">
-                <iframe 
-                  width="100%" 
-                  height="100%" 
-                  src={village.videoUrl} 
-                  title={`Video ${village.name}`}
-                  frameBorder="0" 
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                  allowFullScreen
-                  className="w-full h-full"
-                ></iframe>
+                {village.videoUrl ? (
+                  <iframe 
+                    width="100%" 
+                    height="100%" 
+                    src={village.videoUrl} 
+                    title={`Video ${village.name}`}
+                    frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowFullScreen
+                    className="w-full h-full"
+                  ></iframe>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-white">
+                    <p>Video không sẵn có</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
