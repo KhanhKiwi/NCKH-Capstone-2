@@ -27,6 +27,19 @@ export default function LoginPage() {
     }
   }, [location, navigate]);
 
+  // Clear error/message when switching tabs or forgot-password state
+  useEffect(() => {
+    setError('');
+    setMessage('');
+  }, [activeTab, isForgotPassword]);
+
+  // Controlled setters that also clear errors when user types
+  const handleSetEmail = (v: string) => { setEmail(v); setError(''); setMessage(''); };
+  const handleSetUsername = (v: string) => { setUsername(v); setError(''); setMessage(''); };
+  const handleSetPassword = (v: string) => { setPassword(v); setError(''); setMessage(''); };
+  const handleSetConfirmPassword = (v: string) => { setConfirmPassword(v); setError(''); setMessage(''); };
+  const handleSetName = (v: string) => { setName(v); setError(''); setMessage(''); };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -57,13 +70,26 @@ export default function LoginPage() {
         const response = await authService.login(email, password);
         authService.saveToken(response.access_token);
         console.log('Login successful');
-        navigate('/');
+        setError('');
+        setMessage('');
+        // Force full navigation to clear any modal state owned by other pages
+        if (typeof window !== 'undefined') {
+          window.location.replace('/');
+        } else {
+          navigate('/');
+        }
       } else {
         await authService.register(email, password, name, username);
         console.log('Registration successful');
         const loginResponse = await authService.login(email, password);
         authService.saveToken(loginResponse.access_token);
-        navigate('/');
+        setError('');
+        setMessage('');
+        if (typeof window !== 'undefined') {
+          window.location.replace('/');
+        } else {
+          navigate('/');
+        }
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
@@ -102,15 +128,15 @@ export default function LoginPage() {
           isForgotPassword={isForgotPassword}
           setIsForgotPassword={setIsForgotPassword}
           email={email}
-          setEmail={setEmail}
+          setEmail={handleSetEmail}
           username={username}
-          setUsername={setUsername}
+          setUsername={handleSetUsername}
           password={password}
-          setPassword={setPassword}
+          setPassword={handleSetPassword}
           confirmPassword={confirmPassword}
-          setConfirmPassword={setConfirmPassword}
+          setConfirmPassword={handleSetConfirmPassword}
           name={name}
-          setName={setName}
+          setName={handleSetName}
           onSubmit={handleSubmit}
           isLoading={isLoading}
           error={error}

@@ -9,6 +9,7 @@ import Screen5 from '../pages/making mats/Screen5'
 import Screen6 from '../pages/making mats/Screen6'
 import HomePage from '../pages/web-home/HomePage'
 import BatTrangLevel0 from '../pages/making_ceramics/Screen0/screen0'
+import BatTrangLevel1Phase0 from '../pages/making_ceramics/Screen1/Phase0'
 import BatTrangLevel1Screen1 from '../pages/making_ceramics/Screen1/Phase1'
 import BatTrangLevel1Phase2 from '../pages/making_ceramics/Screen1/Phase2'
 import VillageDetailPage from '../pages/VillageDetailPage'
@@ -51,7 +52,9 @@ export const router = createBrowserRouter([
       { path: 'level-5/*', Component: Screen5 },
       { path: 'level-6/*', Component: Screen6 },
       { path: 'village/:id', Component: VillageDetailPage },
-      { path: 'bat-trang/level-1', Component: BatTrangLevel1Screen1 },
+      // Make Phase0 the default view for /bat-trang/level-1
+      { path: 'bat-trang/level-1', Component: BatTrangLevel1Phase0 },
+      { path: 'bat-trang/level-1/phase1', Component: BatTrangLevel1Screen1 },
       { path: 'bat-trang/level-1/phase2', Component: BatTrangLevel1Phase2 },
       { path: 'bat-trang/level-0', Component: BatTrangLevel0 },
       { path: 'admin', Component: AdminPage },

@@ -9,8 +9,8 @@ import RecentReviewList from '../../components/Reviews/RecentReviewList';
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(!!authService.getToken());
-  const [user, setUser] = useState<{ name?: string; avatar?: string } | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [user, setUser] = useState<any | null>(null);
 
   
 
@@ -22,8 +22,15 @@ export default function HomePage() {
       .getProfile()
       .then((p) => {
         if (!mounted) return;
-        setUser({ name: p.name || p.fullName || p.username, avatar: p.avatar });
-        setIsLoggedIn(true);
+        const hasProfile = p && (p.name || p.fullName || p.username || p.email || p.id);
+        if (hasProfile) {
+          setUser(p);
+          setIsLoggedIn(true);
+        } else {
+          try { localStorage.removeItem('access_token'); } catch (e) {}
+          setUser(null);
+          setIsLoggedIn(false);
+        }
       })
       .catch(() => {
         if (!mounted) return;
@@ -198,7 +205,7 @@ export default function HomePage() {
             </div>
             {/* ...bỏ logo/icon giữa... */}
             <div className="absolute right-6 top-1/2 -translate-y-1/2">
-              {!isLoggedIn ? (
+              {!(isLoggedIn && user) ? (
                 <button
                   onClick={() => navigate('/login')}
                   aria-label="Đăng nhập"

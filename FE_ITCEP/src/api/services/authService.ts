@@ -23,10 +23,29 @@ apiClient.interceptors.request.use((config) => {
 // Handle error responses
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError<any>) => {
-    const message = error.response?.data?.message || error.message || 'An error occurred';
-    throw new Error(message);
-  }
+    (error: AxiosError<any>) => {
+      const status = error.response?.status;
+      // Determine request path (may be relative)
+      const reqUrl: string = (error.config && (error.config as any).url) || '';
+
+      // Only auto-clear token and redirect for protected endpoints (not auth endpoints)
+      // This prevents redirects when login/register requests return 4xx so the login form can show errors.
+      const isAuthEndpoint = reqUrl.includes('/auth');
+
+      if ((status === 401 || status === 404) && !isAuthEndpoint) {
+        try {
+          localStorage.removeItem('access_token');
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+
+      const message = error.response?.data?.message || error.message || 'An error occurred';
+      throw new Error(message);
+    }
 );
 
 export interface LoginResponse {
