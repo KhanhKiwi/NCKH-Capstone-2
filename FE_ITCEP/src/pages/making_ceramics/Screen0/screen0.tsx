@@ -41,7 +41,7 @@ export default function BatTrangLevel0() {
 
             <div className="flex gap-3">
               <Link to="/bat-trang/level-1" className="px-5 py-3 bg-emerald-600 text-white rounded-full shadow hover:scale-105 transition-transform">Bắt đầu thực hành</Link>
-              <Link to="/craft-selection" className="px-5 py-3 border rounded-full text-gray-700">Quay lại</Link>
+              <Link to="/craft-selection?openName=B%C3%A1t%20Tr%C3%A0ng" className="px-5 py-3 border rounded-full text-gray-700">Quay lại</Link>
             </div>
           </div>
         </header>
@@ -103,7 +103,7 @@ export default function BatTrangLevel0() {
             <div className="text-sm text-gray-600 order-2 sm:order-1">Sẵn sàng chưa? Phần tiếp theo là thực hành tay nghề.</div>
 
             <div className="order-1 sm:order-2 w-full sm:w-auto flex items-center justify-center sm:justify-end gap-4">
-              <Link to="/craft-selection" className="text-sm text-gray-600 underline underline-offset-4 decoration-amber-400 decoration-2">Quay lại chọn nghề</Link>
+              <Link to="/craft-selection?openName=B%C3%A1t%20Tr%C3%A0ng" className="text-sm text-gray-600 underline underline-offset-4 decoration-amber-400 decoration-2">Quay lại chọn nghề</Link>
               <Link
                 to="/bat-trang/level-1"
                 className="px-5 py-3 bg-amber-500 text-white rounded-full shadow-lg transform transition duration-200 ease-out hover:shadow-xl hover:-translate-y-1 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-amber-200"

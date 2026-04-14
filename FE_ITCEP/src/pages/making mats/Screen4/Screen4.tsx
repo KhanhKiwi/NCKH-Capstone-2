@@ -1184,7 +1184,7 @@ export default function Level4Page() {
                     <RotateCcw className="w-5 h-5" />
                     Chơi lại
                   </button>
-                  <Link to="/craft-selection">
+                  <Link to="/craft-selection?openName=%C4%90inh%20Y%C3%AAn">
                     <button className="bg-gradient-to-r from-[#4a7c2f] to-[#5d9e3a] hover:from-[#5d9e3a] hover:to-[#4a7c2f] text-white px-6 py-3 rounded-full font-bold transition-all shadow-lg flex items-center gap-2">
                       <Home className="w-5 h-5" />
                       Về menu

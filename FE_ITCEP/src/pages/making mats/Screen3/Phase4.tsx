@@ -28,7 +28,7 @@ export default function Phase4(){
       localStorage.removeItem('phase2_result')
       localStorage.removeItem('phase3_overall')
     } catch (e) {}
-    navigate('/')
+    navigate(`/craft-selection?openName=${encodeURIComponent('Đinh Yên')}`)
   }
 
   function shareScore(){
@@ -43,7 +43,7 @@ export default function Phase4(){
     <div className="phase4-root">
       <div className="overlay-bg" />
       <div className="dialog-card">
-        <button className="close-x" onClick={() => navigate('/')}>×</button>
+        <button className="close-x" onClick={() => navigate(`/craft-selection?openName=${encodeURIComponent('Đinh Yên')}`)}>×</button>
         <div className="dialog-inner">
           <div className="top-row">
             <div className="level-title">Level Complete</div>

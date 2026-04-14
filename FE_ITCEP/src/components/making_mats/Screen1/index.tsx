@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useNavigate } from 'react-router'
 import styles from "./Screen1.module.css";
 import { useGameState } from "./useGameState";
 import FarmerNPC from "./FarmerNPC";
@@ -40,6 +41,8 @@ export default function Screen1() {
     toggleHint,
     resetGame,
   } = useGameState();
+
+  const navigate = useNavigate()
 
   // Sickle position tracking with useRef (not state)
   const sicklePosRef = useRef({ x: 0, y: 0 });
@@ -545,7 +548,15 @@ export default function Screen1() {
               <button className={styles.btnRetry} onClick={resetGame}>
                 Chơi lại 🔄
               </button>
-              <button className={styles.btnNext}>Màn 2 →</button>
+              <button
+                className={styles.btnNext}
+                onClick={() => {
+                  try { resetGame() } catch (e) {}
+                  // open craft selection and auto-open the village modal for Đinh Yên
+                  const q = encodeURIComponent('Đinh Yên')
+                  navigate(`/craft-selection?openName=${q}`)
+                }}
+              >Hoàn thành</button>
             </div>
           </div>
         </div>

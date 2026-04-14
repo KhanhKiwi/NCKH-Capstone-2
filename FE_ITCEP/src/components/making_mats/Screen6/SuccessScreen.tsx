@@ -47,7 +47,7 @@ export function SuccessScreen({ score = 0, onRestart }: SuccessScreenProps) {
     if (onRestart) {
       onRestart();
     } else {
-      navigate("/level-6");
+      navigate(`/craft-selection?openName=${encodeURIComponent('Đinh Yên')}`);
     }
   };
 
@@ -204,7 +204,7 @@ export function SuccessScreen({ score = 0, onRestart }: SuccessScreenProps) {
           <motion.button
             whileHover={{ scale: 1.08, y: -2 }}
             whileTap={{ scale: 0.92 }}
-            onClick={() => navigate("/")}
+            onClick={() => navigate(`/craft-selection?openName=${encodeURIComponent('Đinh Yên')}`)}
             className="px-8 py-4 rounded-full flex items-center gap-3 font-bold text-lg"
             style={{
               background: "linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)",
@@ -214,7 +214,7 @@ export function SuccessScreen({ score = 0, onRestart }: SuccessScreenProps) {
             }}
           >
             <Home className="w-6 h-6" />
-            <span>Trang chủ</span>
+            <span>Về làng nghề</span>
           </motion.button>
         </motion.div>
       </div>

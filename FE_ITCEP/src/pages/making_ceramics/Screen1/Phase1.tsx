@@ -153,7 +153,7 @@ export default function BatTrangLevel1Screen1() {
               {feedback && !feedback.startsWith('Đúng') && <div>{feedback}</div>}
             </div>
             <div className="flex gap-3">
-              <Link to="/craft-selection" className="px-4 py-2 bg-white border rounded">Thoát</Link>
+              <Link to="/craft-selection?openName=B%C3%A1t%20Tr%C3%A0ng" className="px-4 py-2 bg-white border rounded">Thoát</Link>
                <button onClick={next} className="px-4 py-2 bg-amber-500 text-white rounded">{index < questions.length - 1 ? 'Tiếp' : 'Hoàn thành'}</button>
             </div>
           </div>

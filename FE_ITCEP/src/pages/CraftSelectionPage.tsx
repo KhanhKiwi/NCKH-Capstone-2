@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router'
 import { Lock, CheckCircle, Star, X } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { Link } from 'react-router';
@@ -103,6 +104,25 @@ export default function CraftSelectionPage() {
     setSelectedCraft(craft);
     setShowLevelModal(true);
   };
+
+  // If URL contains ?openName=..., auto-open that craft modal (useful for deep links)
+  const location = useLocation();
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(location.search || '');
+      const nameParam = params.get('openName')?.trim();
+      if (!nameParam) return;
+      if (!crafts || crafts.length === 0) return;
+      const found = crafts.find(c => c.name && c.name.toLowerCase().includes(nameParam.toLowerCase()));
+      if (found) {
+        setSelectedCraft(found);
+        setShowLevelModal(true);
+      }
+    } catch (e) {
+      // ignore
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [crafts, location.search]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#fff7ed] via-[#fff1e6] to-[#fff3f0] relative overflow-hidden">
