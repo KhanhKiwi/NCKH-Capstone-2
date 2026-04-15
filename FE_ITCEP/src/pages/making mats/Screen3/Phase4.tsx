@@ -1,9 +1,12 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 import '../../../styles/Screen3/Phase4/game.css'
+import { useAI } from '../../../contexts/AIContext'
+import { useNewPlayerOnce } from '../../../hooks/useNpcTriggers'
 
 export default function Phase4(){
   const navigate = useNavigate()
+  const { triggerEvent } = useAI()
 
   const phaseStars = useMemo(() => {
     try {
@@ -18,6 +21,16 @@ export default function Phase4(){
 
   const average = (phaseStars.p1 + phaseStars.p2 + phaseStars.p3) / 3
   const finalStars = average > 2.5 ? 3 : 2
+
+  useNewPlayerOnce(triggerEvent, 'ai:new_player:level-3-phase4', { event: 'new_player', level: 3, step: 4 })
+
+  useEffect(() => {
+    if (finalStars >= 3) {
+      triggerEvent({ event: 'excellent', level: 3, step: 4 }).catch(() => {})
+    } else {
+      triggerEvent({ event: 'win_fast', level: 3, step: 4 }).catch(() => {})
+    }
+  }, [finalStars, triggerEvent])
 
   function playAgain(){
     try {

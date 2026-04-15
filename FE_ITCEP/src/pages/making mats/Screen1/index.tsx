@@ -9,6 +9,9 @@ import HUD from "../../../components/making_mats/Screen1/HUD";
 import HintPanel from "../../../components/making_mats/Screen1/HintPanel";
 import ScorePop from "../../../components/making_mats/Screen1/ScorePop";
 import Basket from "../../../components/making_mats/Screen1/Basket";
+import { useLocation } from "react-router-dom";
+import { useAI } from "../../../contexts/AIContext";
+import { useIdleTrigger, useNewPlayerOnce, useSpamClickTrigger } from "../../../hooks/useNpcTriggers";
 
 // Import background images
 import bg0 from "../../../assets/bg0-intro.png";
@@ -33,6 +36,8 @@ const OVERLAY: Record<number, string> = {
 };
 
 export default function Screen1() {
+  const { pathname } = useLocation();
+  const { triggerEvent } = useAI();
   const {
     state,
     startGame,
@@ -244,8 +249,31 @@ export default function Screen1() {
     showHint,
   } = state;
 
+  useNewPlayerOnce(triggerEvent, `ai:new_player:${pathname}`, { event: "new_player", level: 1, step: 1 });
+  useIdleTrigger(triggerEvent, { event: "idle", level: 1, step: phase + 1 }, 45_000);
+  useSpamClickTrigger(triggerEvent, { event: "spam_click", level: 1, step: phase + 1 }, 10_000, 10);
+
   return (
     <div className={styles.root}>
+      <button
+        type="button"
+        onClick={() => triggerEvent({ event: "ask_info", level: 1, step: phase + 1 }).catch(() => {})}
+        style={{
+          position: "fixed",
+          top: 16,
+          right: 16,
+          zIndex: 1400,
+          borderRadius: 999,
+          padding: "10px 14px",
+          background: "rgba(17, 24, 39, 0.75)",
+          border: "1px solid rgba(250, 204, 21, 0.4)",
+          color: "#fde68a",
+          fontWeight: 700,
+          cursor: "pointer",
+        }}
+      >
+        Trợ giúp
+      </button>
       {/* Background */}
       <img
         key={`bg${phase}`}

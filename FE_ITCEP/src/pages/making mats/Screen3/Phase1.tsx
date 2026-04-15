@@ -7,9 +7,12 @@ import CenterHint from '../../../components/making_mats/Screen3/Phase1/CenterHin
 import BoardCanvas from '../../../components/making_mats/Screen3/Phase1/BoardCanvas'
 import Controls from '../../../components/making_mats/Screen3/Phase1/Controls'
 import GuideDialog from '../../../util/shared/GuideDialog'
+import { useAI } from '../../../contexts/AIContext'
+import { useIdleTrigger, useNewPlayerOnce, useSpamClickTrigger } from '../../../hooks/useNpcTriggers'
 
 export default function Game(){
   const navigate = useNavigate()
+  const { triggerEvent } = useAI()
   const [started, setStarted] = useState(false);
   const [showRequireStart, setShowRequireStart] = useState(false);
   // Hide the start message after 5s
@@ -30,6 +33,9 @@ export default function Game(){
   const rafRef = useRef<number | null>(null)
 
   const [running, setRunning] = useState<boolean>(true)
+  useNewPlayerOnce(triggerEvent, 'ai:new_player:level-3-phase1', { event: 'new_player', level: 3, step: 1 })
+  useIdleTrigger(triggerEvent, { event: 'idle', level: 3, step: 1 }, 45_000)
+  useSpamClickTrigger(triggerEvent, { event: 'spam_click', level: 3, step: 1 }, 10_000, 10)
   // moverWidth not needed; measured when required via ref
   const [segments, setSegments] = useState<Array<{ type: string; w: number }>>([])
   const [bladeUp, setBladeUp] = useState<boolean>(false)

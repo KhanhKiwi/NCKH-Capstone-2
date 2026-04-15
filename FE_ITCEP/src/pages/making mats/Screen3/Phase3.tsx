@@ -1,10 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import '../../../styles/Screen3/Phase3/game.css'
 /* GuidePerson standalone removed — keep GuideDialog avatar only when needed */
 import GuideDialog from '../../../util/shared/GuideDialog'
+import { useAI } from '../../../contexts/AIContext'
+import { useIdleTrigger, useNewPlayerOnce, useSpamClickTrigger } from '../../../hooks/useNpcTriggers'
 
 export default function Phase3(){
+  const { triggerEvent } = useAI()
   const weatherStates = ['rain', 'sunny', 'cloudy'] as const
   type Weather = (typeof weatherStates)[number]
   const weatherInfo: Record<Weather, { icon: string; label: string }> = {
@@ -18,10 +21,13 @@ export default function Phase3(){
   const getDuration = (w: Weather) => (w === 'rain' ? 25 : w === 'cloudy' ? 30 : 40)
   const [secondsLeft, setSecondsLeft] = useState<number>(() => getDuration(weather))
   const [grassesOut, setGrassesOut] = useState<boolean>(false)
+  const [helpEventUsed, setHelpEventUsed] = useState(false)
+  const weatherEventRef = useRef<string | undefined>(undefined)
   const [running, setRunning] = useState<boolean>(false)
   const [startFlash, setStartFlash] = useState<boolean>(false)
   const navigate = useNavigate()
   const [bundles, setBundles] = useState<Array<{id:number,left:number,length:number,color:string,progress:number,stage:string,top?:number,swayAmt?:number,swaySpeed?:number}>>([])
+  const phaseProgress = useMemo(() => Math.round((bundles.reduce((s, x) => s + (x.progress || 0), 0) / (bundles.length || 1))), [bundles])
   const bundleColors = ['#d35400','#f1c40f','#27ae60','#9b59b6']
   const weatherSubtitle = weather === 'sunny'
     ? 'Điều kiện lý tưởng để làm khô sợi cói'
@@ -120,6 +126,33 @@ export default function Phase3(){
   }
 
   const videoSrc = weatherVideoMap[weather]
+
+  useNewPlayerOnce(triggerEvent, 'ai:new_player:level-3-phase3', { event: 'new_player', level: 3, step: 3 })
+  useIdleTrigger(triggerEvent, { event: 'idle', level: 3, step: 3 }, 45_000)
+  useSpamClickTrigger(triggerEvent, { event: 'spam_click', level: 3, step: 3 }, 10_000, 10)
+
+  useEffect(() => {
+    const nextEvent = weather === 'rain' ? 'raining' : weather === 'sunny' ? 'started' : 'cloudy'
+    if (weatherEventRef.current !== nextEvent) {
+      weatherEventRef.current = nextEvent
+    }
+  }, [weather])
+
+  useEffect(() => {
+    if (helpEventUsed) return
+    if (weather === 'rain' && overall < 35) {
+      setHelpEventUsed(true)
+      triggerEvent({ event: 'ask_info', level: 3, step: 3 }).catch(() => {})
+    }
+  }, [helpEventUsed, overall, triggerEvent, weather])
+
+  useEffect(() => {
+    if (overall >= 100) {
+      triggerEvent({ event: 'excellent', level: 3, step: 3 }).catch(() => {})
+    } else if (overall >= 75) {
+      triggerEvent({ event: 'win_fast', level: 3, step: 3 }).catch(() => {})
+    }
+  }, [overall, triggerEvent])
 
   return (
     <div className="phase3-root">

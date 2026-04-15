@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import {
@@ -12,6 +12,9 @@ import {
   RotateCw,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
+import { useLocation } from 'react-router-dom';
+import { useAI } from '../../../contexts/AIContext';
+import { useIdleTrigger, useNewPlayerOnce, useSpamClickTrigger } from '../../../hooks/useNpcTriggers';
 
 const clampHalfStar = (n: number) =>
   Math.max(0, Math.min(3, Math.round(n * 2) / 2));
@@ -255,6 +258,7 @@ function DraggablePuzzlePiece({
 }
 
 function MiniGame1({ onComplete }: { onComplete: (stars: number) => void }) {
+  const { triggerEvent } = useAI();
   const [board, setBoard] = useState<BoardCell[][]>(createInitialBoard());
   const [pieces, setPieces] = useState<PuzzlePiece[]>(
     PUZZLE_PIECES.map((p) => ({ ...p, rotation: 0, placed: false }))
@@ -269,8 +273,24 @@ function MiniGame1({ onComplete }: { onComplete: (stars: number) => void }) {
     pieceId: string;
     board: BoardCell[][];
   }>>([]);
+  const actionTimesRef = useRef<number[]>([]);
+  const lastActionRef = useRef(Date.now());
+  const idleTriggeredRef = useRef(false);
+  const lastSpamEventRef = useRef(0);
+  const completedEventRef = useRef(false);
 
   const MAX_HINTS = 3;
+
+  const trackAction = useCallback(() => {
+    const now = Date.now();
+    lastActionRef.current = now;
+    idleTriggeredRef.current = false;
+    actionTimesRef.current = [...actionTimesRef.current.filter((t) => now - t <= 10000), now];
+    if (actionTimesRef.current.length >= 10 && now - lastSpamEventRef.current >= 10000) {
+      lastSpamEventRef.current = now;
+      triggerEvent({ event: 'spam_click', level: 4, step: 1 }).catch(() => {});
+    }
+  }, [triggerEvent]);
 
   // Predefined solution positions for hints
   const solutionPositions: { [key: string]: { row: number; col: number; rotation: number } } = {
@@ -290,7 +310,19 @@ function MiniGame1({ onComplete }: { onComplete: (stars: number) => void }) {
     }
   }, [completed]);
 
+  useEffect(() => {
+    if (completed) return;
+    const interval = window.setInterval(() => {
+      if (Date.now() - lastActionRef.current >= 45000 && !idleTriggeredRef.current) {
+        idleTriggeredRef.current = true;
+        triggerEvent({ event: 'idle', level: 4, step: 1 }).catch(() => {});
+      }
+    }, 2000);
+    return () => window.clearInterval(interval);
+  }, [completed, triggerEvent]);
+
   const handleRotate = (pieceId: string) => {
+    trackAction();
     setPieces((prev) =>
       prev.map((p) =>
         p.id === pieceId ? { ...p, rotation: p.rotation + 1 } : p
@@ -332,11 +364,11 @@ function MiniGame1({ onComplete }: { onComplete: (stars: number) => void }) {
 
   const placePiece = (pieceId: string, row: number, col: number) => {
     const piece = pieces.find((p) => p.id === pieceId);
-    if (!piece) return;
+    if (!piece) return false;
 
     const rotatedShape = getRotatedShape(piece.shape, piece.rotation);
 
-    if (!canPlacePiece(rotatedShape, row, col)) return;
+    if (!canPlacePiece(rotatedShape, row, col)) return false;
 
     // Save current board state to history
     setPlacementHistory((prev) => [...prev, {
@@ -365,7 +397,16 @@ function MiniGame1({ onComplete }: { onComplete: (stars: number) => void }) {
     if (nextPieces.every((p) => p.placed)) {
       setCompleted(true);
       setShowLoom(true);
+      if (!completedEventRef.current) {
+        completedEventRef.current = true;
+        if (timer <= 15 && hintsUsed === 0) {
+          triggerEvent({ event: 'excellent', level: 4, step: 1 }).catch(() => {});
+        } else if (timer <= 20) {
+          triggerEvent({ event: 'win_fast', level: 4, step: 1 }).catch(() => {});
+        }
+      }
     }
+    return true;
   };
 
   const removePiece = (pieceId: string) => {
@@ -387,6 +428,7 @@ function MiniGame1({ onComplete }: { onComplete: (stars: number) => void }) {
   };
 
   const handleHint = () => {
+    trackAction();
     if (hintsUsed >= MAX_HINTS) return;
 
     // Find first unplaced piece
@@ -405,6 +447,7 @@ function MiniGame1({ onComplete }: { onComplete: (stars: number) => void }) {
   };
 
   const handleReset = () => {
+    trackAction();
     setBoard(createInitialBoard());
     setPieces(PUZZLE_PIECES.map((p) => ({ ...p, rotation: 0, placed: false })));
     setTimer(0);
@@ -417,6 +460,7 @@ function MiniGame1({ onComplete }: { onComplete: (stars: number) => void }) {
   };
 
   const handleUndo = () => {
+    trackAction();
     if (placementHistory.length === 0) return;
 
     const lastPlacement = placementHistory[placementHistory.length - 1];
@@ -438,7 +482,11 @@ function MiniGame1({ onComplete }: { onComplete: (stars: number) => void }) {
   };
 
   const handleDrop = (item: DragItem, row: number, col: number) => {
-    placePiece(item.id, row, col);
+    trackAction();
+    const ok = placePiece(item.id, row, col);
+    if (!ok) {
+      triggerEvent({ event: 'wrong_action', level: 4, step: 1 }).catch(() => {});
+    }
   };
 
   const BoardCell = ({
@@ -766,6 +814,7 @@ function generateOrderedPattern(
 }
 
 function MiniGame2({ onComplete }: { onComplete: (stars: number) => void }) {
+  const { triggerEvent } = useAI();
   const [memorizePhase, setMemorizePhase] = useState(true);
   const [memorizeIndex, setMemorizeIndex] = useState(0);
   // Khởi tạo ngay — tránh pattern=[] trong vài frame khiến hết thời gian nhớ mà chưa có chuỗi
@@ -779,6 +828,10 @@ function MiniGame2({ onComplete }: { onComplete: (stars: number) => void }) {
   const [hintFlash, setHintFlash] = useState<PatternCell | null>(null);
   const [playSeconds, setPlaySeconds] = useState(0);
   const [completed, setCompleted] = useState(false);
+  const lastActionRef = useRef(Date.now());
+  const idleTriggeredRef = useRef(false);
+  const failManyTriggeredRef = useRef(false);
+  const completedEventRef = useRef(false);
 
   useEffect(() => {
     if (!memorizePhase || completed) return;
@@ -804,6 +857,17 @@ function MiniGame2({ onComplete }: { onComplete: (stars: number) => void }) {
   }, [memorizePhase, completed]);
 
   useEffect(() => {
+    if (completed) return;
+    const interval = window.setInterval(() => {
+      if (Date.now() - lastActionRef.current >= 45000 && !idleTriggeredRef.current) {
+        idleTriggeredRef.current = true;
+        triggerEvent({ event: 'idle', level: 4, step: 2 }).catch(() => {});
+      }
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [completed, triggerEvent]);
+
+  useEffect(() => {
     if (!hintFlash) return;
     const t = setTimeout(() => setHintFlash(null), 2000);
     return () => clearTimeout(t);
@@ -823,6 +887,8 @@ function MiniGame2({ onComplete }: { onComplete: (stars: number) => void }) {
   }, []);
 
   const handleHint = () => {
+    lastActionRef.current = Date.now();
+    idleTriggeredRef.current = false;
     if (memorizePhase || completed) return;
     if (hintsUsed >= MG2_MAX_HINTS) return;
     const next = pattern[playerPattern.length];
@@ -832,11 +898,15 @@ function MiniGame2({ onComplete }: { onComplete: (stars: number) => void }) {
   };
 
   const handleUndo = () => {
+    lastActionRef.current = Date.now();
+    idleTriggeredRef.current = false;
     if (memorizePhase || completed) return;
     setPlayerPattern((prev) => prev.slice(0, -1));
   };
 
   const handleCellClick = (row: number, col: number) => {
+    lastActionRef.current = Date.now();
+    idleTriggeredRef.current = false;
     if (memorizePhase || completed) return;
 
     const idxInPlayer = playerPattern.findIndex(
@@ -858,7 +928,15 @@ function MiniGame2({ onComplete }: { onComplete: (stars: number) => void }) {
       expected.color === chosenColor;
 
     if (!ok) {
-      setWrongTries((w) => w + 1);
+      setWrongTries((w) => {
+        const next = w + 1;
+        triggerEvent({ event: 'wrong_action', level: 4, step: 2, fail_count: next }).catch(() => {});
+        if (next >= 3 && !failManyTriggeredRef.current) {
+          failManyTriggeredRef.current = true;
+          triggerEvent({ event: 'fail_many', level: 4, step: 2, fail_count: next }).catch(() => {});
+        }
+        return next;
+      });
       return;
     }
 
@@ -869,6 +947,14 @@ function MiniGame2({ onComplete }: { onComplete: (stars: number) => void }) {
 
     if (nextIdx + 1 >= pattern.length) {
       setCompleted(true);
+      if (!completedEventRef.current) {
+        completedEventRef.current = true;
+        if (wrongTries === 0 && hintsUsed === 0) {
+          triggerEvent({ event: 'excellent', level: 4, step: 2 }).catch(() => {});
+        } else if (playSeconds <= 25) {
+          triggerEvent({ event: 'win_fast', level: 4, step: 2 }).catch(() => {});
+        }
+      }
     }
   };
 
@@ -1061,10 +1147,16 @@ function MiniGame2({ onComplete }: { onComplete: (stars: number) => void }) {
 
 export default function Level4Page() {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const { triggerEvent } = useAI();
   const [currentMiniGame, setCurrentMiniGame] = useState<1 | 2 | 'complete'>(1);
   const [miniGame1Stars, setMiniGame1Stars] = useState(0);
   const [miniGame2Stars, setMiniGame2Stars] = useState(0);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+
+  useNewPlayerOnce(triggerEvent, `ai:new_player:${pathname}`, { event: 'new_player', level: 4, step: 1 });
+  useIdleTrigger(triggerEvent, { event: 'idle', level: 4, step: 1 }, 45_000);
+  useSpamClickTrigger(triggerEvent, { event: 'spam_click', level: 4, step: 1 }, 10_000, 10);
 
   const handleMiniGame1Complete = (stars: number) => {
     setMiniGame1Stars(stars);
@@ -1100,6 +1192,19 @@ export default function Level4Page() {
               <p className="text-white/90">Làng dệt chiếu Đinh Yên</p>
             </div>
             <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() =>
+                  triggerEvent({
+                    event: 'ask_info',
+                    level: 4,
+                    step: currentMiniGame === 'complete' ? 3 : currentMiniGame,
+                  }).catch(() => {})
+                }
+                className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-full font-semibold transition-colors flex items-center gap-2"
+              >
+                Trợ giúp
+              </button>
               <button
                 type="button"
                 onClick={() => setShowExitConfirm(true)}
