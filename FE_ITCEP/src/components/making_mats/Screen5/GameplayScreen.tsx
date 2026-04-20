@@ -564,7 +564,7 @@ export default function GameplayScreen() {
                     <motion.button 
                       whileHover={{ scale: 1.08, y: -3 }} 
                       whileTap={{ scale: 0.92 }} 
-                      onClick={() => navigate('/level6')}
+                      onClick={() => navigate('/level-6')}
                       className="px-8 md:px-12 py-2.5 md:py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-base md:text-lg font-black rounded-xl shadow-lg border-3 border-blue-800"
                     >
                       Tiếp Tục

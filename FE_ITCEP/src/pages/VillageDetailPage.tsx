@@ -1,12 +1,144 @@
 import { useParams, Link } from 'react-router';
 import { villagesData } from '../data/villagesData';
-import { ChevronLeft, MapPin, Play, Image as ImageIcon, BookOpen } from 'lucide-react';
-import { useState } from 'react';
+import { ChevronLeft, MapPin, Play, Image as ImageIcon } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { villagesService } from '../api/villages/villagesService';
+import { mediaService } from '../api/media/mediaService';
 
 export default function VillageDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const village = villagesData.find(v => v.id === id);
-  const [activeTab, setActiveTab] = useState<'info' | 'video' | 'gallery'>('info');
+  const [village, setVillage] = useState(() => villagesData.find(v => v.id === id) ?? null as any);
+  const [activeTab, setActiveTab] = useState<'video' | 'gallery'>('video');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (village) return;
+    if (!id) return;
+    // if id is numeric, try backend API
+    if (/^\d+$/.test(id)) {
+      setLoading(true);
+      villagesService
+        .getOne(Number(id))
+        .then((data) => {
+          if (!data) {
+            setError('Không tìm thấy làng nghề.');
+            return;
+          }
+
+          // Normalize function to compare names
+          const normalize = (s: string | undefined) => {
+            if (!s) return '';
+            return String(s)
+              .toLowerCase()
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+              .replace(/[^\w\s-]/g, '')
+              .replace(/\s+/g, '-')
+              .trim();
+          };
+
+          // Try to find matching village from villagesData
+          const backendNameNorm = normalize(data.name || data.title);
+          const allLocalNames = villagesData.map(v => ({ name: v.name, normalized: normalize(v.name) }));
+          console.log('VillageDetail: backend name:', data.name, '| normalized:', backendNameNorm);
+          console.log('VillageDetail: all local names:', allLocalNames);
+          
+          const villageDataEntry = villagesData.find(v => {
+            const vNameNorm = normalize(v.name);
+            return vNameNorm === backendNameNorm || 
+                   vNameNorm.includes(backendNameNorm) || 
+                   backendNameNorm.includes(vNameNorm);
+          });
+          
+          console.log('VillageDetail: backend data:', data);
+          console.log('VillageDetail: matched villageData entry:', villageDataEntry);
+
+          const normalized = {
+            id: data.id ?? data.village_id ?? String(data.village_id ?? data.id),
+            name: data.name ?? data.title,
+            location: data.city ?? data.location ?? '',
+            thumbnail: data.thumbnail ?? data.image ?? data.media?.[0]?.url ?? villageDataEntry?.thumbnail ?? '/picture/default-village.jpg',
+            description: data.description ?? '',
+            videoUrl: data.videoUrl ?? data.video_url ?? villageDataEntry?.videoUrl ?? '',
+            galleryImages: data.galleryImages ?? data.gallery_images ?? data.media?.map((m: any) => m.url) ?? villageDataEntry?.galleryImages ?? [],
+          };
+          console.log('VillageDetail: backend videoUrl:', data.videoUrl, 'video_url:', data.video_url);
+          console.log('VillageDetail: villageDataEntry videoUrl:', villageDataEntry?.videoUrl);
+          console.log('VillageDetail: normalized village:', normalized);
+          setVillage(normalized as any);
+        })
+        .catch((err) => {
+          console.error('Village detail fetch error', err);
+          setError('Lỗi khi tải dữ liệu.');
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [id, village]);
+
+  // Load media images for this village from backend media table
+  useEffect(() => {
+    let mounted = true;
+    if (!village) return;
+
+    async function loadMedia() {
+      try {
+        console.log('VillageDetail: loading media for village:', village)
+        // If village.id looks numeric, use it directly
+        if (/^\d+$/.test(String(village.id))) {
+          const items = await mediaService.getByVillage(Number(village.id));
+          console.log('VillageDetail: mediaService.getByVillage result (numeric id):', items)
+          if (!mounted) return;
+          const urls = items.map((m: any) => m.url).filter(Boolean);
+          if (urls.length) setVillage((s: any) => ({ ...s, galleryImages: urls }));
+          return;
+        }
+
+        // Otherwise try to resolve numeric village id by matching existing backend villages
+        const all = await villagesService.getAll();
+        console.log('VillageDetail: villagesService.getAll:', all)
+        // normalize helper: remove diacritics and non-alphanumerics
+        const normalize = (s: any) => {
+          if (!s) return ''
+          try {
+            const str = String(s)
+              .normalize('NFD')
+              .replace(/\p{Diacritic}/gu, '')
+            return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+          } catch (e) {
+            return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-')
+          }
+        }
+        const targetSlug = normalize(String(village.id))
+
+        const match = (all || []).find((bv: any) => {
+          if (!bv) return false;
+          if (bv.id != null && String(bv.id) === String(village.id)) return true;
+          if (bv.village_id != null && String(bv.village_id) === String(village.id)) return true;
+          const nameNorm = normalize(bv.name)
+          // consider contains so short slugs like 'bat-trang' match 'lang-gom-bat-trang'
+          if (nameNorm === targetSlug || nameNorm.includes(targetSlug) || targetSlug.includes(nameNorm)) return true;
+          if (bv.name && village.name && normalize(bv.name) === normalize(village.name)) return true;
+          return false;
+        });
+
+        console.log('VillageDetail: matched backend village:', match)
+        if (match) {
+          const vid = match.village_id ?? match.id;
+          const items = await mediaService.getByVillage(vid);
+          console.log('VillageDetail: mediaService.getByVillage result (matched):', items)
+          if (!mounted) return;
+          const urls = items.map((m: any) => m.url).filter(Boolean);
+          if (urls.length) setVillage((s: any) => ({ ...s, galleryImages: urls }));
+        }
+      } catch (err) {
+        console.warn('loadMedia error', err);
+      }
+    }
+
+    loadMedia();
+    return () => { mounted = false; };
+  }, [village]);
 
   if (!village) {
     return (
@@ -21,6 +153,13 @@ export default function VillageDetailPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f0e8] pb-20">
+      {/* Loading / Error indicators (uses hooks to avoid TS unused errors) */}
+      {loading && (
+        <div className="w-full text-center py-2 bg-yellow-50 text-yellow-800">Đang tải dữ liệu...</div>
+      )}
+      {error && (
+        <div className="w-full text-center py-2 bg-red-50 text-red-800">{error}</div>
+      )}
       {/* Hero Header */}
       <div className="relative h-[60vh] md:h-[70vh] w-full bg-black">
         <img 
@@ -57,12 +196,7 @@ export default function VillageDetailPage() {
         
         {/* Tabs */}
         <div className="flex flex-wrap shadow-xl rounded-2xl bg-white overflow-hidden mb-12">
-          <button 
-            onClick={() => setActiveTab('info')}
-            className={`flex-1 py-5 px-6 font-semibold flex items-center justify-center gap-3 transition-colors ${activeTab === 'info' ? 'bg-[#4a7c2f] text-white' : 'text-[#6b5638] hover:bg-gray-50'}`}
-          >
-            <BookOpen size={20} /> Giới Thiệu
-          </button>
+          {/* 'Giới Thiệu' removed per request */}
           <button 
             onClick={() => setActiveTab('video')}
             className={`flex-1 py-5 px-6 font-semibold flex items-center justify-center gap-3 transition-colors ${activeTab === 'video' ? 'bg-[#4a7c2f] text-white' : 'text-[#6b5638] hover:bg-gray-50'}`}
@@ -80,30 +214,7 @@ export default function VillageDetailPage() {
         {/* Tab Content */}
         <div className="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-[#e4d5b7]">
           
-          {/* Info Tab */}
-          {activeTab === 'info' && (
-            <div className="space-y-10 animate-fade-in">
-              <section>
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-2 h-8 bg-[#4a7c2f] rounded-full"></div>
-                  <h2 className="text-3xl text-[#4a3f2e] font-bold" style={{ fontFamily: 'serif' }}>Câu chuyện Làng Nghề</h2>
-                </div>
-                <p className="text-lg text-[#5a4a35] leading-relaxed">
-                  {village.description}
-                </p>
-              </section>
-
-              <section>
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-2 h-8 bg-[#8b6f47] rounded-full"></div>
-                  <h2 className="text-3xl text-[#4a3f2e] font-bold" style={{ fontFamily: 'serif' }}>Lịch sử hình thành</h2>
-                </div>
-                <p className="text-lg text-[#5a4a35] leading-relaxed bg-[#fbf9f4] p-6 rounded-2xl border border-[#e4d5b7]">
-                  {village.history}
-                </p>
-              </section>
-            </div>
-          )}
+          {/* Info tab removed */}
 
           {/* Video Tab */}
           {activeTab === 'video' && (
@@ -116,16 +227,22 @@ export default function VillageDetailPage() {
                 Khám phá bàn tay tài hoa của các nghệ nhân qua từng công đoạn tỉ mỉ để tạo ra sản phẩm.
               </p>
               <div className="aspect-video w-full rounded-2xl overflow-hidden shadow-2xl bg-black border-4 border-[#e4d5b7]">
-                <iframe 
-                  width="100%" 
-                  height="100%" 
-                  src={village.videoUrl} 
-                  title={`Video ${village.name}`}
-                  frameBorder="0" 
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                  allowFullScreen
-                  className="w-full h-full"
-                ></iframe>
+                {village.videoUrl ? (
+                  <iframe 
+                    width="100%" 
+                    height="100%" 
+                    src={village.videoUrl} 
+                    title={`Video ${village.name}`}
+                    frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowFullScreen
+                    className="w-full h-full"
+                  ></iframe>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-white">
+                    <p>Video không sẵn có</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -138,7 +255,7 @@ export default function VillageDetailPage() {
                 <h2 className="text-3xl text-[#4a3f2e] font-bold" style={{ fontFamily: 'serif' }}>Sắc màu Làng Nghề</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {village.galleryImages.map((img, idx) => (
+                {village.galleryImages.map((img: string, idx: number) => (
                   <div key={idx} className="group relative aspect-4/5 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all cursor-pointer">
                     <img 
                       src={img} 

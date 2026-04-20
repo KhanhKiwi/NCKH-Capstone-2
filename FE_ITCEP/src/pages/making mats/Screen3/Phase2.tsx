@@ -280,7 +280,7 @@ export default function Phase2({ onExit }: { onExit?: () => void }) {
           showRequireStart={false}
           win={gameResult === 'won'}
           progress={currentPercent}
-          onNext={() => navigate('/phase3')}
+          onNext={() => navigate('/level-3/phase3')}
           phase="phase2"
           message={gameResult === 'won'
             ? 'Chúc mừng bạn đã chiến thắng — hãy vào Giai đoạn cuối nào!'

@@ -14,7 +14,7 @@ export function FailScreen({ score = 0, onRestart }: FailScreenProps) {
     if (onRestart) {
       onRestart();
     } else {
-      navigate("/level6");
+      navigate("/level-6");
     }
   };
 

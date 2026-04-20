@@ -169,7 +169,7 @@ export default function GameplayScreen() {
   useEffect(() => {
     if (progress >= 100 && isGameActive) {
       setIsGameActive(false);
-      setTimeout(() => navigate("/level6/success"), 500);
+      setTimeout(() => navigate("/level-6/success"), 500);
     }
   }, [progress, isGameActive, navigate]);
 
@@ -182,9 +182,9 @@ export default function GameplayScreen() {
         if (prev <= 1) {
           setIsGameActive(false);
           if (progress >= 80) {
-            setTimeout(() => navigate("/level6/success"), 1000);
+            setTimeout(() => navigate("/level-6/success"), 1000);
           } else {
-            setTimeout(() => navigate("/level6/fail"), 1000);
+            setTimeout(() => navigate("/level-6/fail"), 1000);
           }
           return 0;
         }
@@ -338,7 +338,7 @@ export default function GameplayScreen() {
   useEffect(() => {
     if (lives <= 0 && isGameActive) {
       setIsGameActive(false);
-      setTimeout(() => navigate("/level6/fail"), 1000);
+      setTimeout(() => navigate("/level-6/fail"), 1000);
     }
   }, [lives, isGameActive, navigate]);
 

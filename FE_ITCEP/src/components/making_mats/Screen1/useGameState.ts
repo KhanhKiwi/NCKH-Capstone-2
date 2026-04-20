@@ -107,7 +107,7 @@ const INIT: GameState = {
   cutIds: [],
   farmerMood: "idle",
   bubbleText:
-    "Hello! I am Chi Lan. Welcome to our village! We weave beautiful mats from sedge grass here.",
+    "Xin chào! Mình là Chi Lan. Chào mừng bạn đến với làng của chúng tôi! Ở đây chúng tôi dệt những tấm chiếu đẹp từ cỏ đót.",
   isLocked: false,
   scorePops: [],
   showHint: false,
@@ -146,7 +146,7 @@ export function useGameState() {
       phase: 1,
       farmerMood: "talking",
       bubbleText:
-        "Find 5 MATURE plants! 🌿 Tall, thick, dark green. Avoid small pale ones!",
+        "Tìm 5 cây ĐÃ TRƯỞNG THÀNH! 🌿 Cao, thân dày, xanh đậm. Tránh những cây nhỏ, màu nhạt!",
     });
   }, []);
 
@@ -170,7 +170,7 @@ export function useGameState() {
                 ...prev,
                 phase: 2,
                 farmerMood: "talking",
-                bubbleText: "Now click the ✓ marked plants to cut them! ✂️",
+                bubbleText: "Bây giờ nhấp vào những cây có dấu ✓ để cắt chúng! ✂️",
               }));
             }, 1600);
           }
@@ -182,22 +182,22 @@ export function useGameState() {
             score: s.score + 20,
             farmerMood: done ? "excited" : "happy",
             bubbleText: done
-              ? "Perfect 5! Now cut them! ✂️"
-              : "That's it! Great eye! ✓",
+              ? "Tuyệt, 5 cây hoàn hảo! Giờ hãy cắt chúng! ✂️"
+              : "Tuyệt! Nhìn chuẩn! ✓",
           };
         } else {
           if (lockTimer.current) clearTimeout(lockTimer.current);
           lockTimer.current = setTimeout(() => {
             setState((prev: GameState) => ({ ...prev, isLocked: false }));
           }, 1500);
-          addPop("-1 ⭐", "#EF5350", x, y);
+          addPop("-1 sao", "#EF5350", x, y);
           return {
             ...s,
             stars: Math.max(1, s.stars - 1),
             penalties: s.penalties + 1,
             isLocked: true,
             farmerMood: "sad",
-            bubbleText: "Oh no! Too young! Find tall dark green ones!",
+            bubbleText: "Ôi không! Còn non! Tìm cây cao, xanh đậm nhé!",
           };
         }
       });
@@ -231,28 +231,28 @@ export function useGameState() {
                 phase: 3,
                 plants: [...prev.plants, ...makeDecoys(prev.plants)],
                 farmerMood: "talking",
-                bubbleText: "Drag the fallen GREEN plants to the basket! 🌾",
+                bubbleText: "Kéo những cây xanh đã ngã vào giỏ! 🌾",
               }));
             }, 1600);
           }
-          addPop("+10 pts", "#FFD54F", x, y);
+          addPop("+10 điểm", "#FFD54F", x, y);
           return {
             ...s,
             plants: updatedPlants,
             cutIds: newCuts,
             score: s.score + 10,
             farmerMood: "happy",
-            bubbleText: "Nice cut! ✂️",
+            bubbleText: "Cắt đẹp! ✂️",
           };
         } else {
-          addPop("-1 ⭐", "#EF5350", x, y);
+          addPop("-1 sao", "#EF5350", x, y);
           return {
             ...s,
             plants: updatedPlants,
             stars: Math.max(1, s.stars - 1),
             penalties: s.penalties + 1,
             farmerMood: "sad",
-            bubbleText: "Wrong plant! Only cut the marked ones! 😬",
+            bubbleText: "Nhầm cây! Chỉ cắt những cây đã được đánh dấu! 😬",
           };
         }
       });
@@ -283,28 +283,28 @@ export function useGameState() {
                 ...prev,
                 phase: 4,
                 farmerMood: "excited",
-                bubbleText: "WONDERFUL! 🎉 You harvested perfectly!",
+                bubbleText: "Tuyệt vời! 🎉 Bạn thu hoạch hoàn hảo!",
               }));
             }, 1200);
           }
-          addPop("+15 pts", "#00E676", x, y);
+          addPop("+15 điểm", "#00E676", x, y);
           return {
             ...s,
             plants: updatedPlants,
             collectedCount: newCount,
             score: s.score + 15,
             farmerMood: "happy",
-            bubbleText: "Great! Keep going! 🌿",
+            bubbleText: "Tuyệt! Tiếp tục nào! 🌿",
           };
         } else {
-          addPop("-20 pts", "#EF5350", x, y);
+          addPop("-20 điểm", "#EF5350", x, y);
           return {
             ...s,
             score: Math.max(0, s.score - 20),
             stars: Math.max(1, s.stars - 1),
             penalties: s.penalties + 1,
             farmerMood: "sad",
-            bubbleText: "Wrong bundle! Only dark green plants! ❌",
+            bubbleText: "Bó sai! Chỉ chọn cây xanh đậm! ❌",
           };
         }
       });

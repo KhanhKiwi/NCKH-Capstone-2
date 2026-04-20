@@ -1,12 +1,9 @@
-import Screen2 from './components/making_mats/Screen2'
-import './App.css'
 
+import { RouterProvider } from "react-router";
+import { router } from "./routes";
+import "./App.css";
 function App() {
-  return (
-    <>
-      <Screen2 />
-    </>
-  )
+  return <RouterProvider router={router} />;
 }
 
-export default App
+export default App;
