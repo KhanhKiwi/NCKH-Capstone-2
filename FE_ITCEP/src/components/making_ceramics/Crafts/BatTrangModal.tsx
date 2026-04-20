@@ -220,7 +220,7 @@ export default function BatTrangModal({ open = true, onClose }: { open?: boolean
                 >
                   <div className="relative flex items-center justify-center">
                     <button
-                      onClick={() => { if (levels[i]?.unlocked) navigate(`/bat-trang/level-${levels[i].id}`) }}
+                      onClick={() => { if (levels[i]?.unlocked) navigate(levels[i].id === 2 ? `/bat-trang/level-${levels[i].id}/phase0` : `/bat-trang/level-${levels[i].id}`) }}
                       className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg text-white text-base font-bold transform transition-all duration-300 ${levels[i]?.unlocked ? 'bg-gradient-to-br from-emerald-500 to-emerald-700 ring-4 ring-emerald-100/50' : 'bg-gray-300'}`}
                       aria-label={`Cấp ${levels[i]?.id}`}
                       style={{ transitionDelay: `${i * 120}ms`, animation: pathDrawn ? `nodePop 540ms cubic-bezier(.2,.9,.2,1) ${i * 120}ms both` : 'none' }}
@@ -238,11 +238,12 @@ export default function BatTrangModal({ open = true, onClose }: { open?: boolean
                               onClick={() => {
                                 // animate retract to this node, then navigate
                                 const p = pathRef.current
-                                if (!p) { navigate(`/bat-trang/level-${levels[i].id}`); return }
+                                const targetPath = levels[i].id === 2 ? `/bat-trang/level-${levels[i].id}/phase0` : `/bat-trang/level-${levels[i].id}`
+                                if (!p) { navigate(targetPath); return }
                                 const total = p.getTotalLength()
                                 const nodeLen = nodeLengths[i] ?? ((i + 1) / (levels.length + 1)) * total
                                 const targetOffset = Math.max(0, total - nodeLen)
-                                pendingNavigationRef.current = `/bat-trang/level-${levels[i].id}`
+                                pendingNavigationRef.current = targetPath
                                 p.style.transition = 'stroke-dashoffset 700ms cubic-bezier(.2,.9,.2,1)'
                                 p.style.strokeDashoffset = String(targetOffset)
                               }}
@@ -291,7 +292,7 @@ export default function BatTrangModal({ open = true, onClose }: { open?: boolean
                 </div>
                 <div>
                   {level.unlocked ? (
-                    <Link to={`/bat-trang/level-${level.id}`}>
+                    <Link to={level.id === 2 ? `/bat-trang/level-${level.id}/phase0` : `/bat-trang/level-${level.id}`}>
                       <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-full text-sm font-semibold transition-colors">Chơi ngay</button>
                     </Link>
                   ) : (
