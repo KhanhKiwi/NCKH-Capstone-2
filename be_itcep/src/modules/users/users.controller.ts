@@ -45,6 +45,14 @@ export class UsersController {
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update current user profile (name, avatar URL)' })
+  @ApiBody({
+    schema: {
+      example: {
+        name: 'Nguyen Van B',
+        avatar: 'https://example.com/avatar.png',
+      },
+    },
+  })
   @ApiResponse({ status: 200, description: 'Profile updated successfully' })
   updateProfile(@GetUser() user: any, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(user.userId, updateUserDto);
@@ -54,6 +62,14 @@ export class UsersController {
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Change current user password' })
+  @ApiBody({
+    schema: {
+      example: {
+        currentPassword: 'oldPassword123',
+        newPassword: 'newPassword123',
+      },
+    },
+  })
   @ApiResponse({ status: 200, description: 'Password changed successfully' })
   async changePassword(@GetUser() user: any, @Body() body: { currentPassword: string; newPassword: string }) {
     const { currentPassword, newPassword } = body;

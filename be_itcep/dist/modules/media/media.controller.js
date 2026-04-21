@@ -27,6 +27,9 @@ let MediaController = class MediaController {
     findAll() {
         return this.mediaService.findAll();
     }
+    findByVillage(villageId) {
+        return this.mediaService.findByVillage(villageId);
+    }
     findOne(id) {
         return this.mediaService.findOne(id);
     }
@@ -41,6 +44,14 @@ exports.MediaController = MediaController;
 __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create media' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            example: {
+                village_id: 1,
+                url: 'https://example.com/media.jpg',
+            },
+        },
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -52,6 +63,14 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], MediaController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('village/:villageId'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get media by village id' }),
+    __param(0, (0, common_1.Param)('villageId', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], MediaController.prototype, "findByVillage", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),

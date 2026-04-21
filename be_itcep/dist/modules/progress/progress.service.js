@@ -85,29 +85,6 @@ let ProgressService = class ProgressService {
     async getProgressForUser(user_id) {
         return this.progressRepo.find({ where: { user: { user_id } }, relations: ['level'] });
     }
-    async unlockLevel(user_id, level_id) {
-        const user = await this.userRepo.findOne({ where: { user_id } });
-        if (!user)
-            throw new common_1.NotFoundException('User not found');
-        const level = await this.levelRepo.findOne({ where: { level_id } });
-        if (!level)
-            throw new common_1.NotFoundException('Level not found');
-        let progress = await this.progressRepo.findOne({
-            where: { user: { user_id }, level: { level_id } },
-            relations: ['level'],
-        });
-        if (!progress) {
-            progress = this.progressRepo.create({
-                user,
-                level,
-                status: 'unlocked',
-            });
-        }
-        else {
-            progress.status = 'unlocked';
-        }
-        return this.progressRepo.save(progress);
-    }
 };
 exports.ProgressService = ProgressService;
 exports.ProgressService = ProgressService = __decorate([

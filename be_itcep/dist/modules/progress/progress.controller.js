@@ -15,10 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProgressController = void 0;
 const common_1 = require("@nestjs/common");
 const create_progress_dto_1 = require("./dto/create-progress.dto");
-const unlock_level_dto_1 = require("./dto/unlock-level.dto");
 const progress_service_1 = require("./progress.service");
 const swagger_1 = require("@nestjs/swagger");
-const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 let ProgressController = class ProgressController {
     progressService;
     constructor(progressService) {
@@ -30,16 +28,22 @@ let ProgressController = class ProgressController {
     async getForUser(id) {
         return this.progressService.getProgressForUser(id);
     }
-    async unlockLevel(dto) {
-        return this.progressService.unlockLevel(dto.user_id, dto.level_id);
-    }
 };
 exports.ProgressController = ProgressController;
 __decorate([
     (0, common_1.Post)(),
     (0, common_1.UsePipes)(new common_1.ValidationPipe({ transform: true })),
     (0, swagger_1.ApiOperation)({ summary: 'Create or update user progress' }),
-    (0, swagger_1.ApiBody)({ type: create_progress_dto_1.CreateProgressDto }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            example: {
+                user_id: 1,
+                level_id: 2,
+                status: 'completed',
+                score: 95,
+            },
+        },
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_progress_dto_1.CreateProgressDto]),
@@ -52,21 +56,6 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], ProgressController.prototype, "getForUser", null);
-__decorate([
-    (0, common_1.Post)('unlock'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UsePipes)(new common_1.ValidationPipe({ transform: true })),
-    (0, swagger_1.ApiOperation)({ summary: 'Unlock a level for a user (Admin/System)' }),
-    (0, swagger_1.ApiBody)({ type: unlock_level_dto_1.UnlockLevelDto }),
-    (0, swagger_1.ApiResponse)({ status: 201, description: 'Level unlocked successfully' }),
-    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'User or level not found' }),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [unlock_level_dto_1.UnlockLevelDto]),
-    __metadata("design:returntype", Promise)
-], ProgressController.prototype, "unlockLevel", null);
 exports.ProgressController = ProgressController = __decorate([
     (0, swagger_1.ApiTags)('progress'),
     (0, common_1.Controller)('progress'),

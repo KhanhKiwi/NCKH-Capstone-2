@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RegisterDto = void 0;
 const class_validator_1 = require("class-validator");
+const swagger_1 = require("@nestjs/swagger");
 class RegisterDto {
     email;
     username;
@@ -19,22 +20,26 @@ class RegisterDto {
 }
 exports.RegisterDto = RegisterDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({ example: 'user@example.com' }),
     (0, class_validator_1.IsEmail)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "email", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ example: 'user123' }),
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MinLength)(3, { message: 'Username must be at least 3 characters' }),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "username", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ example: 'password123' }),
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.MinLength)(6, { message: 'Password must be at least 6 characters' }),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "password", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Nguyen Van A' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)

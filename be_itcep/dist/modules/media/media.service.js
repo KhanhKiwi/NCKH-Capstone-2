@@ -31,6 +31,9 @@ let MediaService = class MediaService {
     findOne(id) {
         return this.repo.findOne({ where: { media_id: id } });
     }
+    findByVillage(villageId) {
+        return this.repo.find({ where: { village: { village_id: villageId } }, relations: ['village'] });
+    }
     async update(id, dto) {
         await this.repo.update(id, dto);
         return this.findOne(id);

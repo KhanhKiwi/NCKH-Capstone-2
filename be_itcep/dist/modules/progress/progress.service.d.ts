@@ -10,5 +10,4 @@ export declare class ProgressService {
     constructor(progressRepo: Repository<UserProgress>, levelRepo: Repository<Level>, userRepo: Repository<User>);
     saveProgress(dto: CreateProgressDto): Promise<UserProgress>;
     getProgressForUser(user_id: number): Promise<UserProgress[]>;
-    unlockLevel(user_id: number, level_id: number): Promise<UserProgress>;
 }
