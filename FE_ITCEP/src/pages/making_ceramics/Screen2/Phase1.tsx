@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { levelsService } from '../../../api/levels/levelsService'
 import { useNavigate } from 'react-router'
 import GuideDialog from '../../../util/shared/GuideDialog'
 
@@ -410,7 +411,18 @@ export default function BatTrangLevel2() {
                 <h2 className="text-xl font-bold">Hoàn thành!</h2>
                 <p className="mt-2">Bạn đã tạo hình thành công.</p>
                 <div className="mt-4 flex gap-2 justify-center">
-                  <button onClick={() => { try{ localStorage.setItem('bat-trang-level-2', 'completed') }catch{} navigate('/craft-selection?openName=B%C3%A1t%20Tr%C3%A0ng') }} className="px-4 py-2 bg-emerald-500 text-white rounded">Hoàn tất</button>
+                  <button onClick={async () => {
+                    try{ localStorage.setItem('bat-trang-level-2', 'completed') }catch{}
+                    // unlock next level (level_number 3) for village 1
+                    try {
+                      const all = await levelsService.getByVillage(1)
+                      if (Array.isArray(all)) {
+                        const next = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === 3)
+                        if (next) await levelsService.update(Number(next.level_id ?? next.id), { deleted_at: new Date().toISOString() })
+                      }
+                    } catch (e) { console.warn('unlock next level failed', e) }
+                    navigate('/craft-selection?openName=B%C3%A1t%20Tr%C3%A0ng')
+                  }} className="px-4 py-2 bg-emerald-500 text-white rounded">Hoàn tất</button>
                   <button onClick={reset} className="px-4 py-2 bg-white border rounded">Chơi lại</button>
                 </div>
               </div>

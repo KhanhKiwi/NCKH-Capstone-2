@@ -12,11 +12,13 @@ export class LevelsService {
 	}
 
 	findAll() {
-		return this.repo.find();
+		// include craft and craft.village relations so frontend can filter by village
+		// include soft-deleted rows too (deleted_at used as lock flag)
+		return this.repo.find({ relations: ['craft', 'craft.village'], withDeleted: true });
 	}
 
 	findOne(id: number) {
-		return this.repo.findOne({ where: { level_id: id } });
+		return this.repo.findOne({ where: { level_id: id }, relations: ['craft', 'craft.village'], withDeleted: true });
 	}
 
 	async update(id: number, dto: Partial<Level>) {

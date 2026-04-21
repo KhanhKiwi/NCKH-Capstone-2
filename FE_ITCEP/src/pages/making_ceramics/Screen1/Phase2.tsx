@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { levelsService } from '../../../api/levels/levelsService'
 import { useNavigate } from 'react-router'
 import confetti from 'canvas-confetti'
 import GuideDialog from '../../../util/shared/GuideDialog'
@@ -324,9 +325,22 @@ export default function Phase2({ onComplete }: Phase2Props) {
 								<div style={{color:'#5b3a26',marginBottom:10}}>Độ mịn: <strong>{Math.round(progress*100)}%</strong></div>
 								<div style={{color:'#5b3a26',marginBottom:18}}>Thời gian còn lại: <strong>{timeLeft}s</strong></div>
 								<div style={{display:'flex',gap:12,justifyContent:'center'}}>
-									<button onClick={()=>{
+									<button onClick={async ()=>{
 										try{ localStorage.setItem('phase2_stars', String(starCount)); localStorage.setItem('phase2_result','won') }catch{}
 										if (onComplete) onComplete({ smoothness: progress, stars: starCount });
+										// unlock next level (level_number = 2) for Bát Tràng (village_id = 1)
+										try {
+											const all = await levelsService.getByVillage(1)
+											if (Array.isArray(all)) {
+												const next = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === 2)
+												if (next) {
+													await levelsService.update(Number(next.level_id ?? next.id), { deleted_at: new Date().toISOString() })
+												}
+											}
+										} catch (e) {
+											console.warn('unlock next level failed', e)
+										}
+
 										setSummaryOpen(false);
 										navigate('/craft-selection?openName=B%C3%A1t%20Tr%C3%A0ng');
 									}} style={{padding:'10px 18px',background:'linear-gradient(90deg,#10b981,#06a86b)',color:'white',borderRadius:12,border:'none',fontWeight:800}}>Hoàn tất</button>

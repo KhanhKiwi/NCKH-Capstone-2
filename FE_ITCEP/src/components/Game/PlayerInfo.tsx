@@ -1,7 +1,31 @@
 import { motion } from "motion/react";
-import { User, Coins } from "lucide-react";
+import { Coins } from "lucide-react";
+import { useEffect, useState } from "react";
+import { authService } from "../../api/services/authService";
 
 export function PlayerInfo() {
+  const [user, setUser] = useState<any | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    authService
+      .getProfile()
+      .then((p) => {
+        if (!mounted) return;
+        setUser(p || null);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setUser(null);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const displayName = user?.name || user?.fullName || 'Nghệ nhân';
+  const avatarSrc = user?.avatar || null;
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
@@ -11,11 +35,15 @@ export function PlayerInfo() {
     >
       <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-4 shadow-2xl">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#F0D4B0] to-[#E6A75E] flex items-center justify-center shadow-lg">
-            <User className="w-6 h-6 text-[#5D4E37]" />
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#F0D4B0] to-[#E6A75E] flex items-center justify-center shadow-lg overflow-hidden">
+            {avatarSrc ? (
+              <img src={avatarSrc} alt={displayName} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-[#5D4E37] font-bold">{(displayName && displayName.charAt(0)) || 'N'}</div>
+            )}
           </div>
           <div>
-            <p className="text-white font-bold text-sm">Nghệ nhân</p>
+            <p className="text-white font-bold text-sm">{displayName}</p>
             <p className="text-[#F0D4B0] text-xs">Cấp độ 15</p>
           </div>
         </div>
