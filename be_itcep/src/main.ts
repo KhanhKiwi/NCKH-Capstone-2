@@ -11,6 +11,7 @@ import { CraftsModule } from './modules/crafts/crafts.module';
 import { ProgressModule } from './modules/progress/progress.module';
 import { SessionsModule } from './modules/sessions/sessions.module';
 import { MediaModule } from './modules/media/media.module';
+import { LevelsModule } from './modules/levels/levels.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -35,11 +36,11 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config, {
-    include: [AuthModule, UsersModule, VillagesModule, CraftsModule, ProgressModule, SessionsModule, MediaModule],
+    include: [AuthModule, UsersModule, VillagesModule, CraftsModule, ProgressModule, SessionsModule, MediaModule, LevelsModule],
   });
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api/docs', app, document);
   await app.listen(process.env.PORT ?? 3000);
-  log('Swagger UI available at http://localhost:3000/api');
+  log('Swagger UI available at http://localhost:3000/api/docs');
 }
 
 bootstrap();

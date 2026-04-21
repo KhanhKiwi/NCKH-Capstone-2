@@ -47,7 +47,7 @@ import { AnalyticsEvent } from '../modules/analytics/entities/analytics-event.en
           AnalyticsEvent,
         ],
 
-        synchronize: true,
+        synchronize: false,
         logging: ['error', 'warn'],
       }),
     }),

@@ -12,6 +12,7 @@ const crafts_module_1 = require("./modules/crafts/crafts.module");
 const progress_module_1 = require("./modules/progress/progress.module");
 const sessions_module_1 = require("./modules/sessions/sessions.module");
 const media_module_1 = require("./modules/media/media.module");
+const levels_module_1 = require("./modules/levels/levels.module");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.enableCors({
@@ -29,11 +30,11 @@ async function bootstrap() {
         .setVersion('1.0')
         .build();
     const document = swagger_1.SwaggerModule.createDocument(app, config, {
-        include: [auth_module_1.AuthModule, users_module_1.UsersModule, villages_module_1.VillagesModule, crafts_module_1.CraftsModule, progress_module_1.ProgressModule, sessions_module_1.SessionsModule, media_module_1.MediaModule],
+        include: [auth_module_1.AuthModule, users_module_1.UsersModule, villages_module_1.VillagesModule, crafts_module_1.CraftsModule, progress_module_1.ProgressModule, sessions_module_1.SessionsModule, media_module_1.MediaModule, levels_module_1.LevelsModule],
     });
-    swagger_1.SwaggerModule.setup('api', app, document);
+    swagger_1.SwaggerModule.setup('api/docs', app, document);
     await app.listen(process.env.PORT ?? 3000);
-    (0, console_1.log)('Swagger UI available at http://localhost:3000/api');
+    (0, console_1.log)('Swagger UI available at http://localhost:3000/api/docs');
 }
 bootstrap();
 //# sourceMappingURL=main.js.map

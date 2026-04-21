@@ -7,4 +7,5 @@ export declare class LevelsController {
     findOne(id: number): Promise<import("./entities/level.entity").Level | null>;
     update(id: number, dto: any): Promise<import("./entities/level.entity").Level | null>;
     remove(id: number): Promise<import("typeorm").UpdateResult>;
+    unlockLevel(levelId: number, userId: number): Promise<import("../progress/entities/user-progress.entity").UserProgress>;
 }
