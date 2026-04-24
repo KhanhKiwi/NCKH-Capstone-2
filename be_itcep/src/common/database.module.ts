@@ -6,12 +6,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from '../modules/users/entities/user.entity';
 import { UserProgress } from '../modules/progress/entities/user-progress.entity';
 import { Level } from '../modules/levels/entities/level.entity';
-import { Step } from '../modules/steps/entities/step.entity';
 import { Craft } from '../modules/crafts/entities/craft.entity';
 import { CraftVillage } from '../modules/villages/entities/craft-village.entity';
 import { Media } from '../modules/media/entities/media.entity';
 import { PlayerSession } from '../modules/sessions/entities/player-session.entity';
-import { UserActionLog } from '../modules/logs/entities/user-action-log.entity';
 import { AnalyticsEvent } from '../modules/analytics/entities/analytics-event.entity';
 
 @Module({
@@ -38,16 +36,14 @@ import { AnalyticsEvent } from '../modules/analytics/entities/analytics-event.en
           User,
           UserProgress,
           Level,
-          Step,
           Craft,
           CraftVillage,
           Media,
           PlayerSession,
-          UserActionLog,
           AnalyticsEvent,
         ],
 
-        synchronize: false,
+        synchronize: true,
         logging: ['error', 'warn'],
       }),
     }),

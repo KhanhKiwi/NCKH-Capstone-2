@@ -12,7 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Level = void 0;
 const typeorm_1 = require("typeorm");
 const craft_entity_1 = require("../../crafts/entities/craft.entity");
-const step_entity_1 = require("../../steps/entities/step.entity");
 const player_session_entity_1 = require("../../sessions/entities/player-session.entity");
 const user_progress_entity_1 = require("../../progress/entities/user-progress.entity");
 let Level = class Level {
@@ -20,7 +19,6 @@ let Level = class Level {
     craft;
     level_number;
     difficulty;
-    steps;
     sessions;
     progresses;
     created_at;
@@ -45,10 +43,6 @@ __decorate([
     (0, typeorm_1.Column)({ length: 50, nullable: true }),
     __metadata("design:type", String)
 ], Level.prototype, "difficulty", void 0);
-__decorate([
-    (0, typeorm_1.OneToMany)(() => step_entity_1.Step, (step) => step.level),
-    __metadata("design:type", Array)
-], Level.prototype, "steps", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => player_session_entity_1.PlayerSession, (session) => session.level),
     __metadata("design:type", Array)

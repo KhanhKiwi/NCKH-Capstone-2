@@ -18,7 +18,7 @@ let UserProgress = class UserProgress {
     user;
     level;
     status;
-    score;
+    star;
     completed_at;
     created_at;
     updated_at;
@@ -46,7 +46,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", Number)
-], UserProgress.prototype, "score", void 0);
+], UserProgress.prototype, "star", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", Date)

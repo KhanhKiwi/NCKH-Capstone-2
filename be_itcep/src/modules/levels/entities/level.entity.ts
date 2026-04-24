@@ -1,6 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
 import { Craft } from '../../crafts/entities/craft.entity';
-import { Step } from '../../steps/entities/step.entity';
 import { PlayerSession } from '../../sessions/entities/player-session.entity';
 import { UserProgress } from '../../progress/entities/user-progress.entity';
 
@@ -18,9 +17,6 @@ export class Level {
 
   @Column({ length: 50, nullable: true })
   difficulty: string;
-
-  @OneToMany(() => Step, (step) => step.level)
-  steps: Step[];
 
   @OneToMany(() => PlayerSession, (session) => session.level)
   sessions: PlayerSession[];

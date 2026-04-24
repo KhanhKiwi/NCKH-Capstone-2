@@ -15,8 +15,8 @@ export class CreateProgressDto {
   @IsString()
   status?: string;
 
-  @ApiPropertyOptional({ example: 100 })
+  @ApiPropertyOptional({ example: 3 })
   @IsOptional()
   @Min(0)
-  score?: number;
+  star?: number;
 }

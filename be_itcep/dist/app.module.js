@@ -9,13 +9,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const analytics_module_1 = require("./modules/analytics/analytics.module");
-const logs_module_1 = require("./modules/logs/logs.module");
 const sessions_module_1 = require("./modules/sessions/sessions.module");
 const progress_module_1 = require("./modules/progress/progress.module");
 const media_module_1 = require("./modules/media/media.module");
 const villages_module_1 = require("./modules/villages/villages.module");
 const crafts_module_1 = require("./modules/crafts/crafts.module");
-const steps_module_1 = require("./modules/steps/steps.module");
 const levels_module_1 = require("./modules/levels/levels.module");
 const auth_module_1 = require("./auth/auth.module");
 const users_module_1 = require("./modules/users/users.module");
@@ -25,7 +23,7 @@ let AppModule = class AppModule {
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [database_module_1.DatabaseModule, users_module_1.UsersModule, auth_module_1.AuthModule, levels_module_1.LevelsModule, steps_module_1.StepsModule, crafts_module_1.CraftsModule, villages_module_1.VillagesModule, media_module_1.MediaModule, progress_module_1.ProgressModule, sessions_module_1.SessionsModule, logs_module_1.LogsModule, analytics_module_1.AnalyticsModule],
+        imports: [database_module_1.DatabaseModule, users_module_1.UsersModule, auth_module_1.AuthModule, levels_module_1.LevelsModule, crafts_module_1.CraftsModule, villages_module_1.VillagesModule, media_module_1.MediaModule, progress_module_1.ProgressModule, sessions_module_1.SessionsModule, analytics_module_1.AnalyticsModule],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map
