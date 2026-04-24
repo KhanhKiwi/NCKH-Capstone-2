@@ -3,20 +3,69 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiTags, ApiBody, ApiOperation } from '@nestjs/swagger';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('/register')
+  @ApiOperation({ summary: 'Register new user' })
+  @ApiBody({
+    schema: {
+      example: {
+        email: 'user@example.com',
+        username: 'user123',
+        password: 'password123',
+        name: 'Nguyen Van A',
+      },
+    },
+  })
   register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }
 
   @Post('/login')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login with email and password' })
+  @ApiBody({
+    schema: {
+      example: {
+        email: 'user@example.com',
+        password: 'password123',
+      },
+    },
+  })
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
+  }
+
+  @Post('forgot-password')
+  @ApiOperation({ summary: 'Request password reset email' })
+  @ApiBody({
+    schema: {
+      example: {
+        email: 'user@example.com',
+      },
+    },
+  })
+  async forgotPassword(@Body('email') email: string) {
+    return this.authService.forgotPassword(email);
+  }
+
+  @Post('reset-password')
+  @ApiOperation({ summary: 'Reset password with token' })
+  @ApiBody({
+    schema: {
+      example: {
+        token: 'reset-token-123',
+        password: 'newPassword123',
+      },
+    },
+  })
+  async resetPassword(@Body() body: any) {
+    return this.authService.resetPassword(body.token, body.password);
   }
 
   @Get('google')
@@ -36,15 +85,5 @@ export class AuthController {
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
       return res.redirect(`${frontendUrl}/login?error=Google login failed`);
     }
-  }
-
-  @Post('forgot-password')
-  async forgotPassword(@Body('email') email: string) {
-    return this.authService.forgotPassword(email);
-  }
-
-  @Post('reset-password')
-  async resetPassword(@Body() body: any) {
-    return this.authService.resetPassword(body.token, body.password);
   }
 }

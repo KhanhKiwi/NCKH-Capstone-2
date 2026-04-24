@@ -11,7 +11,16 @@ export class ProgressController {
 	@Post()
 	@UsePipes(new ValidationPipe({ transform: true }))
 	@ApiOperation({ summary: 'Create or update user progress' })
-	@ApiBody({ type: CreateProgressDto })
+	@ApiBody({
+		schema: {
+			example: {
+				user_id: 1,
+				level_id: 2,
+				status: 'completed',
+				score: 95,
+			},
+		},
+	})
 	async save(@Body() dto: CreateProgressDto) {
 		return this.progressService.saveProgress(dto);
 	}

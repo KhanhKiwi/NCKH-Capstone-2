@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Param, Patch, Delete, ParseIntPipe } from '@nestjs/common';
 import { MediaService } from './media.service';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
 
 @ApiTags('media')
 @Controller('media')
@@ -9,6 +9,14 @@ export class MediaController {
 
 	@Post()
 	@ApiOperation({ summary: 'Create media' })
+	@ApiBody({
+		schema: {
+			example: {
+				village_id: 1,
+				url: 'https://example.com/media.jpg',
+			},
+		},
+	})
 	create(@Body() dto: any) {
 		return this.mediaService.create(dto);
 	}
