@@ -22,7 +22,6 @@ import { LoginPage } from '../components/log'
 import ResetPasswordPage from '../pages/ResetPasswordPage'
 import ProfilePage from '../pages/profile/ProfilePage'
 import CatchFishGamePage from '../components/Making_Fish_Sauce/Screen1/CatchFishGamePage'
-import WashFishScreen2 from '../components/Making_Fish_Sauce/Screen2'
 
 export const router = createBrowserRouter([
   {
@@ -46,7 +45,6 @@ export const router = createBrowserRouter([
       { path: 'game', Component: GamePage },
       { path: 'game/catch-fish', Component: CatchFishGamePage },
       { path: 'craft-selection', Component: CraftSelectionPage },
-      { path: 'game/wash-fish', Component: WashFishScreen2 },
       { path: 'level-1', Component: Screen1 },
       { path: 'level-2', Component: Screen2 },
       { path: 'level-3/*', Component: Screen3 },
