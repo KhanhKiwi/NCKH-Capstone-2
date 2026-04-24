@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import VillagesView from '../../components/Admin/VillagesView'
+import VisitsChart from '../../components/Admin/VisitsChart'
 import { usersService } from '../../api/users/usersService'
 
 type User = { id: string; name: string; email: string }
@@ -19,6 +20,11 @@ export default function AdminPage() {
   })
 
   const [stats, setStats] = useState({ visits: 0, views: 0 })
+  const [visitsSeries, setVisitsSeries] = useState<number[]>([])
+  const [visitsLabels, setVisitsLabels] = useState<string[]>([])
+  const [visitsMode, setVisitsMode] = useState<'day' | 'month'>('day')
+  const [visitsMonthSeries, setVisitsMonthSeries] = useState<number[]>([])
+  const [visitsMonthLabels, setVisitsMonthLabels] = useState<string[]>([])
   const [users, setUsers] = useState<User[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([])
@@ -37,6 +43,30 @@ export default function AdminPage() {
         { id: 'f1', user: 'Nguyen Van A', message: 'Game rất hay, nhưng bị lag.' },
         { id: 'f2', user: 'Tran Thi B', message: 'Mong có thêm hướng dẫn.' },
       ])
+
+      // mock visits series for last 7 days (demo) with concrete date labels
+      const series = [1200, 1800, 2500, 3000, 4000, 2200, 12432]
+      const today = new Date()
+      const labels = Array.from({ length: series.length }).map((_, i) => {
+        const d = new Date(today)
+        d.setDate(today.getDate() - (series.length - 1 - i))
+        const dd = String(d.getDate()).padStart(2, '0')
+        const mm = String(d.getMonth() + 1).padStart(2, '0')
+        return `${dd}/${mm}`
+      })
+      setVisitsSeries(series)
+      setVisitsLabels(labels)
+
+      // mock monthly series (last 6 months)
+      const monthSeries = [3200, 4800, 7600, 9800, 11500, 12432]
+      const monthLabels = Array.from({ length: monthSeries.length }).map((_, i) => {
+        const d = new Date(today.getFullYear(), today.getMonth() - (monthSeries.length - 1 - i), 1)
+        const mm = String(d.getMonth() + 1).padStart(2, '0')
+        const yyyy = d.getFullYear()
+        return `${mm}/${yyyy}`
+      })
+      setVisitsMonthSeries(monthSeries)
+      setVisitsMonthLabels(monthLabels)
     }, 80)
 
     // load users from API (defensive parsing + logging)
@@ -233,6 +263,35 @@ export default function AdminPage() {
                     <div className="text-sm text-slate-500">Users</div>
                     <div className="text-3xl font-bold">{users.length}</div>
                   </div>
+                </div>
+                <div className="mt-6 bg-white p-4 rounded-lg border">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm text-slate-500">Lịch sử lượt truy cập</h3>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setVisitsMode('day')}
+                        className={`px-3 py-1 rounded-md text-sm ${visitsMode === 'day' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'}`}
+                      >
+                        Ngày
+                      </button>
+                      <button
+                        onClick={() => setVisitsMode('month')}
+                        className={`px-3 py-1 rounded-md text-sm ${visitsMode === 'month' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'}`}
+                      >
+                        Tháng
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mb-3 text-sm text-slate-500">
+                    {visitsMode === 'day' ? 'Dữ liệu: 7 ngày gần nhất' : 'Dữ liệu: 6 tháng gần nhất'}
+                  </div>
+
+                  {visitsMode === 'day' ? (
+                    <VisitsChart data={visitsSeries} labels={visitsLabels} height={160} showValues={true} />
+                  ) : (
+                    <VisitsChart data={visitsMonthSeries} labels={visitsMonthLabels} height={160} showValues={true} />
+                  )}
                 </div>
               </section>
             )}

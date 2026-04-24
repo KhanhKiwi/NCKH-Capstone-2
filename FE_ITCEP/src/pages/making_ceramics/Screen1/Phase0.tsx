@@ -53,7 +53,7 @@ export default function Phase0() {
 
             <div className="p-6 border rounded-lg">
               <h3 className="text-xl font-semibold mb-2">Màn 2: Nhào và làm mịn</h3>
-              <p className="text-gray-600">Thao tác tương tác: dùng tay để nhào đất và làm mịn bề mặt và sẽ có người hướng dẫn bạn</p>
+              <p className="text-gray-600">Thao tác tương tác: dùng chuột xoay tròn để nhào đất và làm mịn bề mặt và sẽ có người hướng dẫn bạn</p>
             </div>
           </div>
 

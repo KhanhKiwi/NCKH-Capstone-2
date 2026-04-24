@@ -1,35 +1,22 @@
 import { useEffect, useRef, useState } from 'react'
 import { X, Lock } from 'lucide-react'
 import { Link, useNavigate } from 'react-router'
+import { levelsService } from '../../../api/levels/levelsService'
 
-interface Level { id: number; name: string; unlocked: boolean; completed: boolean }
+interface Level { id: number; level_number?: number; name: string; difficulty?: string; unlocked: boolean; completed: boolean; deleted_at?: string | null }
 
 export default function BatTrangModal({ open = true, onClose }: { open?: boolean; onClose: () => void }) {
-  const defaultLevels: Level[] = [
-    { id: 0, name: 'Giới thiệu làng & hướng dẫn', unlocked: true, completed: false },
-    { id: 1, name: 'Chuẩn bị đất và làm mịn đất', unlocked: false, completed: false },
-    { id: 2, name: 'Tạo hình', unlocked: false, completed: false },
-    { id: 3, name: 'Phơi khô', unlocked: false, completed: false },
-    { id: 4, name: 'Trang trí & tráng men', unlocked: false, completed: false },
-    { id: 5, name: 'Nung & hoàn thiện', unlocked: false, completed: false },
-  ]
-
   const [levels, setLevels] = useState<Level[]>(() => {
     try {
       const saved = localStorage.getItem('unlocked_levels_bat-trang')
       if (saved) {
-        const parsed = JSON.parse(saved) as Level[]
-        // merge saved with defaults so newly added levels appear
-        const byId = new Map(parsed.map(l => [l.id, l]))
-        return defaultLevels.map(d => {
-          const s = byId.get(d.id)
-          return s ? { ...d, unlocked: s.unlocked ?? d.unlocked, completed: s.completed ?? d.completed } : d
-        })
+        return JSON.parse(saved) as Level[]
       }
     } catch {
-      /* ignore parsing errors */
+      /* ignore */
     }
-    return defaultLevels
+    // fallback empty until API loads
+    return []
   })
 
   useEffect(() => {
@@ -94,9 +81,70 @@ export default function BatTrangModal({ open = true, onClose }: { open?: boolean
   }, [levels])
 
   useEffect(() => {
-    // Auto-unlock for demo so players can try levels quickly
-    const t = setTimeout(() => setLevels(prev => prev.map(l => ({ ...l, unlocked: true }))), 50)
-    return () => clearTimeout(t)
+    // load levels from API (levels linked to village id 1 - Bát Tràng)
+    let mounted = true
+    ;(async () => {
+      try {
+        let apiLevels: any[] = await levelsService.getByVillage(1)
+        console.debug('[BatTrangModal] apiLevels.length', apiLevels?.length)
+        // fallback: if service returned none, try fetching all levels and filter by craft_id = 1
+        if ((!apiLevels || apiLevels.length === 0)) {
+          try {
+            const all = await levelsService.getAll()
+            if (Array.isArray(all) && all.length > 0) {
+              apiLevels = all.filter((l: any) => {
+                const craftId = l?.craft_id ?? (typeof l?.craft === 'number' ? l.craft : (l?.craft?.craft_id ?? l?.craft?.id ?? null))
+                return Number(craftId ?? -1) === 1
+              })
+              console.debug('[BatTrangModal] fallback filtered levels from getAll, count=', apiLevels.length)
+            }
+          } catch (e) {
+            console.warn('[BatTrangModal] fallback getAll failed', e)
+          }
+        }
+        // map API levels to our UI Level shape
+        const mapped: Level[] = (apiLevels || []).map((l) => {
+          const deletedAt = l.deleted_at ?? l.deletedAt ?? null
+          const unlockedFromApi = deletedAt != null // per agreed semantics: NULL = locked, NOT NULL = visible/dimmed
+          return {
+            id: Number(l.level_id ?? l.id),
+            level_number: Number(l.level_number ?? l.level_id ?? l.id),
+            name: l.name ?? `Cấp ${l.level_number ?? l.level_id ?? l.id}`,
+            difficulty: l.difficulty ?? String(l.difficulty ?? ''),
+            unlocked: unlockedFromApi,
+            completed: false,
+            deleted_at: deletedAt,
+          }
+        })
+
+        // merge with any saved state in localStorage
+        try {
+          const saved = localStorage.getItem('unlocked_levels_bat-trang')
+          if (saved) {
+            const parsed = JSON.parse(saved) as Level[]
+            const byId = new Map(parsed.map(x => [x.id, x]))
+            // Use API `unlocked` as source-of-truth; only preserve user `completed` flag from storage
+            const merged = mapped.map(m => {
+              const s = byId.get(m.id)
+              return s ? { ...m, completed: s.completed ?? m.completed } : m
+            })
+            if (mounted) setLevels(merged)
+            return
+          }
+        } catch {}
+
+        // if no saved state, use API mapping (do NOT auto-unlock; respect deleted_at semantics)
+        if (mounted) {
+          setLevels(mapped)
+        }
+      } catch (e) {
+        // fallback: keep existing levels (empty) and do not auto-unlock
+        if (mounted) {
+          // keep whatever is already in state
+        }
+      }
+    })()
+    return () => { mounted = false }
   }, [])
 
   const pathRef = useRef<SVGPathElement | null>(null)
@@ -114,14 +162,15 @@ export default function BatTrangModal({ open = true, onClose }: { open?: boolean
     if (!p || !wrapper) return
 
     const computePositions = () => {
+      const activeLevels = levels.filter(l => l.id !== 0)
       const len = p.getTotalLength()
       const wrapperRect = wrapper.getBoundingClientRect()
       const svgEl = wrapper.querySelector('svg') as SVGSVGElement | null
       const svgRect = svgEl ? svgEl.getBoundingClientRect() : null
 
-      // compute even-spaced points along the path for each level
-      const points = levels.map((_, i) => {
-        const t = (i + 1) / (levels.length + 1)
+      // compute even-spaced points along the path for each active level (exclude id=0)
+      const points = activeLevels.map((_, i) => {
+        const t = (i + 1) / (activeLevels.length + 1)
         const pos = p.getPointAtLength(t * len)
         // Map SVG coords (viewBox 600x200) into actual svg pixel rect
         const svgWidth = svgRect ? svgRect.width : wrapper.clientWidth
@@ -135,7 +184,7 @@ export default function BatTrangModal({ open = true, onClose }: { open?: boolean
       })
 
       // compute lengths along the path for each node (used for focus/retract)
-      const lengths = levels.map((_, i) => ((i + 1) / (levels.length + 1)) * len)
+      const lengths = activeLevels.map((_, i) => ((i + 1) / (activeLevels.length + 1)) * len)
       setNodeLengths(lengths)
 
       setNodePositions(points)
@@ -211,52 +260,62 @@ export default function BatTrangModal({ open = true, onClose }: { open?: boolean
                   )}
               </svg>
 
-              {/* render nodes visually on top of path */}
-              {nodePositions.map((pos, i) => (
-                <div
-                  key={i}
-                  className="group"
-                  style={{ position: 'absolute', left: pos.x, top: pos.y, transform: 'translate(-50%, -50%)', pointerEvents: 'auto' }}
-                >
-                  <div className="relative flex items-center justify-center">
-                    <button
-                      onClick={() => { if (levels[i]?.unlocked) navigate(`/bat-trang/level-${levels[i].id}`) }}
-                      className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg text-white text-base font-bold transform transition-all duration-300 ${levels[i]?.unlocked ? 'bg-gradient-to-br from-emerald-500 to-emerald-700 ring-4 ring-emerald-100/50' : 'bg-gray-300'}`}
-                      aria-label={`Cấp ${levels[i]?.id}`}
-                      style={{ transitionDelay: `${i * 120}ms`, animation: pathDrawn ? `nodePop 540ms cubic-bezier(.2,.9,.2,1) ${i * 120}ms both` : 'none' }}
-                    >
-                      {levels[i]?.id}
-                    </button>
+              {/* render nodes visually on top of path (exclude level id 0) */}
+              {nodePositions.map((pos, i) => {
+                const activeLevels = levels.filter(l => l.id !== 0)
+                const lvl = activeLevels[i]
+                return (
+                  <div
+                    key={i}
+                    className="group"
+                    style={{ position: 'absolute', left: pos.x, top: pos.y, transform: 'translate(-50%, -50%)', pointerEvents: 'auto' }}
+                  >
+                    <div className="relative flex items-center justify-center">
+                      <button
+                        onClick={() => {
+                          if (!lvl?.unlocked) return
+                          const num = Number(lvl.level_number ?? lvl.id)
+                          // navigate to level by level_number (routes use level-number not DB id)
+                          navigate(`/bat-trang/level-${num}`)
+                        }}
+                        className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg text-white text-base font-bold transform transition-all duration-300 ${lvl?.unlocked ? 'bg-gradient-to-br from-emerald-500 to-emerald-700 ring-4 ring-emerald-100/50' : 'bg-gray-300'}`}
+                        aria-label={`Cấp ${lvl?.level_number ?? lvl?.id}`}
+                        style={{ transitionDelay: `${i * 120}ms`, animation: pathDrawn ? `nodePop 540ms cubic-bezier(.2,.9,.2,1) ${i * 120}ms both` : 'none' }}
+                      >
+                        {lvl?.level_number ?? lvl?.id}
+                      </button>
 
-                    <div className="absolute left-1/2 -translate-x-1/2 -bottom-2 mb-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 transform-gpu group-hover:translate-y-0 -translate-y-2">
-                      <div className="bg-white rounded-xl px-4 py-3 shadow-2xl border border-gray-100 text-sm text-gray-800 whitespace-nowrap w-48">
-                        <div className="font-semibold">Cấp {levels[i]?.id}</div>
-                        <div className="text-xs text-gray-500">{levels[i]?.name}</div>
-                        {levels[i]?.unlocked ? (
-                          <div className="mt-3 text-right">
-                            <button
-                              onClick={() => {
-                                // animate retract to this node, then navigate
-                                const p = pathRef.current
-                                if (!p) { navigate(`/bat-trang/level-${levels[i].id}`); return }
-                                const total = p.getTotalLength()
-                                const nodeLen = nodeLengths[i] ?? ((i + 1) / (levels.length + 1)) * total
-                                const targetOffset = Math.max(0, total - nodeLen)
-                                pendingNavigationRef.current = `/bat-trang/level-${levels[i].id}`
-                                p.style.transition = 'stroke-dashoffset 700ms cubic-bezier(.2,.9,.2,1)'
-                                p.style.strokeDashoffset = String(targetOffset)
-                              }}
-                              className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded-full text-xs font-semibold transition-colors"
-                            >Chơi</button>
-                          </div>
-                        ) : (
-                          <div className="mt-2 text-xs text-gray-500">Khoá</div>
-                        )}
+                      <div className="absolute left-1/2 -translate-x-1/2 -bottom-2 mb-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 transform-gpu group-hover:translate-y-0 -translate-y-2">
+                        <div className="bg-white rounded-xl px-4 py-3 shadow-2xl border border-gray-100 text-sm text-gray-800 whitespace-nowrap w-48">
+                          <div className="font-semibold">Cấp {lvl?.level_number ?? lvl?.id}</div>
+                            <div className="text-xs text-gray-500">{lvl?.difficulty ?? lvl?.name}</div>
+                          {lvl?.unlocked ? (
+                            <div className="mt-3 text-right">
+                              <button
+                                onClick={() => {
+                                  // animate retract to this node, then navigate
+                                  const p = pathRef.current
+                                  const targetPath = `/bat-trang/level-${Number(lvl.level_number ?? lvl.id)}`
+                                  if (!p) { navigate(targetPath); return }
+                                  const total = p.getTotalLength()
+                                  const nodeLen = nodeLengths[i] ?? ((i + 1) / (levels.filter(l => l.id !== 0).length + 1)) * total
+                                  const targetOffset = Math.max(0, total - nodeLen)
+                                  pendingNavigationRef.current = targetPath
+                                  p.style.transition = 'stroke-dashoffset 700ms cubic-bezier(.2,.9,.2,1)'
+                                  p.style.strokeDashoffset = String(targetOffset)
+                                }}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded-full text-xs font-semibold transition-colors"
+                              >Chơi</button>
+                            </div>
+                          ) : (
+                            <div className="mt-2 text-xs text-gray-500">Khoá</div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
 
               {/* inline styles for animations */}
               <style>{`
@@ -280,18 +339,18 @@ export default function BatTrangModal({ open = true, onClose }: { open?: boolean
 
           {/* fallback list for accessibility and small screens */}
           <div className="space-y-4 mt-6 lg:hidden">
-            {levels.map((level) => (
+            {levels.filter(l => l.id !== 0).map((level) => (
               <div key={level.id} className={`flex items-center gap-4 p-4 rounded-xl border ${level.unlocked ? 'bg-gradient-to-r from-yellow-50 to-white border-amber-200' : 'bg-gray-50 border-gray-200 opacity-80'}`}>
                 <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-md ${level.unlocked ? 'bg-emerald-600 text-white' : 'bg-gray-300 text-white'}`}>
-                  {level.unlocked ? <span className="text-lg font-bold">{level.id}</span> : <Lock className="w-5 h-5" />}
+                  {level.unlocked ? <span className="text-lg font-bold">{level.level_number ?? level.id}</span> : <Lock className="w-5 h-5" />}
                 </div>
                 <div className="flex-1">
-                  <div className={`text-lg font-semibold ${level.unlocked ? 'text-gray-800' : 'text-gray-500'}`}>Cấp {level.id}</div>
-                  <div className={`text-sm ${level.unlocked ? 'text-gray-600' : 'text-gray-400'}`}>{level.name}</div>
+                  <div className={`text-lg font-semibold ${level.unlocked ? 'text-gray-800' : 'text-gray-500'}`}>Cấp {level.level_number ?? level.id}</div>
+                  <div className={`text-sm ${level.unlocked ? 'text-gray-600' : 'text-gray-400'}`}>{level.difficulty ?? level.name}</div>
                 </div>
                 <div>
                   {level.unlocked ? (
-                    <Link to={`/bat-trang/level-${level.id}`}>
+                    <Link to={`/bat-trang/level-${Number(level.level_number ?? level.id)}`}>
                       <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-full text-sm font-semibold transition-colors">Chơi ngay</button>
                     </Link>
                   ) : (
