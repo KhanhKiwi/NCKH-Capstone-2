@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { Star, Trophy, Repeat } from "lucide-react";
+import { Star, Trophy, Repeat, Home, CheckCircle } from "lucide-react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import confetti from "canvas-confetti";
@@ -47,7 +47,7 @@ export function SuccessScreen({ score = 0, onRestart }: SuccessScreenProps) {
     if (onRestart) {
       onRestart();
     } else {
-      navigate("/level6");
+      navigate(`/craft-selection?openName=${encodeURIComponent('Đinh Yên')}`);
     }
   };
 
@@ -97,6 +97,21 @@ export function SuccessScreen({ score = 0, onRestart }: SuccessScreenProps) {
           </div>
         </motion.div>
 
+        {/* Game Completed Badge */}
+        <motion.div
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: "spring", stiffness: 200, delay: 0.3 }}
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-full mb-6"
+          style={{
+            background: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
+            boxShadow: "0 4px 12px rgba(16, 185, 129, 0.4)",
+          }}
+        >
+          <CheckCircle className="w-6 h-6 text-white" />
+          <span className="text-white font-bold text-lg">TRÒ CHƠI HOÀN THÀNH!</span>
+        </motion.div>
+
         {/* Title */}
         <motion.h1
           initial={{ y: 30, opacity: 0 }}
@@ -119,7 +134,7 @@ export function SuccessScreen({ score = 0, onRestart }: SuccessScreenProps) {
           className="text-xl mb-8"
           style={{ color: "#8B4513" }}
         >
-          Nghề thủ công Việt Nam tự hào!
+          Bạn đã hoàn thành tất cả 6 cấp độ!<br/>Nghề thủ công Việt Nam tự hào!
         </motion.p>
 
         {/* Score */}
@@ -161,24 +176,47 @@ export function SuccessScreen({ score = 0, onRestart }: SuccessScreenProps) {
           }}
         />
 
-        {/* Restart button */}
-        <motion.button
+        {/* Buttons Container */}
+        <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 1.2 }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleRestart}
-          className="px-8 py-4 rounded-full flex items-center gap-3 mx-auto"
-          style={{
-            background: "linear-gradient(135deg, #E8A520 0%, #FFD700 100%)",
-            color: "#FFFFFF",
-            boxShadow: "0 4px 16px #E8A52060",
-          }}
+          className="flex flex-col sm:flex-row gap-4 justify-center items-center"
         >
-          <Repeat className="w-6 h-6" />
-          <span className="text-lg">Chơi lại</span>
-        </motion.button>
+          {/* Replay button */}
+          <motion.button
+            whileHover={{ scale: 1.08, y: -2 }}
+            whileTap={{ scale: 0.92 }}
+            onClick={handleRestart}
+            className="px-8 py-4 rounded-full flex items-center gap-3 font-bold text-lg"
+            style={{
+              background: "linear-gradient(135deg, #E8A520 0%, #FFD700 100%)",
+              color: "#FFFFFF",
+              boxShadow: "0 6px 20px #E8A52080",
+              border: "3px solid #FFD700",
+            }}
+          >
+            <Repeat className="w-6 h-6" />
+            <span>Chơi lại</span>
+          </motion.button>
+
+          {/* Home button */}
+          <motion.button
+            whileHover={{ scale: 1.08, y: -2 }}
+            whileTap={{ scale: 0.92 }}
+            onClick={() => navigate(`/craft-selection?openName=${encodeURIComponent('Đinh Yên')}`)}
+            className="px-8 py-4 rounded-full flex items-center gap-3 font-bold text-lg"
+            style={{
+              background: "linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)",
+              color: "#FFFFFF",
+              boxShadow: "0 6px 20px #6366F180",
+              border: "3px solid #4F46E5",
+            }}
+          >
+            <Home className="w-6 h-6" />
+            <span>Về làng nghề</span>
+          </motion.button>
+        </motion.div>
       </div>
     </motion.div>
   );

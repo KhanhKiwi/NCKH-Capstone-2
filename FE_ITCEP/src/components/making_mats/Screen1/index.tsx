@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useNavigate } from 'react-router'
 import styles from "./Screen1.module.css";
 import { useGameState } from "./useGameState";
 import FarmerNPC from "./FarmerNPC";
@@ -40,6 +41,8 @@ export default function Screen1() {
     toggleHint,
     resetGame,
   } = useGameState();
+
+  const navigate = useNavigate()
 
   // Sickle position tracking with useRef (not state)
   const sicklePosRef = useRef({ x: 0, y: 0 });
@@ -261,12 +264,12 @@ export default function Screen1() {
       {phase === 0 && (
         <div className={styles.scene}>
           <div className={styles.introBadge}>
-            🏮 Traditional Mat Weaving — Level 1
+            🏮 Nghề dệt chiếu truyền thống — Màn 1
           </div>
           <FarmerNPC mood={farmerMood} />
           <SpeechBubble text={bubbleText} visible />
           <button className={styles.startBtn} onClick={startGame}>
-            Let's Start! →
+            Bắt đầu! →
           </button>
         </div>
       )}
@@ -287,8 +290,8 @@ export default function Screen1() {
             ) : null,
           )}
           <div className={styles.progressWrap}>
-            <div className={styles.progressLabel}>
-              Selected: {selectedIds.length}/5 🌿
+              <div className={styles.progressLabel}>
+              Đã chọn: {selectedIds.length}/5 🌿
             </div>
             <div className={styles.progressTrack}>
               <div
@@ -305,7 +308,7 @@ export default function Screen1() {
         <div className={styles.scene}>
           <FarmerNPC mood={farmerMood} />
           <SpeechBubble
-            text="Hold my sickle and drag to the glowing plants! 🌾 Cut the marked ones!"
+            text="Giữ liềm và kéo tới các cây phát sáng! 🌾 Cắt những cây được đánh dấu!"
             visible
           />
 
@@ -349,7 +352,7 @@ export default function Screen1() {
                   opacity="0.6"
                 />
               </svg>
-              <div className={styles.sickleLabel}>Hold & drag to cut!</div>
+              <div className={styles.sickleLabel}>Giữ & kéo để cắt!</div>
             </div>
           )}
 
@@ -409,7 +412,7 @@ export default function Screen1() {
           )}
           <div className={styles.progressWrap}>
             <div className={styles.progressLabel}>
-              Cut: {cutIds.length}/5 ✂️
+              Đã cắt: {cutIds.length}/5 ✂️
             </div>
             <div className={styles.progressTrack}>
               <div
@@ -454,7 +457,7 @@ export default function Screen1() {
           {/* Progress */}
           <div className={styles.progressWrap}>
             <div className={styles.progressLabel}>
-              Bundle: {state.collectedCount}/5 🌾
+              Bó: {state.collectedCount}/5 🌾
             </div>
             <div className={styles.progressTrack}>
               <div
@@ -472,9 +475,9 @@ export default function Screen1() {
           <FarmerNPC mood="excited" />
           <SpeechBubble text={bubbleText} visible />
           <div className={styles.resultCard}>
-            <div className={styles.resultTitle}>🌾 Level Complete!</div>
+            <div className={styles.resultTitle}>🌾 Hoàn thành Màn!</div>
             <div className={styles.resultScore}>{score}</div>
-            <div className={styles.resultScoreSub}>points</div>
+            <div className={styles.resultScoreSub}>điểm</div>
             <div className={styles.resultStars}>
               {[1, 2, 3].map((i) => (
                 <span
@@ -495,28 +498,28 @@ export default function Screen1() {
               ))}
             </div>
             <div className={styles.resultStats}>
-              Mistakes: {state.penalties} &nbsp;|&nbsp; Score: {score} pts
+              Lỗi: {state.penalties} &nbsp;|&nbsp; Điểm: {score} điểm
             </div>
             <div className={styles.knowledgeTitle}>
-              📚 What you learned today:
+              📚 Những điều bạn học hôm nay:
             </div>
             <div className={styles.cards}>
               {[
-                {
-                  icon: "🌊",
-                  front: "Sedge & wetlands",
-                  back: "Sedge grass grows in coastal wetland areas",
-                },
-                {
-                  icon: "📏",
-                  front: "When to harvest",
-                  back: "Harvest when tall with thick dark green leaves",
-                },
-                {
-                  icon: "🌱",
-                  front: "Young plants",
-                  back: "Young plants need 3–4 more months to grow",
-                },
+                  {
+                    icon: "🌊",
+                    front: "Cỏ đót & vùng ngập mặn",
+                    back: "Cỏ đót mọc ở các vùng đầm lầy ven biển",
+                  },
+                  {
+                    icon: "📏",
+                    front: "Thời điểm thu hoạch",
+                    back: "Thu hoạch khi cây cao, có lá dày và xanh đậm",
+                  },
+                  {
+                    icon: "🌱",
+                    front: "Cây non",
+                    back: "Cây non cần thêm 3–4 tháng để trưởng thành",
+                  },
               ].map((c, i) => (
                 <div key={i} className={styles.flipCard}>
                   <div className={styles.flipInner}>
@@ -543,9 +546,17 @@ export default function Screen1() {
             </div>
             <div className={styles.resultBtns}>
               <button className={styles.btnRetry} onClick={resetGame}>
-                Play Again 🔄
+                Chơi lại 🔄
               </button>
-              <button className={styles.btnNext}>Level 2 →</button>
+              <button
+                className={styles.btnNext}
+                onClick={() => {
+                  try { resetGame() } catch (e) {}
+                  // open craft selection and auto-open the village modal for Đinh Yên
+                  const q = encodeURIComponent('Đinh Yên')
+                  navigate(`/craft-selection?openName=${q}`)
+                }}
+              >Hoàn thành</button>
             </div>
           </div>
         </div>

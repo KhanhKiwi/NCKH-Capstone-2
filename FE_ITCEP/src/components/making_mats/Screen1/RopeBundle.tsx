@@ -330,9 +330,9 @@ export default function RopeBundle({
           textShadow: "0 1px 5px rgba(0,0,0,0.85)",
         }}
       >
-        {count === 0 && "🌾 Drag sedge onto the rope!"}
-        {count >= 1 && count < 5 && `🌾 Bundle: ${count}/5`}
-        {count === 5 && "✅ Bundle complete! 🎉"}
+        {count === 0 && "🌾 Kéo cây đót vào dây thừng!"}
+        {count >= 1 && count < 5 && `🌾 Bó: ${count}/5`}
+        {count === 5 && "✅ Hoàn thành bó! 🎉"}
       </div>
     </div>
   );

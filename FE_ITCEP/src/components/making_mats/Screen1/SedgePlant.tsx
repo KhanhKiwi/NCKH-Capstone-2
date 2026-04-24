@@ -686,7 +686,7 @@ export default function SedgePlant({
                 : "#5D4037",
         }}
       >
-        {type === "mature" ? "Mature" : type === "young" ? "Young" : "Wilted"}
+        {type === "mature" ? "Trưởng thành" : type === "young" ? "Cây non" : "Héo"}
       </span>
     </div>
   );

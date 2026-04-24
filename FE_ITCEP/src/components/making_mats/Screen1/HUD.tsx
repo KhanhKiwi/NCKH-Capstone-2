@@ -34,8 +34,8 @@ export default function HUD({
         <button className={styles.backBtn} onClick={onBack}>
           ← Trở về
         </button>
-        <span className={styles.badgeGold}>Level 1</span>
-        <span className={styles.badgeOutline}>Thu Hoạch Cói</span>
+        <span className={styles.badgeGold}>Màn 1</span>
+        <span className={styles.badgeOutline}>Thu hoạch cỏ đót</span>
       </div>
       <div className={styles.hudCenter}>
         <span className={styles.phaseLabel}>

@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Param, Patch, Delete, ParseIntPipe } from '@nestjs/common';
 import { CraftsService } from './crafts.service';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
 
 @ApiTags('crafts')
 @Controller('crafts')
@@ -9,6 +9,15 @@ export class CraftsController {
 
 	@Post()
 	@ApiOperation({ summary: 'Create craft' })
+	@ApiBody({
+		schema: {
+			example: {
+				name: 'Nặn gốm',
+				description: 'Craft truyền thống của làng gốm',
+				village_id: 1,
+			},
+		},
+	})
 	create(@Body() dto: any) {
 		return this.craftsService.create(dto);
 	}
@@ -24,6 +33,15 @@ export class CraftsController {
 	}
 
 	@Patch(':id')
+	@ApiBody({
+		schema: {
+			example: {
+				name: 'Nặn gốm',
+				description: 'Cập nhật tên và mô tả craft',
+				village_id: 1,
+			},
+		},
+	})
 	update(@Param('id', ParseIntPipe) id: number, @Body() dto: any) {
 		return this.craftsService.update(id, dto);
 	}

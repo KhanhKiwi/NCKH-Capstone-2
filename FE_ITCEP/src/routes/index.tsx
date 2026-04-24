@@ -1,0 +1,69 @@
+import { createBrowserRouter } from 'react-router'
+import { Navigate } from 'react-router-dom'
+import CraftSelectionPage from '../pages/CraftSelectionPage'
+import GamePage from '../pages/GamePage'
+import Screen4 from '../pages/making mats/Screen4/Screen4'
+import Screen2 from '../components/making_mats/Screen2'
+import Screen3 from '../pages/making mats/Screen3'
+import Screen5 from '../pages/making mats/Screen5'
+import Screen6 from '../pages/making mats/Screen6'
+import HomePage from '../pages/web-home/HomePage'
+import BatTrangLevel0 from '../pages/making_ceramics/Screen0/screen0'
+import BatTrangLevel1Phase0 from '../pages/making_ceramics/Screen1/Phase0'
+import BatTrangLevel1Screen1 from '../pages/making_ceramics/Screen1/Phase1'
+import BatTrangLevel1Phase2 from '../pages/making_ceramics/Screen1/Phase2'
+import BatTrangLevel2Phase0 from '../pages/making_ceramics/Screen2/Phase0'
+import BatTrangLevel2 from '../pages/making_ceramics/Screen2/Phase1'
+import VillageDetailPage from '../pages/VillageDetailPage'
+import AdminPage from '../pages/admin/AdminPage'
+import Screen1 from '../components/making_mats/Screen1'
+import RootLayout from './RootLayout'
+import { LoginPage } from '../components/log'
+import ResetPasswordPage from '../pages/ResetPasswordPage'
+import ProfilePage from '../pages/profile/ProfilePage'
+import CatchFishGamePage from '../components/Making_Fish_Sauce/Screen1/CatchFishGamePage'
+
+export const router = createBrowserRouter([
+  {
+    path: '/login',
+    Component: LoginPage,
+  },
+  {
+    path: '/reset-password',
+    Component: ResetPasswordPage,
+  },
+  {
+    path: '/',
+    element: <RootLayout />,
+    children: [
+      // legacy/absolute phase paths redirect to their level-prefixed routes
+      { path: 'phase2', element: <Navigate to="/level-3/phase2" replace /> },
+      { path: 'phase3', element: <Navigate to="/level-3/phase3" replace /> },
+      { path: 'phase4', element: <Navigate to="/level-3/phase4" replace /> },
+
+      { index: true, Component: HomePage },
+      { path: 'game', Component: GamePage },
+      { path: 'game/catch-fish', Component: CatchFishGamePage },
+      { path: 'craft-selection', Component: CraftSelectionPage },
+      { path: 'level-1', Component: Screen1 },
+      { path: 'level-2', Component: Screen2 },
+      { path: 'level-3/*', Component: Screen3 },
+      { path: 'level-4', Component: Screen4 },
+      { path: 'level-5/*', Component: Screen5 },
+      { path: 'level-6/*', Component: Screen6 },
+      { path: 'village/:id', Component: VillageDetailPage },
+      // Make Phase0 the default view for /bat-trang/level-1
+      { path: 'bat-trang/level-1', Component: BatTrangLevel1Phase0 },
+      { path: 'bat-trang/level-1/phase1', Component: BatTrangLevel1Screen1 },
+      { path: 'bat-trang/level-1/phase2', Component: BatTrangLevel1Phase2 },
+      { path: 'bat-trang/level-2', Component: BatTrangLevel2Phase0 },
+      { path: 'bat-trang/level-2/phase0', Component: BatTrangLevel2Phase0 },
+      { path: 'bat-trang/level-2/phase1', Component: BatTrangLevel2 },
+      { path: 'bat-trang/level-0', Component: BatTrangLevel0 },
+      { path: 'admin', Component: AdminPage },
+      { path: 'profile', Component: ProfilePage },
+    ],
+  },
+])
+
+export default router

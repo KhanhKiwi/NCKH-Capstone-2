@@ -7,6 +7,7 @@ export interface Village {
   history: string;
   videoUrl: string; // YouTube embed URL
   galleryImages: string[];
+  hasGame?: boolean; // Whether this village has an interactive game
 }
 
 export const villagesData: Village[] = [
@@ -17,7 +18,7 @@ export const villagesData: Village[] = [
     thumbnail: 'https://images.unsplash.com/photo-1734600891288-e762b5128851?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aWV0bmFtZXNlJTIwYmF0JTIwdHJhbmclMjBwb3R0ZXJ5JTIwY2VyYW1pY3N8ZW58MXx8fHwxNzczMzA4ODc0fDA&ixlib=rb-4.1.0&q=80&w=1080',
     description: 'Bát Tràng là làng nghề sản xuất gốm sứ truyền thống nổi tiếng nhất Việt Nam. Những sản phẩm gốm Bát Tràng được làm hoàn toàn thủ công với kỹ thuật chuốt tay, đắp nổi và vẽ hoa văn tinh tế, đậm đà bản sắc văn hóa dân tộc.',
     history: 'Làng gốm Bát Tràng hình thành từ thế kỷ XIV-XV thời nhà Lý, khi thủ đô dời về Thăng Long. Trải qua hơn 500 năm thăng trầm, làng nghề vẫn giữ được ngọn lửa cháy rực rỡ và những bí quyết gia truyền từ đôi bàn tay tài hoa của các nghệ nhân.',
-    videoUrl: 'https://www.youtube.com/embed/5kQWvM1jBv4', // Placeholder youtube embed
+    videoUrl: 'https://www.youtube.com/embed/Z5VHUW5oUe4',
     galleryImages: [
       'https://images.unsplash.com/photo-1578509376106-96b6c86ded1b?auto=format&fit=crop&q=80&w=1080',
       'https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&q=80&w=1080',
@@ -54,12 +55,12 @@ export const villagesData: Village[] = [
   },
   {
     id: 'dinh-yen',
-    name: 'Làng dệt chiếu Đinh Yên',
+    name: 'Làng Dệt Đinh Yên',
     location: 'Lấp Vò, Đồng Tháp',
     thumbnail: 'https://images.unsplash.com/photo-1710559055621-451811ff73ad?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0cmFkaXRpb25hbCUyMG1hdCUyMHdlYXZpbmclMjBzZWRnZXxlbnwxfHx8fDE3NzMzMDg4NzV8MA&ixlib=rb-4.1.0&q=80&w=1080',
     description: 'Sản phẩm chiếu Đinh Yên rực rỡ sắc màu với những họa tiết sinh động. Quãng đường từ thu hoạch cói, phơi, chẻ, nhuộm, đến dệt đòi hỏi sự tỉ mẩn, phối hợp nhịp nhàng giữa người thợ chính và thợ phụ chà lát.',
     history: 'Tồn tại hơn trăm năm qua, làng chiếu Đinh Yên không chỉ là nơi lưu giữ nét đẹp văn hóa độc đáo mà còn được biết đến với "Chợ ma", nơi giao thương chiếu diễn ra vào lúc chạng vạng hay nửa đêm tĩnh lặng.',
-    videoUrl: 'https://www.youtube.com/embed/tS1G6y6_1Ww',
+    videoUrl: 'https://www.youtube.com/embed/6jP_BpiXvn8',
     galleryImages: [
       'https://images.unsplash.com/photo-1528698827591-e19ccd7bc23d?auto=format&fit=crop&q=80&w=1080',
       'https://images.unsplash.com/photo-1579781404111-9a41db3866b1?auto=format&fit=crop&q=80&w=1080',
@@ -93,5 +94,20 @@ export const villagesData: Village[] = [
       'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80&w=1080',
       'https://images.unsplash.com/photo-1615529182904-14819c35db37?auto=format&fit=crop&q=80&w=1080'
     ]
+  },
+  {
+    id: 'mam-nam-o',
+    name: 'Làng Mắm Nam Ô',
+    location: 'Sơ Hàng, Đà Nẵng',
+    thumbnail: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&q=80&w=1080',
+    description: 'Nam Ô là một trong những làng mắm nổi tiếng nhất của Việt Nam. Mắm Nam Ô được chế biến từ cá cơm tươi theo công thức truyền thống qua nhiều tháng lên men, tạo ra hương vị đặc trưng, mằn mặn và thơm ngon.',
+    history: 'Làng mắm Nam Ô hình thành từ thế kỷ XIX khi ngư dân địa phương phát hiện ra cách chế biến mắm từ cá cơm. Qua hơn 100 năm, làng đã giữ được bí quyết gia truyền và trở thành điểm đến du lịch nổi tiếng, nơi du khách có thể trải nghiệm quy trình làm mắm truyền thống.',
+    videoUrl: 'https://www.youtube.com/embed/posLHl4r8xg',
+    galleryImages: [
+      'https://images.unsplash.com/photo-1596855407944-bf87f6fdd49e?auto=format&fit=crop&q=80&w=1080',
+      'https://images.unsplash.com/photo-1535521066927-ab7cc9b129d7?auto=format&fit=crop&q=80&w=1080',
+      'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=1080'
+    ],
+    hasGame: true
   }
 ];

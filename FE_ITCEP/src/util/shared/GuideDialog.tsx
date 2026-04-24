@@ -1,5 +1,7 @@
 import React from 'react'
 import GuidePerson from './GuidePerson'
+import Phase2Dialogues from '../shared_ceramics/phase2Dialogues'
+import { useEffect, useState } from 'react'
 
 export default function GuideDialog({
   started,
@@ -51,49 +53,82 @@ export default function GuideDialog({
   const phaseKey = phase || 'phase1'
   let message = messageProp ?? ''
   if (!messageProp) {
-    if (showRequireStart && !started) {
-      message = "Hãy bấm 'Bắt đầu' để bắt đầu trò chơi, sau đó nhấn vào dao để chẻ sợi"
-    } else if (!started) {
-      message = "Nhấn 'Bắt đầu' để chơi trò chơi"
-    } else if (win) {
-      const finalHints = hintsByPhase[phaseKey] || hintsByPhase.phase1
-      message = finalHints[finalHints.length - 1]
-    } else {
-      const hints = hintsByPhase[phaseKey] || hintsByPhase.phase1
-      if (phaseKey === 'phase3' && typeof event === 'string') {
-        if (event === 'started') {
-          message = 'Bắt đầu phơi — hãy đưa cói ra khi trời nắng để tăng tiến độ.'
-        } else if (event === 'soon_rain') {
-          message = 'Trời sắp nắng — hãy chuẩn bị cói ra phơi.'
-        } else if (event === 'raining') {
-          message = 'Đang mưa — tạm dừng phơi và thu cói vào nơi an toàn.'
-        } else if (event === 'soon_clear' || event === 'sun_coming' || event === 'soon_sunny') {
-          message = 'Sắp hết mưa — có thể chuẩn bị phơi trở lại để tận dụng thời tiết.'
-        }
+    if (phaseKey === 'phase2') {
+      // Use Phase2Dialogues data for ceramics Phase 2
+      if (!started) {
+        message = showRequireStart ? "Nhấn 'Bắt đầu' để bắt đầu luyện nhão và làm mịn" : "Nhấn 'Bắt đầu' để chơi trò chơi"
+      } else if (win) {
+        message = Phase2Dialogues.end?.win || "Hoàn thành!"
+      } else {
+        // choose progress hint
+        const p = Math.max(0, Math.min(100, Math.round(progress)))
+        if (p < 25) message = Phase2Dialogues.progressHints?.low || ''
+        else if (p < 60) message = Phase2Dialogues.progressHints?.mid || ''
+        else if (p < 95) message = Phase2Dialogues.progressHints?.high || ''
+        else message = Phase2Dialogues.progressHints?.complete || ''
+        // fallback to first step if empty
+        if (!message) message = (Phase2Dialogues.steps && Phase2Dialogues.steps[0]) || ''
       }
-
-      if (!message) {
-        if (phaseKey === 'phase3' && typeof weather === 'string') {
-          if (weather === 'soon_rain' || weather === 'cloudy_soon') {
-            message = 'Thời tiết có vẻ sắp nắng - hãy chuẩn bị cói để phơi.'
-          } else if (weather === 'raining' || weather === 'rain') {
+    } else {
+      if (showRequireStart && !started) {
+        message = "Hãy bấm 'Bắt đầu' để bắt đầu trò chơi, sau đó nhấn vào dao để chẻ sợi"
+      } else if (!started) {
+        message = "Nhấn 'Bắt đầu' để chơi trò chơi"
+      } else if (win) {
+        const finalHints = hintsByPhase[phaseKey] || hintsByPhase.phase1
+        message = finalHints[finalHints.length - 1]
+      } else {
+        const hints = hintsByPhase[phaseKey] || hintsByPhase.phase1
+        if (phaseKey === 'phase3' && typeof event === 'string') {
+          if (event === 'started') {
+            message = 'Bắt đầu phơi — hãy đưa cói ra khi trời nắng để tăng tiến độ.'
+          } else if (event === 'soon_rain') {
+            message = 'Trời sắp nắng — hãy chuẩn bị cói ra phơi.'
+          } else if (event === 'raining') {
             message = 'Đang mưa — tạm dừng phơi và thu cói vào nơi an toàn.'
-          } else if (weather === 'stopped' || weather === 'clear') {
-            message = 'Hết mưa rồi — có thể phơi tiếp để tăng tiến độ.'
-          } else if (weather === 'sunny') {
-            message = 'Điều kiện tốt để phơi, hãy đưa cói ra.'
+          } else if (event === 'soon_clear' || event === 'sun_coming' || event === 'soon_sunny') {
+            message = 'Sắp hết mưa — có thể chuẩn bị phơi trở lại để tận dụng thời tiết.'
           }
         }
-      }
 
-      if (!message) {
-        const hintCount = Math.max(1, hints.length - 1)
-        const idx = Math.min(hintCount - 1, Math.floor((progress / 100) * hintCount))
-        message = hints[idx]
+        if (!message) {
+          if (phaseKey === 'phase3' && typeof weather === 'string') {
+            if (weather === 'soon_rain' || weather === 'cloudy_soon') {
+              message = 'Thời tiết có vẻ sắp nắng - hãy chuẩn bị cói để phơi.'
+            } else if (weather === 'raining' || weather === 'rain') {
+              message = 'Đang mưa — tạm dừng phơi và thu cói vào nơi an toàn.'
+            } else if (weather === 'stopped' || weather === 'clear') {
+              message = 'Hết mưa rồi — có thể phơi tiếp để tăng tiến độ.'
+            } else if (weather === 'sunny') {
+              message = 'Điều kiện tốt để phơi, hãy đưa cói ra.'
+            }
+          }
+        }
+
+        if (!message) {
+          const hintCount = Math.max(1, hints.length - 1)
+          const idx = Math.min(hintCount - 1, Math.floor((progress / 100) * hintCount))
+          message = hints[idx]
+        }
       }
     }
   }
 
+  const [displayText, setDisplayText] = useState(message)
+  const [visible, setVisible] = useState(true)
+
+  // animate text change: fade out -> swap -> fade in
+  useEffect(() => {
+    if (message === displayText) return
+    setVisible(false)
+    const t1 = setTimeout(() => {
+      setDisplayText(message)
+      setVisible(true)
+    }, 220)
+    return () => clearTimeout(t1)
+  }, [message, displayText])
+
+  // styles
   const container: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
@@ -104,7 +139,7 @@ export default function GuideDialog({
     marginTop: 14,
   }
 
-  const bubble: React.CSSProperties = {
+  const bubbleBase: React.CSSProperties = {
     maxWidth: 360,
     background: 'linear-gradient(90deg, #ffffff, #f7fff7)',
     padding: '12px 18px',
@@ -117,20 +152,43 @@ export default function GuideDialog({
     border: '1px solid rgba(6,120,60,0.04)'
   }
 
+  const bubbleAnim: React.CSSProperties = {
+    transition: 'opacity 220ms ease, transform 260ms cubic-bezier(.2,.9,.2,1)',
+    opacity: visible ? 1 : 0,
+    transform: visible ? 'translateY(0)' : 'translateY(-6px)'
+  }
+
+  const pulseWhenIdle: React.CSSProperties = !started ? { transform: 'scale(1.02)', boxShadow: '0 22px 60px rgba(6,120,60,0.08)', animation: 'pulse 1600ms ease-in-out infinite' } : {}
+
   const avatarWrap: React.CSSProperties = {
     width: 72,
     height: 72,
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    transition: 'transform 320ms ease',
+    // bob when started, gentle idle bounce when not started
+    transform: started ? 'translateY(0)' : 'translateY(-4px)'
   }
 
   void onNext
 
   return (
     <div style={container}>
-      <div style={bubble}>{message}</div>
-      <div style={avatarWrap}><GuidePerson size={64} /></div>
+      <style>{`
+        @keyframes pulse { 0% { transform: scale(1) } 50% { transform: scale(1.03) } 100% { transform: scale(1) } }
+        @keyframes bob { 0% { transform: translateY(0) } 50% { transform: translateY(-6px) } 100% { transform: translateY(0) } }
+      `}</style>
+
+      <div style={{ ...bubbleBase, ...bubbleAnim, ...(!started ? { border: '1px solid rgba(6,120,60,0.06)' } : {}), ...( !started ? pulseWhenIdle : {} ) }}>
+        {displayText}
+      </div>
+
+      <div style={{ ...avatarWrap }}>
+        <div style={{ borderRadius: '50%', padding: 6, background: 'white', boxShadow: '0 8px 22px rgba(0,0,0,0.06)', animation: started ? 'bob 1400ms ease-in-out infinite' : 'bob 2400ms ease-in-out infinite' }}>
+          <GuidePerson size={64} />
+        </div>
+      </div>
     </div>
   )
 }

@@ -7,11 +7,29 @@ export class User {
   @PrimaryGeneratedColumn()
   user_id: number;
 
-  @Column({ length: 100, nullable: true })
-  email: string;
+  @Column({ type: 'varchar', length: 100, nullable: true, unique: true })
+  email: string | null;
 
-  @Column({ length: 255, nullable: true })
-  password: string;
+  @Column({ type: 'varchar', length: 100, nullable: true, unique: true })
+  username: string | null;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  password: string | null;
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  name: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  avatar: string | null;
+
+  @Column({ name: 'google_id', type: 'varchar', length: 100, nullable: true, unique: true })
+  googleId: string | null;
+
+  @Column({ name: 'reset_password_token', type: 'varchar', length: 255, nullable: true })
+  resetPasswordToken: string | null;
+
+  @Column({ name: 'reset_password_expires', type: 'datetime', nullable: true })
+  resetPasswordExpires: Date | null;
 
   @OneToMany(() => UserProgress, (progress) => progress.user)
   progress: UserProgress[];
