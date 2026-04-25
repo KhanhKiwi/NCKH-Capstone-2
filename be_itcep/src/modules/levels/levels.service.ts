@@ -58,8 +58,8 @@ export class LevelsService {
 				user,
 				level,
 				status: 'unlocked',
-				score: 0,
-			});
+				star: 0,
+			} as import('typeorm').DeepPartial<UserProgress>);
 		} else {
 			// If already completed, keep completed status
 			if (userProgress.status === 'completed') {

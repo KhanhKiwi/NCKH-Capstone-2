@@ -29,7 +29,7 @@ let ProgressService = class ProgressService {
         this.userRepo = userRepo;
     }
     async saveProgress(dto) {
-        const { user_id, level_id, status, score } = dto;
+        const { user_id, level_id, status, star } = dto;
         const user = await this.userRepo.findOne({ where: { user_id } });
         if (!user)
             throw new common_1.NotFoundException('User not found');
@@ -46,15 +46,15 @@ let ProgressService = class ProgressService {
                 user,
                 level,
                 status: status ?? 'in_progress',
-                score: score ?? null,
+                star: star ?? null,
                 completed_at: status === 'completed' ? now : null,
             });
         }
         else {
             if (status)
                 progress.status = status;
-            if (typeof score !== 'undefined')
-                progress.score = score;
+            if (typeof star !== 'undefined')
+                progress.star = star;
             if (status === 'completed')
                 progress.completed_at = now;
         }

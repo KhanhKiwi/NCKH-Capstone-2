@@ -16,7 +16,7 @@ class CreateProgressDto {
     user_id;
     level_id;
     status;
-    score;
+    star;
 }
 exports.CreateProgressDto = CreateProgressDto;
 __decorate([
@@ -36,9 +36,9 @@ __decorate([
     __metadata("design:type", String)
 ], CreateProgressDto.prototype, "status", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ example: 100 }),
+    (0, swagger_1.ApiPropertyOptional)({ example: 3 }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
-], CreateProgressDto.prototype, "score", void 0);
+], CreateProgressDto.prototype, "star", void 0);
 //# sourceMappingURL=create-progress.dto.js.map

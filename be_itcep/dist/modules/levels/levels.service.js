@@ -62,7 +62,7 @@ let LevelsService = class LevelsService {
                 user,
                 level,
                 status: 'unlocked',
-                score: 0,
+                star: 0,
             });
         }
         else {

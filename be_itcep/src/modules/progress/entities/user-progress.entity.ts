@@ -19,7 +19,7 @@ export class UserProgress {
   status: string;
 
   @Column({ nullable: true })
-  score: number;
+  star: number;
 
   @Column({ nullable: true })
   completed_at: Date;

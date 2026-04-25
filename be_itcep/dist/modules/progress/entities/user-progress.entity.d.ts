@@ -5,7 +5,7 @@ export declare class UserProgress {
     user: User;
     level: Level;
     status: string;
-    score: number;
+    star: number;
     completed_at: Date;
     created_at: Date;
     updated_at: Date;
