@@ -18,6 +18,7 @@ const levels_module_1 = require("./modules/levels/levels.module");
 const auth_module_1 = require("./auth/auth.module");
 const users_module_1 = require("./modules/users/users.module");
 const database_module_1 = require("./common/database.module");
+const feedback_module_1 = require("./modules/feedback/feedback.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;

@@ -48,7 +48,7 @@ exports.DatabaseModule = DatabaseModule = __decorate([
                         player_session_entity_1.PlayerSession,
                         analytics_event_entity_1.AnalyticsEvent,
                     ],
-                    synchronize: true,
+                    synchronize: false,
                     logging: ['error', 'warn'],
                 }),
             }),
