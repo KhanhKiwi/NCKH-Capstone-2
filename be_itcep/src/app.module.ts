@@ -13,9 +13,23 @@ import { LevelsModule } from './modules/levels/levels.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { DatabaseModule } from './common/database.module';
+import { FeedbackModule } from './modules/feedback/feedback.module';
 
 @Module({
-  imports: [DatabaseModule,UsersModule, AuthModule, LevelsModule, StepsModule, CraftsModule, VillagesModule, MediaModule, ProgressModule, SessionsModule, LogsModule, AnalyticsModule],
-
+  imports: [
+    DatabaseModule,
+    UsersModule,
+    AuthModule,
+    LevelsModule,
+    StepsModule,
+    CraftsModule,
+    VillagesModule,
+    MediaModule,
+    ProgressModule,
+    SessionsModule,
+    LogsModule,
+    AnalyticsModule,
+    FeedbackModule,
+  ],
 })
 export class AppModule {}

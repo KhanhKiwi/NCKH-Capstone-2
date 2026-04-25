@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ValidationPipe } from '@nestjs/common';
 import { log } from 'console';
 import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
@@ -12,6 +13,7 @@ import { ProgressModule } from './modules/progress/progress.module';
 import { SessionsModule } from './modules/sessions/sessions.module';
 import { MediaModule } from './modules/media/media.module';
 import { LevelsModule } from './modules/levels/levels.module';
+import { FeedbackModule } from './modules/feedback/feedback.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -29,6 +31,9 @@ async function bootstrap() {
     prefix: '/uploads/',
   });
 
+  // Enable global validation for DTOs
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+
   const config = new DocumentBuilder()
     .setTitle('ITCEP API')
     .setDescription('API documentation for ITCEP backend')
@@ -36,7 +41,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config, {
-    include: [AuthModule, UsersModule, VillagesModule, CraftsModule, ProgressModule, SessionsModule, MediaModule, LevelsModule],
+    include: [AuthModule, UsersModule, VillagesModule, CraftsModule, ProgressModule, SessionsModule, MediaModule, LevelsModule, FeedbackModule],
   });
   SwaggerModule.setup('api/docs', app, document);
   await app.listen(process.env.PORT ?? 3000);
