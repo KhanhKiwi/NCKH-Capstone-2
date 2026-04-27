@@ -43,6 +43,13 @@ const gameLevels: GameLevel[] = [
     icon: '🏺',
     route: '/game/close-jar-ferment'
   },
+  {
+    id: 5,
+    name: 'Di sản Giọt Cuối',
+    description: 'Lọc thanh nước mắm qua 4 lớp vật liệu khác nhau, pha blend tinh hoa, và đánh giá chất lượng. Chiết xuất những giọt quý báu từ di sản của cha ông!',
+    icon: '✨',
+    route: '/game/final-extraction'
+  },
 ];
 
 export default function MamNamOModal({ onClose }: MamNamOModalProps) {
