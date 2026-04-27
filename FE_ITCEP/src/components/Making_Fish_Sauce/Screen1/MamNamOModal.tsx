@@ -50,6 +50,13 @@ const gameLevels: GameLevel[] = [
     icon: '✨',
     route: '/game/final-extraction'
   },
+  {
+    id: 6,
+    name: 'Vĩnh Cửu Hương',
+    description: 'Nghi thức niêm phong tinh hoa bất diệt - chọn chai quý nhất, rót mắm với lễ nghi truyền thống, và đánh giá hương vị. Hoàn thành di sản Nam Ô qua muôn đời!',
+    icon: '🏆',
+    route: '/game/eternal-fragrance'
+  },
 ];
 
 export default function MamNamOModal({ onClose }: MamNamOModalProps) {

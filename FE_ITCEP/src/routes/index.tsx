@@ -26,6 +26,7 @@ import WashFishGamePage from '../components/Making_Fish_Sauce/Screen2/WashFishGa
 import WashSaltGamePage from '../components/Making_Fish_Sauce/Screen3/WashSaltGamePage'
 import CloseJarFermentGamePage from '../components/Making_Fish_Sauce/Screen4/CloseJarFermentGamePage'
 import Screen5FinalExtraction from '../components/Making_Fish_Sauce/Screen5/Screen5'
+import Screen6EternalFragrance from '../components/Making_Fish_Sauce/Screen6/Screen6'
 
 export const router = createBrowserRouter([
   {
@@ -52,6 +53,7 @@ export const router = createBrowserRouter([
       { path: 'game/wash-salt', Component: WashSaltGamePage },
       { path: 'game/close-jar-ferment', Component: CloseJarFermentGamePage },
       { path: 'game/final-extraction', Component: Screen5FinalExtraction },
+      { path: 'game/eternal-fragrance', Component: Screen6EternalFragrance },
       { path: 'craft-selection', Component: CraftSelectionPage },
       { path: 'level-1', Component: Screen1 },
       { path: 'level-2', Component: Screen2 },
