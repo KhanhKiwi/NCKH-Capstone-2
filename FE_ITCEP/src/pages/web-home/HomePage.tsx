@@ -1,16 +1,32 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User } from 'lucide-react';
+import axios from 'axios';
+import { Bot, MessageCircle, Send, User, X } from 'lucide-react';
 import { authService } from '../../api/services/authService';
 import { villagesData } from '../../data/villagesData';
 import { villagesService } from '../../api/villages/villagesService';
 import Footer from '../../components/Footer/Footer';
 import RecentReviewList from '../../components/Reviews/RecentReviewList';
 
+type ChatRole = 'user' | 'assistant';
+
+interface ChatMessage {
+  id: number;
+  role: ChatRole;
+  content: string;
+}
+
 export default function HomePage() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [user, setUser] = useState<any | null>(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const chatBodyRef = useRef<HTMLDivElement | null>(null);
+  const hasSeededGreetingRef = useRef(false);
+  const chatApiBase = (import.meta.env.VITE_AI_URL || 'http://26.145.116.212:8000').replace(/\/+$/, '');
 
   
 
@@ -157,6 +173,71 @@ export default function HomePage() {
   // Modal state
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showGuestWarn, setShowGuestWarn] = useState(false);
+
+  useEffect(() => {
+    if (!isChatOpen || !chatBodyRef.current) return;
+    chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+  }, [chatMessages, isChatOpen, chatLoading]);
+
+  const openChat = () => {
+    if (!hasSeededGreetingRef.current && chatMessages.length === 0) {
+      hasSeededGreetingRef.current = true;
+      setChatMessages([
+        {
+          id: Date.now(),
+          role: 'assistant',
+          content: 'Xin chào! 😊 Mình sẵn sàng giúp bạn khám phá các làng nghề truyền thống Việt Nam. Bạn muốn tìm hiểu về điều gì?',
+        },
+      ]);
+    }
+    setIsChatOpen(true);
+  };
+
+  const pushChatMessage = (role: ChatRole, content: string) => {
+    setChatMessages((prev) => [...prev, { id: Date.now() + Math.random(), role, content }]);
+  };
+
+  const parseAssistantReply = (payload: any) => {
+    if (typeof payload === 'string') return payload.trim();
+    if (!payload) return '';
+    if (typeof payload.reply === 'string') return payload.reply.trim();
+    if (typeof payload.message === 'string') return payload.message.trim();
+    if (typeof payload.text === 'string') return payload.text.trim();
+    if (typeof payload.output === 'string') return payload.output.trim();
+    if (payload.output && typeof payload.output.text === 'string') return payload.output.text.trim();
+    return '';
+  };
+
+  const handleSendChat = async () => {
+    const message = chatInput.trim();
+    if (!message || chatLoading) return;
+
+    setChatInput('');
+    pushChatMessage('user', message);
+    setChatLoading(true);
+
+    try {
+      const res = await axios.post(
+        `${chatApiBase}/chat`,
+        { message },
+        { headers: { 'Content-Type': 'application/json' }, timeout: 15000 },
+      );
+      const assistantReply = parseAssistantReply(res.data) || 'Mình chưa có phản hồi rõ ràng, bạn thử hỏi lại nhé.';
+      pushChatMessage('assistant', assistantReply);
+    } catch (error) {
+      console.error('Chat API error:', error);
+      pushChatMessage('assistant', 'AI đang bận, bạn thử lại sau một chút nhé.');
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
+  const handleChatKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendChat();
+    }
+  };
 
   return (
     <>
@@ -538,6 +619,85 @@ export default function HomePage() {
       </div>
 
       <Footer />
+
+      <div className="fixed left-5 bottom-5 z-[70]">
+        {!isChatOpen ? (
+          <button
+            type="button"
+            aria-label="Mở chat AI"
+            onClick={openChat}
+            className="w-14 h-14 rounded-full bg-gradient-to-r from-[#4a7c2f] to-[#7bc043] text-white shadow-2xl flex items-center justify-center hover:scale-105 transition-transform"
+          >
+            <MessageCircle className="w-6 h-6" />
+          </button>
+        ) : (
+          <div className="w-[340px] max-w-[88vw] rounded-2xl overflow-hidden bg-white border border-[#e8dcc8] shadow-2xl">
+            <div className="px-4 py-3 bg-gradient-to-r from-[#4a7c2f] to-[#7bc043] text-white flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Bot className="w-5 h-5" />
+                <span className="font-semibold">Hỗ trợ</span>
+              </div>
+              <button
+                type="button"
+                aria-label="Đóng chat"
+                onClick={() => setIsChatOpen(false)}
+                className="w-7 h-7 rounded-full hover:bg-white/20 flex items-center justify-center"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div ref={chatBodyRef} className="h-80 overflow-y-auto px-3 py-3 bg-[#fffdf7] space-y-3">
+              {chatMessages.length === 0 ? (
+                <div className="text-sm text-[#6b5a46] text-center pt-10">
+                  Xin chào! Hãy cho tôi biết thắc mắc của bạn 
+                </div>
+              ) : (
+                chatMessages.map((msg) => (
+                  <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div
+                      className={`max-w-[82%] rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap ${
+                        msg.role === 'user' ? 'bg-[#4a7c2f] text-white' : 'bg-white border border-[#e8dcc8] text-[#4a3f2e]'
+                      }`}
+                    >
+                      <div className="flex items-center gap-1 mb-1 opacity-80">
+                        {msg.role === 'user' ? <User className="w-3.5 h-3.5" /> : <Bot className="w-3.5 h-3.5" />}
+                        <span className="text-[11px]">{msg.role === 'user' ? 'Bạn' : 'AI'}</span>
+                      </div>
+                      {msg.content}
+                    </div>
+                  </div>
+                ))
+              )}
+
+              {chatLoading && (
+                <div className="text-xs text-[#6b5a46] animate-pulse px-1">AI dang tra loi...</div>
+              )}
+            </div>
+
+            <div className="p-3 border-t border-[#efe2cc] bg-white">
+              <div className="flex items-center gap-2">
+                <input
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyDown={handleChatKeyDown}
+                  placeholder="Nhập câu hỏi..."
+                  className="flex-1 rounded-xl border border-[#d8c6a7] px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#b48a3c]/40"
+                  disabled={chatLoading}
+                />
+                <button
+                  type="button"
+                  onClick={handleSendChat}
+                  disabled={chatLoading || !chatInput.trim()}
+                  className="w-10 h-10 rounded-xl bg-[#b48a3c] text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </>
   );
 }
