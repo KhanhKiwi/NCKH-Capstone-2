@@ -2,7 +2,7 @@ import { createBrowserRouter } from 'react-router'
 import { Navigate } from 'react-router-dom'
 import CraftSelectionPage from '../pages/CraftSelectionPage'
 import GamePage from '../pages/GamePage'
-import Screen4 from '../pages/making mats/Screen4/Screen4'
+import Screen4MakingMats from '../pages/making mats/Screen4/Screen4'
 import Screen2 from '../components/making_mats/Screen2'
 import Screen3MakingMats from '../pages/making mats/Screen3'
 import Screen5 from '../pages/making mats/Screen5'
@@ -24,6 +24,7 @@ import ProfilePage from '../pages/profile/ProfilePage'
 import CatchFishGamePage from '../components/Making_Fish_Sauce/Screen1/CatchFishGamePage'
 import WashFishGamePage from '../components/Making_Fish_Sauce/Screen2/WashFishGamePage'
 import WashSaltGamePage from '../components/Making_Fish_Sauce/Screen3/WashSaltGamePage'
+import CloseJarFermentGamePage from '../components/Making_Fish_Sauce/Screen4/CloseJarFermentGamePage'
 
 export const router = createBrowserRouter([
   {
@@ -48,11 +49,12 @@ export const router = createBrowserRouter([
       { path: 'game/catch-fish', Component: CatchFishGamePage },
       { path: 'game/wash-fish', Component: WashFishGamePage },
       { path: 'game/wash-salt', Component: WashSaltGamePage },
+      { path: 'game/close-jar-ferment', Component: CloseJarFermentGamePage },
       { path: 'craft-selection', Component: CraftSelectionPage },
       { path: 'level-1', Component: Screen1 },
       { path: 'level-2', Component: Screen2 },
       { path: 'level-3/*', Component: Screen3MakingMats },
-      { path: 'level-4', Component: Screen4 },
+      { path: 'level-4', Component: Screen4MakingMats },
       { path: 'level-5/*', Component: Screen5 },
       { path: 'level-6/*', Component: Screen6 },
       { path: 'village/:id', Component: VillageDetailPage },

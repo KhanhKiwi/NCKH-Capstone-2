@@ -36,6 +36,13 @@ const gameLevels: GameLevel[] = [
     icon: '🧂',
     route: '/game/wash-salt'
   },
+  {
+    id: 4,
+    name: 'Đóng lu & Ủ chượp',
+    description: 'Đóng nắp lu cẩn thận, niêm phong kín khí, tạo điều kiện lên men tự nhiên. Quá trình lên men kéo dài 12 tháng để tạo ra nước mắm hoàn hảo!',
+    icon: '🏺',
+    route: '/game/close-jar-ferment'
+  },
 ];
 
 export default function MamNamOModal({ onClose }: MamNamOModalProps) {
