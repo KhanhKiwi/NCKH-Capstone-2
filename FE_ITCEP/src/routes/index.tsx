@@ -23,6 +23,7 @@ import ResetPasswordPage from '../pages/ResetPasswordPage'
 import ProfilePage from '../pages/profile/ProfilePage'
 import CatchFishGamePage from '../components/Making_Fish_Sauce/Screen1/CatchFishGamePage'
 import WashFishGamePage from '../components/Making_Fish_Sauce/Screen2/WashFishGamePage'
+import WashSaltGamePage from '../components/Making_Fish_Sauce/Screen3/WashSaltGamePage'
 
 export const router = createBrowserRouter([
   {
@@ -46,6 +47,7 @@ export const router = createBrowserRouter([
       { path: 'game', Component: GamePage },
       { path: 'game/catch-fish', Component: CatchFishGamePage },
       { path: 'game/wash-fish', Component: WashFishGamePage },
+      { path: 'game/wash-salt', Component: WashSaltGamePage },
       { path: 'craft-selection', Component: CraftSelectionPage },
       { path: 'level-1', Component: Screen1 },
       { path: 'level-2', Component: Screen2 },

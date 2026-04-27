@@ -29,6 +29,13 @@ const gameLevels: GameLevel[] = [
     icon: '💧',
     route: '/game/wash-fish'
   },
+  {
+    id: 3,
+    name: 'Pha Muối & Ướp Cá',
+    description: 'Pha muối với tỷ lệ phù hợp, trộn đều, chuyển vào thùng chượp, nén chặt và đậy nắp. Công đoạn quan trọng để chuẩn bị cho quá trình lên men!',
+    icon: '🧂',
+    route: '/game/wash-salt'
+  },
 ];
 
 export default function MamNamOModal({ onClose }: MamNamOModalProps) {
@@ -110,11 +117,12 @@ export default function MamNamOModal({ onClose }: MamNamOModalProps) {
                 <div className="mb-8">
                   <h3 className="text-2xl font-bold text-[#4a3f2e] mb-4">Quy Trình Chế Biến</h3>
                   <div className="space-y-3 text-lg text-[#6b5638]">
-                    <p><span className="font-semibold">1. Thu hoạch cá cơm:</span> Cá cơm tươi được vợt từ biển vào buổi chiều</p>
-                    <p><span className="font-semibold">2. Sơ chế:</span> Cá được rửa và làm sạch kỹ lưỡng</p>
-                    <p><span className="font-semibold">3. Muối cá:</span> Cá được trộn với muối biển và để lên men từ 3-6 tháng</p>
-                    <p><span className="font-semibold">4. Chia cơm:</span> Tách riêng nước mắm và cơm cá</p>
-                    <p><span className="font-semibold">5. Đóng chai:</span> Mắm được đóng vào chai và phát hành</p>
+                    <p><span className="font-semibold">1. Bắt cá:</span> Cá cơm tươi được vợt từ biển vào buổi chiều (🎣 Bắt Cá Cơm)</p>
+                    <p><span className="font-semibold">2. Sơ chế:</span> Cá được rửa sạch kỹ lưỡng bằng nước biển tươi (💧 Rửa Cá)</p>
+                    <p><span className="font-semibold">3. Pha muối & Ướp cá:</span> Cá được trộn với muối biển theo tỷ lệ phù hợp, nén chặt trong thùng chượp (🧂 Pha Muối)</p>
+                    <p><span className="font-semibold">4. Lên men:</span> Hỗn hợp được để lên men từ 3-6 tháng trong môi trường kỵ khí</p>
+                    <p><span className="font-semibold">5. Chia cơm:</span> Tách riêng nước mắm và cơm cá</p>
+                    <p><span className="font-semibold">6. Đóng chai:</span> Mắm được đóng vào chai và phát hành</p>
                   </div>
                 </div>
 
