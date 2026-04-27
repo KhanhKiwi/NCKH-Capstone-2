@@ -4,7 +4,7 @@ import CraftSelectionPage from '../pages/CraftSelectionPage'
 import GamePage from '../pages/GamePage'
 import Screen4 from '../pages/making mats/Screen4/Screen4'
 import Screen2 from '../components/making_mats/Screen2'
-import Screen3 from '../pages/making mats/Screen3'
+import Screen3MakingMats from '../pages/making mats/Screen3'
 import Screen5 from '../pages/making mats/Screen5'
 import Screen6 from '../pages/making mats/Screen6'
 import HomePage from '../pages/web-home/HomePage'
@@ -22,6 +22,7 @@ import { LoginPage } from '../components/log'
 import ResetPasswordPage from '../pages/ResetPasswordPage'
 import ProfilePage from '../pages/profile/ProfilePage'
 import CatchFishGamePage from '../components/Making_Fish_Sauce/Screen1/CatchFishGamePage'
+import WashFishGamePage from '../components/Making_Fish_Sauce/Screen2/WashFishGamePage'
 
 export const router = createBrowserRouter([
   {
@@ -44,10 +45,11 @@ export const router = createBrowserRouter([
       { index: true, Component: HomePage },
       { path: 'game', Component: GamePage },
       { path: 'game/catch-fish', Component: CatchFishGamePage },
+      { path: 'game/wash-fish', Component: WashFishGamePage },
       { path: 'craft-selection', Component: CraftSelectionPage },
       { path: 'level-1', Component: Screen1 },
       { path: 'level-2', Component: Screen2 },
-      { path: 'level-3/*', Component: Screen3 },
+      { path: 'level-3/*', Component: Screen3MakingMats },
       { path: 'level-4', Component: Screen4 },
       { path: 'level-5/*', Component: Screen5 },
       { path: 'level-6/*', Component: Screen6 },
