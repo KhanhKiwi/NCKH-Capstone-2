@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DeepPartial } from 'typeorm';
 import { CreateProgressDto } from './dto/create-progress.dto';
@@ -8,6 +8,9 @@ import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class ProgressService {
+
+  private readonly logger = new Logger(ProgressService.name);
+
 	constructor(
 		@InjectRepository(UserProgress)
 		private readonly progressRepo: Repository<UserProgress>,
@@ -20,6 +23,7 @@ export class ProgressService {
 	) {}
 
 	async saveProgress(dto: CreateProgressDto) {
+		this.logger.log(`saveProgress called with payload ${JSON.stringify(dto)}`);
 		const { user_id, level_id, status, score } = dto;
 
 		const user = await this.userRepo.findOne({ where: { user_id } });
@@ -52,6 +56,7 @@ export class ProgressService {
 		}
 
 		await this.progressRepo.save(progress);
+		this.logger.log(`Progress saved for user ${user_id} level ${level_id} status=${progress.status}`);
 
 		// If completed, unlock next level (same craft, level_number + 1)
 		if (status === 'completed') {
@@ -62,6 +67,7 @@ export class ProgressService {
 				});
 
 				if (nextLevel) {
+					this.logger.log(`Found next level ${nextLevel.level_id} (level_number=${nextLevel.level_number}) — ensuring unlocked for user ${user_id}`);
 					const existing = await this.progressRepo.findOne({
 						where: { user: { user_id }, level: { level_id: nextLevel.level_id } },
 					});
@@ -70,10 +76,12 @@ export class ProgressService {
 						const unlocked = this.progressRepo.create(
 							({ user, level: nextLevel, status: 'unlocked' } as DeepPartial<UserProgress>),
 						);
-						await this.progressRepo.save(unlocked);
+							await this.progressRepo.save(unlocked);
+							this.logger.log(`Created unlocked UserProgress for user ${user_id} level ${nextLevel.level_id}`);
 					} else if (existing.status === 'locked') {
 						existing.status = 'unlocked';
 						await this.progressRepo.save(existing);
+							this.logger.log(`Updated existing UserProgress to unlocked for user ${user_id} level ${nextLevel.level_id}`);
 					}
 				}
 			}

@@ -57,41 +57,8 @@ export default function CraftSelectionPage() {
     { id: 6, name: 'Hoàn thiện chiếu', unlocked: false, completed: false },
   ];
 
-  const [levels, setLevels] = useState<Level[]>(() => {
-    try {
-      const all = localStorage.getItem('unlocked_all_levels')
-      if (all === '1') return defaultLevels.map(l => ({ ...l, unlocked: true }))
-      const saved = localStorage.getItem('unlocked_levels')
-      if (saved) return JSON.parse(saved) as Level[]
-    } catch (e) { }
-    return defaultLevels
-  })
-
-  const [unlockedAll, setUnlockedAll] = useState<boolean>(() => {
-    try { return localStorage.getItem('unlocked_all_levels') === '1' } catch { return false }
-  })
-
-  useEffect(() => {
-    try { localStorage.setItem('unlocked_levels', JSON.stringify(levels)) } catch (e) { }
-  }, [levels])
-
-  function unlockAllLevels() {
-    setLevels(prev => {
-      const next = prev.map(l => ({ ...l, unlocked: true }))
-      try {
-        localStorage.setItem('unlocked_all_levels', '1')
-        localStorage.setItem('unlocked_levels', JSON.stringify(next))
-      } catch (e) { }
-      return next
-    })
-    setUnlockedAll(true)
-  }
-
-  // Auto-unlock immediately so user sees all levels playable
-  useEffect(() => {
-    if (!unlockedAll) unlockAllLevels()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  // levels UI is driven by backend per-craft progress; default fallback for offline
+  const [levels, setLevels] = useState<Level[]>(defaultLevels)
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 50);
