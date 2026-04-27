@@ -2,49 +2,15 @@ import { useEffect, useRef, useState } from 'react'
 import { X, Lock } from 'lucide-react'
 import { Link, useNavigate } from 'react-router'
 import { levelsService } from '../../../api/levels/levelsService'
+import { progressService } from '../../../api/progress/progressService'
+import { authService } from '../../../api/services/authService'
 
 interface Level { id: number; level_number?: number; name: string; difficulty?: string; unlocked: boolean; completed: boolean; deleted_at?: string | null }
 
 export default function BatTrangModal({ open = true, onClose }: { open?: boolean; onClose: () => void }) {
-  const [levels, setLevels] = useState<Level[]>(() => {
-    try {
-      const saved = localStorage.getItem('unlocked_levels_bat-trang')
-      if (saved) {
-        return JSON.parse(saved) as Level[]
-      }
-    } catch {
-      /* ignore */
-    }
-    // fallback empty until API loads
-    return []
-  })
+  const [levels, setLevels] = useState<Level[]>([])
 
-  useEffect(() => {
-    try {
-      localStorage.setItem('unlocked_levels_bat-trang', JSON.stringify(levels))
-    } catch {
-      /* ignore storage errors */
-    }
-  }, [levels])
-
-  // Ensure legacy saved data without level 0 gets migrated: insert level 0 at front if missing
-  useEffect(() => {
-    if (!levels || levels.length === 0) return
-    if (!levels.find(l => l.id === 0)) {
-      const lvl0: Level = { id: 0, name: 'Giới thiệu làng & hướng dẫn', unlocked: true, completed: false }
-      setLevels(prev => {
-        // keep existing unlocked/completed flags for existing levels, but ensure they come after level 0
-        const next = [lvl0, ...prev]
-        try {
-          localStorage.setItem('unlocked_levels_bat-trang', JSON.stringify(next))
-        } catch {
-          /* ignore storage errors */
-        }
-        return next
-      })
-    }
-  // only run when levels changes so this migrates on first render
-  }, [levels])
+  
 
   // Normalize levels: dedupe by id and ensure exactly one level 0.
   useEffect(() => {
@@ -69,13 +35,7 @@ export default function BatTrangModal({ open = true, onClose }: { open?: boolean
       }
     }
 
-    const asStr = JSON.stringify(deduped)
-    if (asStr !== JSON.stringify(levels)) {
-      try {
-        localStorage.setItem('unlocked_levels_bat-trang', asStr)
-      } catch {
-        /* ignore storage errors */
-      }
+    if (JSON.stringify(deduped) !== JSON.stringify(levels)) {
       setLevels(deduped)
     }
   }, [levels])
@@ -85,7 +45,15 @@ export default function BatTrangModal({ open = true, onClose }: { open?: boolean
     let mounted = true
     ;(async () => {
       try {
-        let apiLevels: any[] = await levelsService.getByVillage(1)
+        // attempt to include authenticated user's id so backend can return per-user `unlocked`
+        let userId: number | undefined
+        try {
+          const profile = await authService.getProfile()
+          userId = Number(profile?.user_id ?? profile?.id ?? profile?.userId)
+        } catch {
+          userId = undefined
+        }
+        const apiLevels: any[] = await levelsService.getByVillage(1, userId)
         console.debug('[BatTrangModal] apiLevels.length', apiLevels?.length)
         // fallback: if service returned none, try fetching all levels and filter by craft_id = 1
         if ((!apiLevels || apiLevels.length === 0)) {
@@ -103,40 +71,36 @@ export default function BatTrangModal({ open = true, onClose }: { open?: boolean
           }
         }
         // map API levels to our UI Level shape
+
+        console.debug('[BatTrangModal] apiLevels', apiLevels)
         const mapped: Level[] = (apiLevels || []).map((l) => {
-          const deletedAt = l.deleted_at ?? l.deletedAt ?? null
-          const unlockedFromApi = deletedAt != null // per agreed semantics: NULL = locked, NOT NULL = visible/dimmed
+          const idNum = Number(l.level_id ?? l.id)
+          const levelNum = Number(l.level_number ?? l.levelNumber ?? (l.level_id ? (Number(l.level_id) - 1) : l.id))
+          // prefer backend-provided `unlocked` boolean only; do not rely on client-side progress fetches
+          const unlockedFromApi = Boolean(l.unlocked === true)
           return {
-            id: Number(l.level_id ?? l.id),
-            level_number: Number(l.level_number ?? l.level_id ?? l.id),
+            id: idNum,
+            level_number: Number(l.level_number ?? l.levelNumber ?? levelNum),
             name: l.name ?? `Cấp ${l.level_number ?? l.level_id ?? l.id}`,
             difficulty: l.difficulty ?? String(l.difficulty ?? ''),
-            unlocked: unlockedFromApi,
-            completed: false,
-            deleted_at: deletedAt,
+              unlocked: unlockedFromApi,
+              completed: false,
+              deleted_at: l.deleted_at ?? null,
           }
         })
+        console.debug('[BatTrangModal] mapped levels', mapped)
 
-        // merge with any saved state in localStorage
+        // Use API and progress results only; do not use localStorage at all.
         try {
-          const saved = localStorage.getItem('unlocked_levels_bat-trang')
-          if (saved) {
-            const parsed = JSON.parse(saved) as Level[]
-            const byId = new Map(parsed.map(x => [x.id, x]))
-            // Use API `unlocked` as source-of-truth; only preserve user `completed` flag from storage
-            const merged = mapped.map(m => {
-              const s = byId.get(m.id)
-              return s ? { ...m, completed: s.completed ?? m.completed } : m
-            })
-            if (mounted) setLevels(merged)
-            return
-          }
-        } catch {}
-
-        // if no saved state, use API mapping (do NOT auto-unlock; respect deleted_at semantics)
-        if (mounted) {
-          setLevels(mapped)
+          // Use API-provided unlocked flag directly; do not synthesize from local progress
+          const final = mapped.map(m => ({ ...m, unlocked: Boolean(m.unlocked), completed: Boolean(m.completed) }))
+          if (mounted) setLevels(final)
+          return
+        } catch (err) {
+          console.debug('[BatTrangModal] mapping failed', err)
         }
+
+        if (mounted) setLevels(mapped)
       } catch (e) {
         // fallback: keep existing levels (empty) and do not auto-unlock
         if (mounted) {
@@ -235,6 +199,7 @@ export default function BatTrangModal({ open = true, onClose }: { open?: boolean
           </button>
           <h2 className="text-3xl font-bold mb-1" >Làng gốm Bát Tràng</h2>
           <p className="text-1xl font-bold text-white/90">Làng gốm – nơi đất và lửa tạo nên hồn quê</p>
+          {/* debug buttons removed */}
         </div>
 
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-160px)]">
@@ -272,11 +237,22 @@ export default function BatTrangModal({ open = true, onClose }: { open?: boolean
                   >
                     <div className="relative flex items-center justify-center">
                       <button
-                        onClick={() => {
-                          if (!lvl?.unlocked) return
-                          const num = Number(lvl.level_number ?? lvl.id)
+                        onClick={async () => {
+                          const levelId = Number(lvl.id)
+                          const levelNumber = Number(lvl.level_number ?? lvl.id)
+                          // if locked, attempt to unlock via API (will redirect to login on 401)
+                          if (!lvl?.unlocked) {
+                            try {
+                              await progressService.unlockLevel(levelId)
+                              // update local state to reflect unlock so UI shows new state
+                              setLevels(prev => prev.map(p => p.id === lvl.id ? { ...p, unlocked: true } : p))
+                            } catch (err) {
+                              console.error('Failed to unlock level', err)
+                              return
+                            }
+                          }
                           // navigate to level by level_number (routes use level-number not DB id)
-                          navigate(`/bat-trang/level-${num}`)
+                          navigate(`/bat-trang/level-${levelNumber}`)
                         }}
                         className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg text-white text-base font-bold transform transition-all duration-300 ${lvl?.unlocked ? 'bg-gradient-to-br from-emerald-500 to-emerald-700 ring-4 ring-emerald-100/50' : 'bg-gray-300'}`}
                         aria-label={`Cấp ${lvl?.level_number ?? lvl?.id}`}

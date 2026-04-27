@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { levelsService } from '../../../api/levels/levelsService'
+import { progressService } from '../../../api/progress/progressService'
 import { useNavigate } from 'react-router'
 import confetti from 'canvas-confetti'
 import GuideDialog from '../../../util/shared/GuideDialog'
@@ -330,15 +331,19 @@ export default function Phase2({ onComplete }: Phase2Props) {
 										if (onComplete) onComplete({ smoothness: progress, stars: starCount });
 										// unlock next level (level_number = 2) for Bát Tràng (village_id = 1)
 										try {
-											const all = await levelsService.getByVillage(1)
+											// include authenticated user id so backend returns per-user progress where available
+											let userId: number | undefined
+											try { const profile = await import('../../../api/services/authService').then(m => m.authService.getProfile()); userId = Number(profile?.user_id ?? profile?.id ?? profile?.userId) } catch { userId = undefined }
+											const all = await levelsService.getByVillage(1, userId)
 											if (Array.isArray(all)) {
-												const next = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === 2)
-												if (next) {
-													await levelsService.update(Number(next.level_id ?? next.id), { deleted_at: new Date().toISOString() })
+												// complete current level via progress API so backend unlocks next level
+												const current = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === 1)
+																								if (current) {
+													await progressService.saveProgress({ user_id: 1, level_id: Number(current.level_id ?? current.id), status: 'completed', score: 100 })
 												}
 											}
 										} catch (e) {
-											console.warn('unlock next level failed', e)
+											console.warn('complete level failed', e)
 										}
 
 										setSummaryOpen(false);

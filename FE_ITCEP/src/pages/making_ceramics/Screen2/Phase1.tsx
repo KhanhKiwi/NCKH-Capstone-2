@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { levelsService } from '../../../api/levels/levelsService'
+import { progressService } from '../../../api/progress/progressService'
 import { useNavigate } from 'react-router'
 import GuideDialog from '../../../util/shared/GuideDialog'
 
@@ -412,15 +413,20 @@ export default function BatTrangLevel2() {
                 <p className="mt-2">Bạn đã tạo hình thành công.</p>
                 <div className="mt-4 flex gap-2 justify-center">
                   <button onClick={async () => {
-                    try{ localStorage.setItem('bat-trang-level-2', 'completed') }catch{}
                     // unlock next level (level_number 3) for village 1
-                    try {
-                      const all = await levelsService.getByVillage(1)
-                      if (Array.isArray(all)) {
-                        const next = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === 3)
-                        if (next) await levelsService.update(Number(next.level_id ?? next.id), { deleted_at: new Date().toISOString() })
-                      }
-                    } catch (e) { console.warn('unlock next level failed', e) }
+                      try {
+                        let userId: number | undefined
+                        try { const profile = await import('../../../api/services/authService').then(m => m.authService.getProfile()); userId = Number(profile?.user_id ?? profile?.id ?? profile?.userId) } catch { userId = undefined }
+                        const all = await levelsService.getByVillage(1, userId)
+                        if (Array.isArray(all)) {
+                          // mark current level (level_number 2) as completed via progress API;
+                          // backend will create/update progress and unlock the next level automatically
+                          const current = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === 2)
+                          if (current) {
+                            await progressService.saveProgress({ user_id: 1, level_id: Number(current.level_id ?? current.id), status: 'completed', score: 100 })
+                          }
+                        }
+                      } catch (e) { console.warn('complete level failed', e) }
                     navigate('/craft-selection?openName=B%C3%A1t%20Tr%C3%A0ng')
                   }} className="px-4 py-2 bg-emerald-500 text-white rounded">Hoàn tất</button>
                   <button onClick={reset} className="px-4 py-2 bg-white border rounded">Chơi lại</button>

@@ -17,12 +17,35 @@ export class LevelsService {
 		return this.levelRepo.save(dto);
 	}
 
-	findAll() {
-		return this.levelRepo.find();
+	async findAll(userId?: number) {
+		// include craft relation (and craft.village) so callers can determine which village a level belongs to
+		const levels = await this.levelRepo.find({ relations: ['craft', 'craft.village'] });
+		if (!userId) return levels;
+
+		// attach user's progress (if any) to each level for convenience
+		const progress = await this.progressRepo.find({ where: { user: { user_id: userId } }, relations: ['level'] });
+		const byLevel = new Map<number, UserProgress>();
+		for (const p of progress) {
+			if (p && p.level && typeof p.level.level_id === 'number') byLevel.set(p.level.level_id, p);
+		}
+		return levels.map(l => ({
+			...l,
+			user_progress: byLevel.get(l.level_id) ?? null,
+			// unlocked is determined solely by user progress (unlocked/completed). Do NOT use deleted_at.
+			unlocked: (byLevel.get(l.level_id)?.status === 'unlocked') || (byLevel.get(l.level_id)?.status === 'completed'),
+		}));
 	}
 
-	findOne(id: number) {
-		return this.levelRepo.findOne({ where: { level_id: id } });
+	async findOne(id: number, userId?: number) {
+		const level = await this.levelRepo.findOne({ where: { level_id: id }, relations: ['craft', 'craft.village'] });
+		if (!userId || !level) return level;
+		const p = await this.progressRepo.findOne({ where: { user: { user_id: userId }, level: { level_id: id } }, relations: ['level'] });
+		return {
+			...level,
+			user_progress: p ?? null,
+			// unlocked determined only by user's progress
+			unlocked: (p?.status === 'unlocked') || (p?.status === 'completed'),
+		}
 	}
 
 	async update(id: number, dto: Partial<Level>) {

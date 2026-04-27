@@ -8,6 +8,17 @@ INSERT INTO craft_villages (village_id, name, description, image, city, created_
 (7, 'Coming Soon', 'Sắp ra mắt', 'https://example.com/coming-soon.jpg', 'Ẩn', '2026-04-06 22:34:35', '2026-04-06 22:34:35', NULL, 0);
 
 
+UPDATE craft_villages
+SET 
+    name = 'Làng Mắm Nam Ô',
+    description = 'Làng nghề truyền thống nổi tiếng với nước mắm Nam Ô, được ủ từ cá cơm than và muối biển, mang hương vị đậm đà đặc trưng miền Trung.',
+    image = 'https://tourdanangcity.vn/wp-content/uploads/2022/12/ai_image-2.jpg',
+    city = 'Đà Nẵng',
+    updated_at = NOW(),
+    is_open = 1
+WHERE village_id = 6;
+
+
 INSERT INTO `Craft` (craft_id, name, description, village_id, created_at, updated_at)
 VALUES
 (1, 'Gốm Bát Tràng', 'Thực hành kỹ thuật làm gốm truyền thống Bát Tràng.', 1, '2026-04-06 22:34:35', '2026-04-06 22:34:35'),
@@ -18,15 +29,26 @@ VALUES
 (6, 'Sơn Mài Hà Thái', 'Kỹ thuật sơn mài: chạm khắc, dát vàng và phủ bóng.', 6, '2026-04-06 22:34:35', '2026-04-06 22:34:35');
 
 
-
 INSERT INTO `Level` (level_id, craft_id, level_number, difficulty, created_at, updated_at, deleted_at)
 VALUES
-(1, 1, 0, 'Giới thiệu làng và hướng dẫn', '2026-04-09 10:01:00', '2026-04-09 10:01:00', '2026-04-09 11:00:00'),
-(2, 1, 1, 'Chuẩn bị đất', '2026-04-09 10:01:00', '2026-04-09 10:01:00', '2026-04-09 11:00:00'),
+(1, 1, 0, 'Giới thiệu làng và hướng dẫn', '2026-04-09 10:01:00', '2026-04-09 10:01:00', NULL),
+(2, 1, 1, 'Chuẩn bị đất', '2026-04-09 10:01:00', '2026-04-09 10:01:00', NULL),
 (3, 1, 2, 'Tạo hình', '2026-04-09 10:02:00', '2026-04-09 10:02:00', NULL),
 (4, 1, 3, 'Phơi khô', '2026-04-09 10:03:00', '2026-04-09 10:03:00', NULL),
 (5, 1, 4, 'Trang trí & tráng men', '2026-04-09 10:04:00', '2026-04-09 10:04:00', NULL),
 (6, 1, 5, 'Nung & hoàn thiện', '2026-04-09 10:05:00', '2026-04-09 10:05:00', NULL);
+
+INSERT INTO `UserProgress` (`status`, `score`, `completed_at`, `created_at`, `updated_at`, `deleted_at`, `user_id`, `level_id`)
+VALUES
+  ('unlocked', 0, NULL, '2026-04-10 10:00:00', '2026-04-10 10:00:00', NULL, 1, 1),
+  ('unlocked', 0, NULL, '2026-04-10 10:01:00', '2026-04-10 10:01:00', NULL, 1, 2),
+  ('locked', 0, NULL, '2026-04-10 10:02:00', '2026-04-10 10:02:00', NULL, 1, 3),
+  ('locked', 0, NULL, '2026-04-10 10:03:00', '2026-04-10 10:03:00', NULL, 1, 4),
+  ('locked', 0, NULL, '2026-04-10 10:04:00', '2026-04-10 10:04:00', NULL, 1, 5),
+  ('locked', 0, NULL, '2026-04-10 10:05:00', '2026-04-10 10:05:00', NULL, 1, 6);
+
+
+
 
 
 INSERT INTO `Media` (media_id, url, created_at, updated_at, deleted_at, village_id) VALUES

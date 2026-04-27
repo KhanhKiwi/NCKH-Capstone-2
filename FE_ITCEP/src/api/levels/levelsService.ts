@@ -1,12 +1,13 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.DEV ? 'http://localhost:3000' : '')
 const api = axios.create({ baseURL: API_BASE_URL, headers: { 'Content-Type': 'application/json' } })
 
 export const levelsService = {
-  async getAll() {
+  async getAll(userId?: number) {
     try {
-      const res = await api.get('/levels')
+      const url = userId ? `/levels?user_id=${userId}` : '/levels'
+      const res = await api.get(url)
       // backend may return array directly or wrap in { data: [...] } or { levels: [...] }
       if (Array.isArray(res.data)) return res.data
       if (Array.isArray(res.data?.data)) return res.data.data
@@ -29,9 +30,10 @@ export const levelsService = {
   },
 
   // convenience: fetch all levels and return those whose craft.village matches villageId
-  async getByVillage(villageId: number) {
+  async getByVillage(villageId: number, userId?: number) {
     try {
-      const all = await this.getAll()
+      // accept optional explicit userId; do NOT fall back to a seeded demo user
+      const all = await this.getAll(userId)
       if (!Array.isArray(all)) return []
       // first try to match nested craft -> village shapes
       const matched = all.filter((lvl: any) => {
@@ -45,7 +47,7 @@ export const levelsService = {
       if (levelsWithCraftId.length === 0) return []
 
       // build a map of craft_id -> village_id by fetching crafts endpoint (if available)
-      try {
+        try {
         const craftsRes = await api.get('/crafts')
         const crafts = Array.isArray(craftsRes.data) ? craftsRes.data : Array.isArray(craftsRes.data?.data) ? craftsRes.data.data : Array.isArray(craftsRes.data?.crafts) ? craftsRes.data.crafts : craftsRes.data
         const craftMap = new Map<number, any>()
@@ -61,7 +63,24 @@ export const levelsService = {
           return vid != null && Number(vid) === Number(villageId)
         })
       } catch (e) {
-        // unable to fetch crafts; return empty
+        // unable to fetch crafts; fall back to permissive matching.
+        // Some backends don't expose /crafts mapping; try matching by craft_id directly.
+        try {
+          const fallback = all.filter((lvl: any) => {
+            if (lvl == null) return false
+            // match when level.craft_id equals the requested villageId (common when craft_id=1 for Bát Tràng)
+            if (lvl.craft_id != null && Number(lvl.craft_id) === Number(villageId)) return true
+            // also handle numeric `craft` field
+            if (typeof lvl.craft === 'number' && Number(lvl.craft) === Number(villageId)) return true
+            return false
+          })
+          if (fallback.length > 0) {
+            console.debug('levelsService.getByVillage: using fallback craft_id match, count=', fallback.length)
+            return fallback
+          }
+        } catch (er) {
+          /* ignore fallback errors */
+        }
         return []
       }
     } catch (err) {

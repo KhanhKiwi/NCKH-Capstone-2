@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, ParseIntPipe, UseGuards, Query } from '@nestjs/common';
 import { LevelsService } from './levels.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -18,13 +18,15 @@ export class LevelsController {
 	}
 
 	@Get()
-	findAll() {
-		return this.levelsService.findAll();
+	findAll(@Query('user_id') userId?: string) {
+		const uid = userId ? Number(userId) : undefined
+		return this.levelsService.findAll(uid)
 	}
 
 	@Get(':id')
-	findOne(@Param('id', ParseIntPipe) id: number) {
-		return this.levelsService.findOne(id);
+	findOne(@Param('id', ParseIntPipe) id: number, @Query('user_id') userId?: string) {
+		const uid = userId ? Number(userId) : undefined
+		return this.levelsService.findOne(id, uid);
 	}
 
 	@Patch(':id')

@@ -12,11 +12,12 @@ export class CraftsService {
 	}
 
 	findAll() {
-		return this.repo.find();
+		// include village relation so callers can map craft -> village
+		return this.repo.find({ relations: ['village'] });
 	}
 
 	findOne(id: number) {
-		return this.repo.findOne({ where: { craft_id: id } });
+		return this.repo.findOne({ where: { craft_id: id }, relations: ['village'] });
 	}
 
 	async update(id: number, dto: Partial<Craft>) {

@@ -1,6 +1,7 @@
  import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { QUESTIONS } from '../../../util/question_ceramics/questions'
+import { progressService } from '../../../api/progress/progressService'
 import type { Q } from '../../../util/question_ceramics/questions'
 export default function BatTrangLevel1Screen1() {
   // shuffle choices so correct answer isn't always in the same position
@@ -46,7 +47,7 @@ export default function BatTrangLevel1Screen1() {
     }
   }
 
-  function next() {
+  async function next() {
     const selected = answers[q.id]
     if (!selected) {
       setFeedback('Vui lòng chọn một đáp án trước khi tiếp tục')
@@ -66,15 +67,11 @@ export default function BatTrangLevel1Screen1() {
     }
 
     try {
-      const saved = localStorage.getItem('unlocked_levels_bat-trang')
-      let arr: any[] = []
-      if (saved) arr = JSON.parse(saved)
-      if (!Array.isArray(arr)) arr = []
-      const idxExisting = arr.findIndex(x => x && x.id === 1)
-      if (idxExisting >= 0) arr[idxExisting].completed = true
-      else arr.push({ id: 1, name: 'Chuẩn bị đất', unlocked: true, completed: true })
-      localStorage.setItem('unlocked_levels_bat-trang', JSON.stringify(arr))
-    } catch {}
+      // Save progress to backend (use seeded dev user id=1 for local testing)
+      await progressService.saveProgress({ user_id: 1, level_id: 2, status: 'unlocked', score: 0 })
+      // mark completed for this level as well
+      await progressService.saveProgress({ user_id: 1, level_id: 2, status: 'completed', score: 100 })
+    } catch (e) { console.warn('progress save failed', e) }
 
     navigate('/bat-trang/level-1/phase2')
   }
