@@ -36,6 +36,27 @@ const gameLevels: GameLevel[] = [
     icon: '🧂',
     route: '/game/wash-salt'
   },
+  {
+    id: 4,
+    name: 'Đóng lu & Ủ chượp',
+    description: 'Đóng nắp lu cẩn thận, niêm phong kín khí, tạo điều kiện lên men tự nhiên. Quá trình lên men kéo dài 12 tháng để tạo ra nước mắm hoàn hảo!',
+    icon: '🏺',
+    route: '/game/close-jar-ferment'
+  },
+  {
+    id: 5,
+    name: 'Di sản Giọt Cuối',
+    description: 'Lọc thanh nước mắm qua 4 lớp vật liệu khác nhau, pha blend tinh hoa, và đánh giá chất lượng. Chiết xuất những giọt quý báu từ di sản của cha ông!',
+    icon: '✨',
+    route: '/game/final-extraction'
+  },
+  {
+    id: 6,
+    name: 'Vĩnh Cửu Hương',
+    description: 'Nghi thức niêm phong tinh hoa bất diệt - chọn chai quý nhất, rót mắm với lễ nghi truyền thống, và đánh giá hương vị. Hoàn thành di sản Nam Ô qua muôn đời!',
+    icon: '🏆',
+    route: '/game/eternal-fragrance'
+  },
 ];
 
 export default function MamNamOModal({ onClose }: MamNamOModalProps) {
