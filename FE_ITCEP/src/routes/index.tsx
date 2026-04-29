@@ -13,8 +13,9 @@ import BatTrangLevel1Phase0 from '../pages/making_ceramics/Screen1/Phase0'
 import BatTrangLevel1Screen1 from '../pages/making_ceramics/Screen1/Phase1'
 import BatTrangLevel1Phase2 from '../pages/making_ceramics/Screen1/Phase2'
 import BatTrangLevel2Phase0 from '../pages/making_ceramics/Screen2/Phase0'
+import BatTrangLevel3Phase0 from '../pages/making_ceramics/Screen3/Phase0'
 import BatTrangLevel2 from '../pages/making_ceramics/Screen2/Phase1'
-import Level3 from '../pages/making_ceramics/Screen3/Level3'
+import Level3 from '../pages/making_ceramics/Screen3/Phase1'
 import VillageDetailPage from '../pages/VillageDetailPage'
 import AdminPage from '../pages/admin/AdminPage'
 import Screen1 from '../components/making_mats/Screen1'
@@ -66,7 +67,9 @@ export const router = createBrowserRouter([
       // Make Phase0 the default view for /bat-trang/level-1
       { path: 'bat-trang/level-1', Component: BatTrangLevel1Phase0 },
       // Bat Trang Level 3
-      { path: 'bat-trang/level-3', Component: Level3 },
+      { path: 'bat-trang/level-3/phase0', Component: BatTrangLevel3Phase0 },
+      { path: 'bat-trang/level-3/phase1', Component: Level3 },
+      { path: 'bat-trang/level-3', element: <Navigate to="/bat-trang/level-3/phase0" replace /> },
       { path: 'bat-trang/level-1/phase1', Component: BatTrangLevel1Screen1 },
       { path: 'bat-trang/level-1/phase2', Component: BatTrangLevel1Phase2 },
       { path: 'bat-trang/level-2', Component: BatTrangLevel2Phase0 },
