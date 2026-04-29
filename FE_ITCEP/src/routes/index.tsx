@@ -14,8 +14,12 @@ import BatTrangLevel1Screen1 from '../pages/making_ceramics/Screen1/Phase1'
 import BatTrangLevel1Phase2 from '../pages/making_ceramics/Screen1/Phase2'
 import BatTrangLevel2Phase0 from '../pages/making_ceramics/Screen2/Phase0'
 import BatTrangLevel3Phase0 from '../pages/making_ceramics/Screen3/Phase0'
+import BatTrangLevel3Screen1 from '../pages/making_ceramics/Screen3/Phase1'
 import BatTrangLevel2 from '../pages/making_ceramics/Screen2/Phase1'
-import Level3 from '../pages/making_ceramics/Screen3/Phase1'
+import Level3 from '../pages/making_ceramics/Screen3/Phase2'
+import BatTrangLevel4 from '../pages/making_ceramics/Screen4/Phase1'
+import BatTrangLevel4Phase0 from '../pages/making_ceramics/Screen4/Phase0'
+import BatTrangLevel5Phase1 from '../pages/making_ceramics/Screen5/Phase1'
 import VillageDetailPage from '../pages/VillageDetailPage'
 import AdminPage from '../pages/admin/AdminPage'
 import Screen1 from '../components/making_mats/Screen1'
@@ -29,6 +33,7 @@ import WashSaltGamePage from '../components/Making_Fish_Sauce/Screen3/WashSaltGa
 import CloseJarFermentGamePage from '../components/Making_Fish_Sauce/Screen4/CloseJarFermentGamePage'
 import Screen5FinalExtraction from '../components/Making_Fish_Sauce/Screen5/Screen5'
 import Screen6EternalFragrance from '../components/Making_Fish_Sauce/Screen6/Screen6'
+
 
 export const router = createBrowserRouter([
   {
@@ -68,8 +73,15 @@ export const router = createBrowserRouter([
       { path: 'bat-trang/level-1', Component: BatTrangLevel1Phase0 },
       // Bat Trang Level 3
       { path: 'bat-trang/level-3/phase0', Component: BatTrangLevel3Phase0 },
-      { path: 'bat-trang/level-3/phase1', Component: Level3 },
+      { path: 'bat-trang/level-3/phase1', Component: BatTrangLevel3Screen1 },
+      { path: 'bat-trang/level-3/phase2', Component: Level3 },
       { path: 'bat-trang/level-3', element: <Navigate to="/bat-trang/level-3/phase0" replace /> },
+      { path: 'bat-trang/level-4/phase0', Component: BatTrangLevel4Phase0 },
+      { path: 'bat-trang/level-4/phase1', Component: BatTrangLevel4 },
+      { path: 'bat-trang/level-4', element: <Navigate to="/bat-trang/level-4/phase0" replace /> },
+      { path: 'bat-trang/level-5/phase0', element: <Navigate to="/bat-trang/level-5/phase1" replace /> },
+      { path: 'bat-trang/level-5/phase1', Component: BatTrangLevel5Phase1 },
+      { path: 'bat-trang/level-5', element: <Navigate to="/bat-trang/level-5/phase1" replace /> },
       { path: 'bat-trang/level-1/phase1', Component: BatTrangLevel1Screen1 },
       { path: 'bat-trang/level-1/phase2', Component: BatTrangLevel1Phase2 },
       { path: 'bat-trang/level-2', Component: BatTrangLevel2Phase0 },
