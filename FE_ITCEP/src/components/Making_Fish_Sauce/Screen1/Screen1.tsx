@@ -466,61 +466,13 @@ export default function Screen1() {
         <motion.div
           animate={{ rotate: [0, -1, 0, 1, 0] }}
           transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          className="drop-shadow-2xl"
         >
-          <svg width="180" height="80" viewBox="0 0 180 80" className="drop-shadow-2xl">
-            {/* Boat Shadow */}
-            <ellipse cx="90" cy="75" rx="80" ry="8" fill="rgba(0,0,0,0.2)" />
-
-            {/* Boat Body - Enhanced wood texture */}
-            <defs>
-              <linearGradient id="wood" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#A0826D" />
-                <stop offset="30%" stopColor="#8B6F47" />
-                <stop offset="70%" stopColor="#6B5839" />
-                <stop offset="100%" stopColor="#4A3C28" />
-              </linearGradient>
-              <filter id="woodSheen">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="2" />
-              </filter>
-            </defs>
-
-            {/* Hull - Curved boat shape */}
-            <path
-              d="M 25 45 Q 20 35 35 28 L 145 28 Q 160 35 155 45 L 152 60 Q 145 72 90 75 Q 35 72 28 60 Z"
-              fill="url(#wood)"
-              stroke="#3A2C18"
-              strokeWidth="2.5"
-              filter="url(#woodSheen)"
-            />
-
-            {/* Boat rim - decorative top edge */}
-            <path
-              d="M 35 28 L 145 28"
-              stroke="#C4A878"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              opacity="0.8"
-            />
-
-            {/* Wood planks with depth */}
-            <line x1="40" y1="32" x2="140" y2="32" stroke="#3A2C18" strokeWidth="1.2" opacity="0.5" />
-            <line x1="38" y1="42" x2="142" y2="42" stroke="#3A2C18" strokeWidth="1.2" opacity="0.5" />
-            <line x1="35" y1="52" x2="145" y2="52" stroke="#3A2C18" strokeWidth="1.2" opacity="0.5" />
-
-            {/* Wood grain texture lines */}
-            <line x1="50" y1="28" x2="55" y2="60" stroke="#4A3C28" strokeWidth="0.8" opacity="0.3" />
-            <line x1="80" y1="28" x2="85" y2="60" stroke="#4A3C28" strokeWidth="0.8" opacity="0.3" />
-            <line x1="110" y1="28" x2="105" y2="60" stroke="#4A3C28" strokeWidth="0.8" opacity="0.3" />
-
-            {/* Cabin/shelter area */}
-            <rect x="70" y="20" width="40" height="15" rx="3" fill="#8B6F47" stroke="#6B5839" strokeWidth="1.5" />
-            <line x1="75" y1="20" x2="75" y2="35" stroke="#6B5839" strokeWidth="1" opacity="0.4" />
-            <line x1="90" y1="20" x2="90" y2="35" stroke="#6B5839" strokeWidth="1" opacity="0.4" />
-            <line x1="105" y1="20" x2="105" y2="35" stroke="#6B5839" strokeWidth="1" opacity="0.4" />
-
-            {/* Highlight/shine effect */}
-            <ellipse cx="80" cy="38" rx="35" ry="8" fill="#D4A574" opacity="0.15" />
-          </svg>
+          <img 
+            src="/picture/langmam/43a505bd-814f-42b6-b91c-b1b70facdaef.png" 
+            alt="Boat with Fisherman" 
+            className="h-[180px] object-contain"
+          />
         </motion.div>
       </motion.div>
 
@@ -595,7 +547,7 @@ export default function Screen1() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="flex-1 bg-gradient-to-r from-[#00C897] to-[#00E5A8] text-white px-6 py-3 rounded-2xl shadow-xl font-semibold"
-                  onClick={() => navigate('/game/wash-salt')}
+                  onClick={() => navigate('/game/wash-fish')}
                 >
                   ➡️ Đi Tiếp
                 </motion.button>
