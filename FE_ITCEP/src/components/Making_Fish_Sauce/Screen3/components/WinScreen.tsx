@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { progressService } from '../../../../api/services/progressService';
+import { getUserId } from '../../../../utils/authUtils';
 
 interface WinScreenProps {
   quality: number;
@@ -147,7 +149,17 @@ export function WinScreen({ quality }: WinScreenProps) {
         {/* Buttons */}
         <div className="flex flex-col sm:flex-row gap-2">
           <motion.button
-            onClick={() => navigate('/game/close-jar-ferment')}
+            onClick={async () => {
+              try {
+                const userId = getUserId();
+                if (userId) {
+                  await progressService.completeLevel(userId, 3, quality);
+                }
+              } catch (error) {
+                console.error('Failed to save progress:', error);
+              }
+              navigate('/game/close-jar-ferment');
+            }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex-1 px-4 py-2 sm:py-3 bg-[#1a1a1a] text-[#d4af37] font-bold rounded-lg hover:bg-[#2a2a2a] transition-colors text-sm sm:text-base"

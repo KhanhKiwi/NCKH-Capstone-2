@@ -1,10 +1,8 @@
-import { useNavigate } from 'react-router';
 import { useState } from 'react';
 import Screen1 from './Screen1';
 import IntroScreen from './IntroScreen';
 
 export default function CatchFishGamePage() {
-  const navigate = useNavigate();
   const [gameStarted, setGameStarted] = useState(false);
 
   return (

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useMotionValue, AnimatePresence } from 'motion/react';
+import { progressService } from '../../../api/services/progressService';
+import { getUserId } from '../../../utils/authUtils';
 
 // Fish type definitions
 type FishType = 'correct' | 'wrong' | 'spoiled';
@@ -547,7 +549,18 @@ export default function Screen1() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="flex-1 bg-gradient-to-r from-[#00C897] to-[#00E5A8] text-white px-6 py-3 rounded-2xl shadow-xl font-semibold"
-                  onClick={() => navigate('/game/wash-fish')}
+                  onClick={async () => {
+                    try {
+                      const userId = getUserId();
+                      if (userId) {
+                        await progressService.completeLevel(userId, 1, quality);
+                      }
+                      navigate('/game/wash-fish');
+                    } catch (error) {
+                      console.error('Failed to save progress:', error);
+                      navigate('/game/wash-fish');
+                    }
+                  }}
                 >
                   ➡️ Đi Tiếp
                 </motion.button>

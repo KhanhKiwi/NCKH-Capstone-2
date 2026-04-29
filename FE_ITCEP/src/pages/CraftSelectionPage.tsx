@@ -213,7 +213,7 @@ export default function CraftSelectionPage() {
       )}
 
       {showLevelModal && selectedCraft && selectedCraft.name?.includes('Mắm Nam Ô') && (
-        <MamNamOModal onClose={() => setShowLevelModal(false)} />
+        <MamNamOModal onClose={() => setShowLevelModal(false)} isOpen={showLevelModal} />
       )}
 
       {showLevelModal && selectedCraft && !selectedCraft.name?.includes('Bát Tràng') && !selectedCraft.name?.includes('Mắm Nam Ô') && (
