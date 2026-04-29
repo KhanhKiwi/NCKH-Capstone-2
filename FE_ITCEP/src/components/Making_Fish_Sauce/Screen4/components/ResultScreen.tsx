@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
 
 interface ResultScreenProps {

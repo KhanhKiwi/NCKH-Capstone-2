@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Minus, Info } from 'lucide-react';
 import { JarDisplay } from './JarDisplay';
 import { ControlPanel } from './ControlPanel';
-import { FermentationMetrics } from './FermentationMetrics';
+
 import { ResultScreen } from './ResultScreen';
 import { ActionNotification } from './ActionNotification';
 import { AmbientParticles } from './AmbientParticles';
@@ -28,7 +28,7 @@ export function FermentationGame({ onGameEnd }: FermentationGameProps) {
   const [finalQuality, setFinalQuality] = useState(50);
   const [gamePassed, setGamePassed] = useState(false);
   const [phase, setPhase] = useState<'preparation' | 'fermentation' | 'finished'>('preparation');
-  const [stage, setStage] = useState('Chuẩn bị');
+  const [_stage, _setStage] = useState('Chuẩn bị');
   const [timeInRange, setTimeInRange] = useState(0);
   const [notification, setNotification] = useState({ show: false, message: '' });
 
@@ -64,7 +64,7 @@ export function FermentationGame({ onGameEnd }: FermentationGameProps) {
       case 'ferment':
         setIsSealed(true);
         setPhase('fermentation');
-        setStage('Ủ chượp');
+        _setStage('Ủ chượp');
         setTemperature(30);
         setHumidity(75);
         break;
@@ -91,7 +91,7 @@ export function FermentationGame({ onGameEnd }: FermentationGameProps) {
           setGamePassed(passed);
           setGameFinished(true);
           setPhase('finished');
-          setStage('Hoàn thành');
+          _setStage('Hoàn thành');
           
           onGameEnd(passed, calculatedQuality);
           return m;

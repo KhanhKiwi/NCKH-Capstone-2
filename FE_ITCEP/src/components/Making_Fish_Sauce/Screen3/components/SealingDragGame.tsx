@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 
 interface SealingDragGameProps {
@@ -10,7 +10,8 @@ export function SealingDragGame({ isActive, onSealingResult }: SealingDragGamePr
   const [dragProgress, setDragProgress] = useState(0); // 0-100%
   const [isDragging, setIsDragging] = useState(false);
   const [resultMessage, setResultMessage] = useState<string | null>(null);
-  const [dragDirection, setDragDirection] = useState<'left' | 'right' | null>(null);
+  const [_dragDirection, setDragDirection] = useState<'left' | 'right' | null>(null);
+
   const dragStartXRef = useRef(0);
   const totalDragRef = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);

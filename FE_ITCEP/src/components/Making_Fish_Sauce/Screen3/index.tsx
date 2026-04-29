@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { GameHeader } from './components/GameHeader';
 import { SaltRatioSlider } from './components/SaltRatioSlider';
 import { ActionButtons } from './components/ActionButtons';
 import { GameCanvas } from './components/GameCanvas';
 import { DataVisualization } from './components/DataVisualization';
 import { FeedbackToast } from './components/FeedbackToast';
-import { ImageWithFallback } from '../../figma/ImageWithFallback';
+
 import { SaltParticles } from './components/SaltParticles';
 import { MixingTimingGame } from './components/MixingTimingGame';
 import { PressureGauge } from './components/PressureGauge';
@@ -36,12 +36,14 @@ export default function Screen3() {
   
   // Difficulty & Challenge System
   const [mixClickCount, setMixClickCount] = useState(0);
-  const [requiredMixes, setRequiredMixes] = useState(5 + Math.floor(Math.random() * 3)); // 5-7 clicks needed
+  const [requiredMixes] = useState(5 + Math.floor(Math.random() * 3)); // 5-7 clicks needed
   const [lastMixTime, setLastMixTime] = useState<number | null>(null);
-  const [activeChallenge, setActiveChallenge] = useState<string | null>(null);
+  const [_activeChallenge, _setActiveChallenge] = useState<string | null>(null);
+  const [_buttonPressed, _setButtonPressed] = useState<string | null>(null);
+
   const qualityDegradationRef = useRef(0);
   const [showSaltParticles, setShowSaltParticles] = useState(false);
-  const [buttonPressed, setButtonPressed] = useState<string | null>(null);
+
 
   // ========== INITIALIZE TARGET SALT RATIO ==========
   useEffect(() => {
@@ -105,11 +107,11 @@ export default function Screen3() {
       
       if (Math.random() < 0.3) {
         const randomChallenge = challenges[Math.floor(Math.random() * challenges.length)];
-        setActiveChallenge(randomChallenge);
+        _setActiveChallenge(randomChallenge);
         setFeedback(`⚠️ ${randomChallenge}`);
         setQuality(prev => Math.max(0, prev - 2));
         
-        setTimeout(() => setActiveChallenge(null), 3000);
+        setTimeout(() => _setActiveChallenge(null), 3000);
       }
     }, 8000);
     
@@ -156,7 +158,7 @@ export default function Screen3() {
 
     setSaltApplied(true);
     setShowSaltParticles(true);
-    setButtonPressed('salt');
+    _setButtonPressed('salt');
     setQuality(prev => Math.max(0, Math.min(100, prev + qualityChange)));
     setFeedback(feedbackMsg);
     qualityDegradationRef.current = 0;
@@ -175,7 +177,7 @@ export default function Screen3() {
 
     const newClickCount = mixClickCount + 1;
     setMixClickCount(newClickCount);
-    setButtonPressed('mix');
+    _setButtonPressed('mix');
     
     // HARDER LOGIC: Randomized mixing effectiveness + timing penalties
     const currentTime = Date.now();
@@ -289,7 +291,7 @@ export default function Screen3() {
   const handleTransfer = () => {
     if (gameStatus !== 'playing' || currentStep !== 'transferring') return;
     
-    setButtonPressed('transfer');
+    _setButtonPressed('transfer');
     // Random quality check during transfer
     if (Math.random() < 0.3) {
       setFeedback('⚠️ Chuyển không đều - một số muối rơi! -5%');
@@ -337,7 +339,7 @@ export default function Screen3() {
   const handlePress = () => {
     if (gameStatus !== 'playing' || currentStep !== 'pressing') return;
     
-    setButtonPressed('press');
+    _setButtonPressed('press');
     // Random quality check during pressing
     if (Math.random() < 0.25) {
       setFeedback('⚠️ Nén không đều - một số về không phẳng! -3%');
@@ -396,7 +398,7 @@ export default function Screen3() {
   const handleSeal = () => {
     if (gameStatus !== 'playing' || currentStep !== 'sealing') return;
     
-    setButtonPressed('seal');
+    _setButtonPressed('seal');
     setGameStatus('completed');
     const finalQuality = Math.min(100, quality + 10);
     setQuality(finalQuality);

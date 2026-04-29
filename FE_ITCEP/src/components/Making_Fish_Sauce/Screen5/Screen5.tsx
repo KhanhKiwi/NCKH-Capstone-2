@@ -14,7 +14,7 @@ export default function Screen5() {
   const [clarity, setClarity] = useState(45);
   const [harvestComplete, setHarvestComplete] = useState(false);
   const [blendingActive, setBlendingActive] = useState(false);
-  const [finalQuality, setFinalQuality] = useState(0);
+  const [_finalQuality, _setFinalQuality] = useState(0);
 
   // Flavor profile state
   const [flavorProfile, setFlavorProfile] = useState({
@@ -58,7 +58,7 @@ export default function Screen5() {
     setBlendingActive(true);
     setTimeout(() => {
       const quality = Math.round((flavorProfile.umami + flavorProfile.aroma + flavorProfile.aftertaste + flavorProfile.colorQuality) / 4);
-      setFinalQuality(quality);
+      _setFinalQuality(quality);
       toast.success('Pha blend hoàn tất!', {
         description: `Chất lượng đạt ${quality}%`,
       });

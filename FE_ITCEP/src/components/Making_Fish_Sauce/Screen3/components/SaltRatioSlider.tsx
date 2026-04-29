@@ -12,7 +12,7 @@ export function SaltRatioSlider({
   saltRatio,
   onSaltRatioChange,
   disabled = false,
-  gameStatus = 'playing',
+
   targetSaltRatio
 }: SaltRatioSliderProps) {
   return (
