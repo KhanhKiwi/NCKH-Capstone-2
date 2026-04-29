@@ -9,21 +9,29 @@ import { DataVisualization } from './components/DataVisualization';
 import { FeedbackToast } from './components/FeedbackToast';
 import { ImageWithFallback } from '../../figma/ImageWithFallback';
 import { SaltParticles } from './components/SaltParticles';
+import { MixingTimingGame } from './components/MixingTimingGame';
+import { PressureGauge } from './components/PressureGauge';
+import { SealingDragGame } from './components/SealingDragGame';
+import { WinScreen } from './components/WinScreen';
+import { LossScreen } from './components/LossScreen';
 
 export default function Screen3() {
   const navigate = useNavigate();
 
   // Main state
-  const [quality, setQuality] = useState(100);
-  const [saltRatio, setSaltRatio] = useState(3.0);
+  const [quality, setQuality] = useState(60);
+  const [saltRatio, setSaltRatio] = useState(2.0);
   const [mixingEvenness, setMixingEvenness] = useState(0);
   const [currentStep, setCurrentStep] = useState<'adding' | 'mixing' | 'transferring' | 'pressing' | 'sealing'>('adding');
   const [feedback, setFeedback] = useState<string | null>(null);
   const [heatmapData, setHeatmapData] = useState<number[]>(Array(9).fill(0));
+  const [targetSaltRatio, setTargetSaltRatio] = useState<number | null>(null);
+  const [timingMixCount, setTimingMixCount] = useState(0);
   
   // Timer & Game Status
-  const [timeRemaining, setTimeRemaining] = useState(150); // 2.5 minutes
+  const [timeRemaining, setTimeRemaining] = useState(90); // 1.5 minutes
   const [gameStatus, setGameStatus] = useState<'playing' | 'completed' | 'failed'>('playing');
+  const [lossReason, setLossReason] = useState<'timeout' | 'low-quality' | null>(null);
   const [saltApplied, setSaltApplied] = useState(false);
   
   // Difficulty & Challenge System
@@ -35,11 +43,19 @@ export default function Screen3() {
   const [showSaltParticles, setShowSaltParticles] = useState(false);
   const [buttonPressed, setButtonPressed] = useState<string | null>(null);
 
+  // ========== INITIALIZE TARGET SALT RATIO ==========
+  useEffect(() => {
+    // Random target between 3.0 and 4.0
+    const target = 3.0 + Math.random() * 1.0;
+    setTargetSaltRatio(Math.round(target * 10) / 10);
+  }, []);
+
   // ========== TIMER & QUALITY DEGRADATION ==========
   useEffect(() => {
     if (gameStatus !== 'playing' || timeRemaining <= 0) {
       if (timeRemaining <= 0 && gameStatus === 'playing') {
         setGameStatus('failed');
+        setLossReason('timeout');
         setFeedback('⏰ Hết thời gian! Công đoạn ướp cá không hoàn tất.');
       }
       return;
@@ -50,6 +66,7 @@ export default function Screen3() {
         const newTime = prev - 1;
         if (newTime <= 0) {
           setGameStatus('failed');
+          setLossReason('timeout');
           setFeedback('⏰ Hết thời gian! Công đoạn ướp cá không hoàn tất.');
         }
         return Math.max(0, newTime);
@@ -58,7 +75,16 @@ export default function Screen3() {
       // Quality degradation if not progressing
       qualityDegradationRef.current += 0.05;
       if (qualityDegradationRef.current > 1) {
-        setQuality(prev => Math.max(0, prev - 0.5));
+        setQuality(prev => {
+          const newQuality = Math.max(0, prev - 0.5);
+          // Check if quality drops below 30% (game over)
+          if (newQuality < 30 && gameStatus === 'playing') {
+            setGameStatus('failed');
+            setLossReason('low-quality');
+            setFeedback('😢 Chất lượng quá thấp! Công đoạn không thể tiếp tục.');
+          }
+          return newQuality;
+        });
         qualityDegradationRef.current = 0;
       }
     }, 1000);
@@ -108,17 +134,22 @@ export default function Screen3() {
     let qualityChange = 0;
     let feedbackMsg = '';
 
-    // HARDER LOGIC: More precise salt ratio (2.8-3.5 ideal, harsh penalties outside)
-    if (saltRatio < 2.8) {
-      feedbackMsg = '😭 Muối quá thấp! (Đỏ là gây ngoài màu) -20%';
-      qualityChange = -20;
-    } else if (saltRatio > 3.5) {
-      feedbackMsg = '😭 Muối quá cao! (Sản phẩm quá mặn) -15%';
-      qualityChange = -15;
-    } else if (saltRatio >= 2.9 && saltRatio <= 3.2) {
-      feedbackMsg = '✨ Tỉ lệ muối thực sự hoàn hảo! +10% Bonus!';
-      qualityChange = 10;
+    // NEW LOGIC: Check against random target with ±0.1 margin
+    if (targetSaltRatio !== null) {
+      const minAcceptable = targetSaltRatio - 0.1;
+      const maxAcceptable = targetSaltRatio + 0.1;
+      
+      if (saltRatio >= minAcceptable && saltRatio <= maxAcceptable) {
+        // CORRECT! Bonus points
+        feedbackMsg = `✨ Tỉ lệ muối hoàn hảo! ${saltRatio.toFixed(1)} = ${targetSaltRatio.toFixed(1)} +10% Bonus!`;
+        qualityChange = 10;
+      } else {
+        // WRONG! Heavy penalty
+        feedbackMsg = `😭 Sai tỉ lệ muối! Cần ${targetSaltRatio.toFixed(1)}, bạn cho ${saltRatio.toFixed(1)} -20%`;
+        qualityChange = -20;
+      }
     } else {
+      // Fallback (shouldn't happen)
       feedbackMsg = '✓ Tỉ lệ muối chấp nhận được! +5%';
       qualityChange = 5;
     }
@@ -202,6 +233,59 @@ export default function Screen3() {
     setFeedback(feedbackMsg);
   };
 
+  // NEW: Spacebar timing game for mixing
+  const handleTimingResult = (success: boolean) => {
+    if (gameStatus !== 'playing' || currentStep !== 'mixing') return;
+
+    const newCount = timingMixCount + 1;
+    setTimingMixCount(newCount);
+
+    // Calculate progress
+    const progressPerHit = 100 / requiredMixes;
+    const newEvenness = Math.min(100, mixingEvenness + progressPerHit);
+    setMixingEvenness(newEvenness);
+
+    // Update heatmap
+    const newHeatmap = heatmapData.map(() => Math.random() * (newEvenness / 100));
+    setHeatmapData(newHeatmap);
+
+    let qualityChange = 0;
+    let feedbackMsg = '';
+
+    if (success) {
+      // Correct timing: +5%
+      qualityChange = 5;
+      feedbackMsg = `✓ Lần ${newCount}/${requiredMixes}... Trúng! Độ đều ${Math.round(newEvenness)}% +5%`;
+    } else {
+      // Missed timing: -6%
+      qualityChange = -6;
+      feedbackMsg = `✗ Lần ${newCount}/${requiredMixes}... Sai! Độ đều ${Math.round(newEvenness)}% -6%`;
+    }
+
+    const newQuality = Math.max(0, Math.min(100, quality + qualityChange));
+    setQuality(newQuality);
+    
+    // Check if quality drops below 30%
+    if (newQuality < 30) {
+      setGameStatus('failed');
+      setLossReason('low-quality');
+      setFeedback('😢 Chất lượng quá thấp! Công đoạn không thể tiếp tục.');
+      return;
+    }
+    
+    setFeedback(feedbackMsg);
+
+    // Check if mixing is complete (reached target evenness or max attempts)
+    if (newEvenness >= 95 || newCount >= requiredMixes) {
+      setTimeout(() => {
+        setCurrentStep('transferring');
+        setFeedback('✨ Trộn đều hoàn hảo! Bước tiếp theo: Chuyển vào thùng chum!');
+        setTimingMixCount(0);
+        qualityDegradationRef.current = 0;
+      }, 1500);
+    }
+  };
+
   const handleTransfer = () => {
     if (gameStatus !== 'playing' || currentStep !== 'transferring') return;
     
@@ -222,6 +306,34 @@ export default function Screen3() {
     }, 1500);
   };
 
+  // NEW: Pressure gauge for pressing
+  const handlePressureResult = (success: boolean) => {
+    if (gameStatus !== 'playing' || currentStep !== 'pressing') return;
+
+    let qualityChange = 0;
+    let feedbackMsg = '';
+
+    if (success) {
+      // Perfect pressure: +8%
+      qualityChange = 8;
+      feedbackMsg = '✓ Nén chặt hoàn hảo! Môi trường kỵ khí tốt +8%';
+    } else {
+      // Bad pressure: -5%
+      qualityChange = -5;
+      feedbackMsg = '⚠️ Nén chặt không đúng lực! -5%';
+    }
+
+    setQuality(prev => Math.max(0, Math.min(100, prev + qualityChange)));
+    setFeedback(feedbackMsg);
+    qualityDegradationRef.current = 0;
+
+    // Auto-advance to sealing after result
+    setTimeout(() => {
+      setCurrentStep('sealing');
+      setFeedback('Bước cuối: Phủ & Đậy năp!');
+    }, 1500);
+  };
+
   const handlePress = () => {
     if (gameStatus !== 'playing' || currentStep !== 'pressing') return;
     
@@ -239,6 +351,45 @@ export default function Screen3() {
     setTimeout(() => {
       setCurrentStep('sealing');
       setFeedback('Bước cuối: Phủ & Đậy năp!');
+    }, 1500);
+  };
+
+  // NEW: Sealing drag game handler
+  const handleSealingResult = (success: boolean) => {
+    if (gameStatus !== 'playing' || currentStep !== 'sealing') return;
+
+    let qualityChange = 0;
+    let feedbackMsg = '';
+
+    if (success) {
+      // Perfect sealing: +8%
+      qualityChange = 8;
+      feedbackMsg = '✓ Phủ muối hoàn hảo! Đậy nắp kín! +8%';
+    } else {
+      // Bad sealing: -5%
+      qualityChange = -5;
+      feedbackMsg = '⚠️ Phủ muối không đều! -5%';
+    }
+
+    const newQuality = Math.max(0, Math.min(100, quality + qualityChange));
+    setQuality(newQuality);
+
+    // Check if quality drops below 30%
+    if (newQuality < 30) {
+      setGameStatus('failed');
+      setLossReason('low-quality');
+      setFeedback('😢 Chất lượng quá thấp! Công đoạn không thể tiếp tục.');
+      return;
+    }
+
+    setFeedback(feedbackMsg);
+    qualityDegradationRef.current = 0;
+
+    // Auto-complete game after sealing
+    setTimeout(() => {
+      setGameStatus('completed');
+      const finalQuality = Math.min(100, newQuality);
+      setQuality(finalQuality);
     }, 1500);
   };
 
@@ -317,19 +468,43 @@ export default function Screen3() {
           onSaltRatioChange={setSaltRatio}
           disabled={gameStatus !== 'playing' || currentStep !== 'adding'}
           gameStatus={gameStatus}
+          targetSaltRatio={targetSaltRatio ?? undefined}
         />
 
-        {/* Action Buttons */}
-        <ActionButtons
-          currentStep={currentStep}
-          mixingEvenness={mixingEvenness}
-          gameStatus={gameStatus}
-          onAddSalt={handleAddSalt}
-          onMix={handleMix}
-          onTransfer={handleTransfer}
-          onPress={handlePress}
-          onSeal={handleSeal}
-        />
+        {/* Mixing Timing Game / Pressure Gauge / Sealing Drag Game / Action Buttons */}
+        {currentStep === 'mixing' ? (
+          <div className="w-full px-4 sm:px-6 md:px-4 py-2 sm:py-3 md:py-2">
+            <MixingTimingGame 
+              isActive={gameStatus === 'playing'} 
+              onTimingResult={handleTimingResult}
+            />
+          </div>
+        ) : currentStep === 'pressing' ? (
+          <div className="w-full px-4 sm:px-6 md:px-4 py-2 sm:py-3 md:py-2">
+            <PressureGauge
+              isActive={gameStatus === 'playing'}
+              onPressureResult={handlePressureResult}
+            />
+          </div>
+        ) : currentStep === 'sealing' ? (
+          <div className="w-full px-4 sm:px-6 md:px-4 py-2 sm:py-3 md:py-2">
+            <SealingDragGame
+              isActive={gameStatus === 'playing'}
+              onSealingResult={handleSealingResult}
+            />
+          </div>
+        ) : (
+          <ActionButtons
+            currentStep={currentStep}
+            mixingEvenness={mixingEvenness}
+            gameStatus={gameStatus}
+            onAddSalt={handleAddSalt}
+            onMix={handleMix}
+            onTransfer={handleTransfer}
+            onPress={handlePress}
+            onSeal={handleSeal}
+          />
+        )}
 
         {/* Data Visualization */}
         <DataVisualization
@@ -341,6 +516,18 @@ export default function Screen3() {
         {/* Feedback Toast */}
         <FeedbackToast message={feedback} />
       </div>
+
+      {/* Win Screen */}
+      <AnimatePresence>
+        {gameStatus === 'completed' && <WinScreen quality={quality} />}
+      </AnimatePresence>
+
+      {/* Loss Screen */}
+      <AnimatePresence>
+        {gameStatus === 'failed' && lossReason && (
+          <LossScreen reason={lossReason} quality={quality} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
