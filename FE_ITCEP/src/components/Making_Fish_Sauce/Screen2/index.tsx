@@ -390,10 +390,10 @@ export default function Screen2() {
       if (userId) {
         await progressService.completeLevel(userId, 2, quality);
       }
-      navigate('/craft-selection');
+      navigate('/game/wash-salt');
     } catch (error) {
       console.error('Failed to save progress:', error);
-      navigate('/craft-selection');
+      navigate('/game/wash-salt');
     }
   };
 

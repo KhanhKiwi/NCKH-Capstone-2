@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react'
 import VillagesView from '../../components/Admin/VillagesView'
 import VisitsChart from '../../components/Admin/VisitsChart'
+import PlayerProgressManager from '../../components/Admin/PlayerProgressManager'
 import { usersService } from '../../api/users/usersService'
 
 type User = { id: string; name: string; email: string }
 type Feedback = { id: string; user: string; message: string; resolved?: boolean }
 
 export default function AdminPage() {
-  const [active, setActive] = useState<'dashboard' | 'users' | 'feedback' | 'villages' | 'settings'>(() => {
+  const [active, setActive] = useState<'dashboard' | 'users' | 'feedback' | 'villages' | 'settings' | 'player-progress'>(() => {
     try {
       const v = localStorage.getItem('adminActive')
-      if (v === 'dashboard' || v === 'users' || v === 'feedback' || v === 'villages' || v === 'settings') return v
+      if (v === 'dashboard' || v === 'users' || v === 'feedback' || v === 'villages' || v === 'settings' || v === 'player-progress') return v
     } catch (e) {}
     return 'dashboard'
   })
@@ -183,6 +184,7 @@ export default function AdminPage() {
                   ['dashboard', '🏠', 'Dashboard'],
                   ['users', '👥', 'Users'],
                   ['feedback', '💬', 'Feedback'],
+                  ['player-progress', '🔓', 'Unlock Levels'],
                   ['villages', '🏘️', 'Villages'],
                   ['settings', '⚙️', 'Settings'],
                 ].map(([key, icon, label]) => {
@@ -387,6 +389,10 @@ export default function AdminPage() {
                   ))}
                 </ul>
               </section>
+            )}
+
+            {active === 'player-progress' && (
+              <PlayerProgressManager />
             )}
 
             {active === 'villages' && (

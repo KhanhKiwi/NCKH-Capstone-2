@@ -104,18 +104,50 @@ export default function MamNamOModal({ onClose, isOpen }: MamNamOModalProps) {
   };
 
   const isLevelLocked = (levelId: number): boolean => {
-    // Level 1 is always unlocked
+    // Check if this level is explicitly locked by admin
+    const currentLevel = getProgressForLevel(levelId);
+    if (currentLevel && currentLevel.status === 'locked') return true;
+    
+    // Level 1 doesn't need previous level unlocked
     if (levelId === 1) return false;
     
-    // Check if previous level is completed
+    // Check if previous level is completed or unlocked by admin
     const previousLevel = getProgressForLevel(levelId - 1);
-    return !previousLevel || previousLevel.status !== 'completed';
+    return !previousLevel || (previousLevel.status !== 'completed' && previousLevel.status !== 'unlocked');
   };
 
-  const handlePlayGame = (levelId: number, route: string) => {
-    if (!isLevelLocked(levelId)) {
-      onClose();
-      navigate(route);
+  const handlePlayGame = async (levelId: number, route: string) => {
+    // Re-fetch latest progress before playing to catch admin locks
+    try {
+      const userId = getUserId();
+      if (userId) {
+        const latestProgress = await progressService.getUserProgress(userId);
+        setProgress(latestProgress);
+        
+        // Now check with fresh data
+        const freshProgressForLevel = latestProgress.find((p) => p.level.level_id === levelId);
+        
+        // Check if explicitly locked by admin
+        if (freshProgressForLevel && freshProgressForLevel.status === 'locked') {
+          alert('Màn này đã bị khóa bởi admin. Vui lòng mở khóa trước khi chơi.');
+          return;
+        }
+        
+        // For levels 2+, check if previous level is unlocked
+        if (levelId > 1) {
+          const prevLevel = latestProgress.find((p) => p.level.level_id === levelId - 1);
+          if (!prevLevel || (prevLevel.status !== 'completed' && prevLevel.status !== 'unlocked')) {
+            alert('Hoàn thành màn trước để mở màn này.');
+            return;
+          }
+        }
+        
+        onClose();
+        navigate(route);
+      }
+    } catch (error) {
+      console.error('Failed to verify level status:', error);
+      alert('Lỗi khi kiểm tra trạng thái màn. Vui lòng thử lại.');
     }
   };
 
@@ -240,7 +272,7 @@ export default function MamNamOModal({ onClose, isOpen }: MamNamOModalProps) {
                               ? 'border-gray-300 bg-gray-50 cursor-not-allowed opacity-60'
                               : 'border-amber-200 hover:bg-amber-50 hover:border-amber-400 cursor-pointer group'
                           }`}
-                          onClick={() => !isLocked && handlePlayGame(level.id, level.route)}
+                          onClick={() => handlePlayGame(level.id, level.route)}
                           title={isLocked ? 'Hoàn thành màn trước để mở' : ''}
                         >
                           <div className="flex items-start justify-between">
