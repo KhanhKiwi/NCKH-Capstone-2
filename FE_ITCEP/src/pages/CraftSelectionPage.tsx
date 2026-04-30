@@ -68,6 +68,15 @@ export default function CraftSelectionPage() {
   const handleCraftClick = (craft: Craft) => {
     if (craft.comingSoon) return;
     if (!craft.unlocked) return; // do not open locked crafts
+    // If this is the Làng Dệt Đinh Yên craft, unlock all levels locally
+    const craftName = craft.name ?? '';
+    if (craftName.toLowerCase().includes('đinh yên') || craftName.toLowerCase().includes('dệt')) {
+      setLevels(defaultLevels.map(l => ({ ...l, unlocked: true })));
+    } else {
+      // reset to default per-craft fallback
+      setLevels(defaultLevels);
+    }
+
     setSelectedCraft(craft);
     setShowLevelModal(true);
   };

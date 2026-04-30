@@ -33,6 +33,7 @@ export default function Level3() {
   const potAlphaRef = useRef<number>(1);
   const potTargetRef = useRef<number>(1);
   const startedRef = useRef<boolean>(false);
+  const [started, setStarted] = useState(false);
                       <button
                         onClick={() => { setShowSuccess(false); setSummaryOpen(true); }}
                         className="px-5 py-2 rounded-2xl bg-white border border-gray-200 text-gray-700 hover:shadow-lg transition"
@@ -643,11 +644,12 @@ export default function Level3() {
                     setWeatherTimer(30);
                     startedRef.current = true;
                   }
+                  setStarted(true);
                   setRunning(true);
                 }}
               className="px-4 py-2 bg-emerald-600 text-white rounded-lg shadow"
             >
-              Bắt đầu
+              {started ? 'Tiếp tục' : 'Bắt đầu'}
             </button>
           ) : (
             <button
@@ -703,6 +705,7 @@ export default function Level3() {
                           setWeatherTimer(30);
                           setRunning(false);
                           startedRef.current = false;
+                          setStarted(false);
                         }}
                       className="px-5 py-2 rounded-2xl bg-emerald-600 text-white hover:bg-emerald-700 transition shadow-lg"
                     >
@@ -758,7 +761,7 @@ export default function Level3() {
                   setSummaryOpen(false);
                   navigate('/craft-selection?openName=B%C3%A1t%20Tr%C3%A0ng');
                 }} style={{padding:'10px 18px',background:'linear-gradient(90deg,#10b981,#06a86b)',color:'white',borderRadius:12,border:'none',fontWeight:800}}>Hoàn tất</button>
-                <button onClick={()=>{ setSummaryOpen(false); setShowSuccess(false); setHumidity(0); setTimeLeft(INITIAL_TIME); setSelectedWeather(INITIAL_WEATHER); setWeatherTimer(30); startedRef.current = false; navigate('/bat-trang/level-3'); }} style={{padding:'10px 18px',background:'white',borderRadius:12,border:'1px solid rgba(0,0,0,0.06)',fontWeight:700}}>Chơi lại</button>
+                <button onClick={()=>{ setSummaryOpen(false); setShowSuccess(false); setHumidity(0); setTimeLeft(INITIAL_TIME); setSelectedWeather(INITIAL_WEATHER); setWeatherTimer(30); startedRef.current = false; setStarted(false); navigate('/bat-trang/level-3'); }} style={{padding:'10px 18px',background:'white',borderRadius:12,border:'1px solid rgba(0,0,0,0.06)',fontWeight:700}}>Chơi lại</button>
               </div>
             </div>
           </div>
@@ -796,6 +799,7 @@ export default function Level3() {
                         setWeatherTimer(30);
                         setRunning(false);
                         startedRef.current = false;
+                        setStarted(false);
                       }}
                       className="px-5 py-2 rounded-2xl bg-white border border-gray-200 text-gray-700 hover:shadow-lg transition"
                     >

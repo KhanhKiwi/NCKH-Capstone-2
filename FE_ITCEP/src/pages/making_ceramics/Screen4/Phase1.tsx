@@ -13,6 +13,7 @@ export default function Level4() {
   const [drawAnywhere, setDrawAnywhere] = useState(true)
   const [running, setRunning] = useState(false)
   const [timeLeft, setTimeLeft] = useState(135) // 2:15 default as in mock
+  const [started, setStarted] = useState(false)
   const [decorProgress, setDecorProgress] = useState(40)
   const [quality, setQuality] = useState(92)
   const [activeTool, setActiveTool] = useState<'none'|'pencil'|'brush'>('none')
@@ -590,10 +591,10 @@ export default function Level4() {
         <div className="absolute right-4 sm:right-8 z-50 flex items-center gap-3" style={{top: '65%'}}>
           {!running ? (
             <button
-              onClick={() => setRunning(true)}
+              onClick={() => { setRunning(true); setStarted(true) }}
               className="px-4 py-2 bg-emerald-600 text-white rounded-lg shadow"
             >
-              Bắt đầu
+              {started ? 'Tiếp tục' : 'Bắt đầu'}
             </button>
           ) : (
             <button
@@ -736,6 +737,58 @@ export default function Level4() {
                     onClick={async () => {
                       // close modal first for UX
                       setShowFinishModal(false)
+
+                      // Export the decorated pot (crop to pot area) so Level 5 can reuse it.
+                      try {
+                        const main = canvasRef.current
+                        const overlay = drawCanvasRef.current
+                        if (main && overlay) {
+                          const rect = main.getBoundingClientRect()
+                          const w = rect.width
+                          const h = rect.height
+                          const dpr = window.devicePixelRatio || 1
+
+                          // same pot layout logic as render loop
+                          const vw = Math.min(w * 0.20, 320)
+                          const vh = vw * 1.05
+                          const sx = Math.floor((w / 2 - vw / 2) * dpr)
+                          const sy = Math.floor((h * 0.55 - vh * 0.45) * dpr)
+                          const sw = Math.floor(vw * dpr)
+                          const sh = Math.floor(vh * dpr)
+
+                          // create offscreen canvas and draw only the pot (transparent background)
+                          const tmp = document.createElement('canvas')
+                          tmp.width = sw
+                          tmp.height = sh
+                          tmp.style.width = `${sw / dpr}px`
+                          tmp.style.height = `${sh / dpr}px`
+                          const tctx = tmp.getContext('2d')!
+                          // ensure correct pixel density
+                          tctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+
+                          // Re-render the pot shape into the temporary canvas so background stays transparent.
+                          try {
+                            // vw/vh are CSS pixels; drawRealisticPot expects those units.
+                            drawRealisticPot(tctx, (sw / dpr) / 2, 0, vw, vh, dpr)
+                          } catch (e) {
+                            // fallback: if pot redraw fails, try copying from main canvas crop
+                            tctx.clearRect(0, 0, sw, sh)
+                            tctx.drawImage(main, sx, sy, sw, sh, 0, 0, sw, sh)
+                          }
+
+                          // draw only overlay (user decorations) from the overlay canvas into tmp
+                          tctx.drawImage(overlay, sx, sy, sw, sh, 0, 0, sw, sh)
+                          try {
+                            const data = tmp.toDataURL('image/png')
+                            localStorage.setItem('batTrang_decorated_pot', data)
+                          } catch (e) {
+                            console.warn('export decorated pot failed', e)
+                          }
+                        }
+                      } catch (e) {
+                        console.warn('capture error', e)
+                      }
+
                       try {
                         // Attempt to map levels via API (village id 1 = Bát Tràng)
                         const lvls = await levelsService.getByVillage(1)

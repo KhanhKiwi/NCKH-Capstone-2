@@ -1,324 +1,224 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 
-export default function BatTrangLevel5Phase1() {
+const QUESTIONS = [
+  {
+    id: 1,
+    q: 'Nhiệt độ nung ảnh hưởng lớn nhất đến điều nào sau đây?',
+    options: ['Màu sắc men', 'Độ ẩm đất', 'Kích thước đất', 'Thời gian phơi'],
+    a: 0,
+  },
+  {
+    id: 2,
+    q: 'Giai đoạn nung làm cho gốm trở nên:',
+    options: ['Cứng hơn và bền hơn', 'Mềm và dẻo', 'Ẩm hơn', 'Nhẹ hơn'],
+    a: 0,
+  },
+  {
+    id: 3,
+    q: 'Nếu nhiệt tăng quá nhanh, rủi ro chính là:',
+    options: ['Nứt do sốc nhiệt', 'Men sáng bóng hơn', 'Gốm nhẹ hơn', 'Giảm thời gian nung'],
+    a: 0,
+  },
+  {
+    id: 4,
+    q: 'Phạm vi nhiệt lý tưởng cho bài học này là:',
+    options: ['900-1000°C', '1000-1050°C', '1050-1150°C', '1200-1300°C'],
+    a: 2,
+  },
+  {
+    id: 5,
+    q: 'Giữ nhiệt trong vùng lý tưởng giúp:',
+    options: ['Tăng chất lượng gốm', 'Giảm độ bền', 'Gây nứt', 'Làm gốm tan chảy'],
+    a: 0,
+  },
+]
+
+export default function BatTrangLevel5Phase0() {
   const navigate = useNavigate()
+  type Q = { id: number; q: string; options: string[]; a: number }
+  const shuffleArray = <T,>(arr: T[]) => {
+    const a = arr.slice()
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      const tmp = a[i]
+      a[i] = a[j]
+      a[j] = tmp
+    }
+    return a
+  }
 
-  const [temperature, setTemperature] = useState(1120)
-  const [timeLeft, setTimeLeft] = useState(35 * 60)
-  const [quality, setQuality] = useState(88)
-  const [running, setRunning] = useState(true)
+  const shuffleQuestion = (q: Q): Q => {
+    const idx = q.options.map((_, i) => i)
+    const shuffledIdx = shuffleArray(idx)
+    const newOptions = shuffledIdx.map(i => q.options[i])
+    const newA = shuffledIdx.findIndex(i => i === q.a)
+    return { id: q.id, q: q.q, options: newOptions, a: newA }
+  }
 
-  const sliderRef = useRef<HTMLDivElement | null>(null)
-  const potCanvasRef = useRef<HTMLCanvasElement | null>(null)
+  const makeShuffledQuiz = () => shuffleArray(QUESTIONS.map(q => shuffleQuestion(q as Q)))
 
-  const MIN = 900
-  const MAX = 1250
-  const IDEAL_MIN = 1050
-  const IDEAL_MAX = 1150
+  const [quiz, setQuiz] = useState<Q[]>(() => makeShuffledQuiz())
+  const [answers, setAnswers] = useState<Record<number, number | null>>({})
+  const [submitted, setSubmitted] = useState(false)
+  const [correctCount, setCorrectCount] = useState(0)
+  const [confetti, setConfetti] = useState<number[]>([])
 
-  /* ===== TIME ===== */
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((t) => Math.max(0, t - 1))
-    }, 1000)
-    return () => clearInterval(timer)
+    document.title = 'Bát Tràng — Level 5: Trắc nghiệm nung'
   }, [])
 
-  // draw pot into center canvas
-  useEffect(() => {
-    const canvas = potCanvasRef.current
-    if (!canvas) return
-    const rect = canvas.getBoundingClientRect()
-    const dpr = window.devicePixelRatio || 1
-    const w = Math.floor(rect.width)
-    const h = Math.floor(rect.height)
-    canvas.width = Math.floor(w * dpr)
-    canvas.height = Math.floor(h * dpr)
-    canvas.style.width = `${w}px`
-    canvas.style.height = `${h}px`
-    const ctx = canvas.getContext('2d')!
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-    ctx.clearRect(0,0,w,h)
-    const cx = w / 2
-    const topY = h * 0.08
-    const potW = Math.min(w * 0.8, 340)
-    const potH = potW * 1.12
-    drawRealisticPot(ctx, cx, topY, potW, potH)
-    // redraw on resize
-    const onResize = () => {
-      const r = canvas.getBoundingClientRect()
-      const nw = Math.floor(r.width)
-      const nh = Math.floor(r.height)
-      canvas.width = Math.floor(nw * dpr)
-      canvas.height = Math.floor(nh * dpr)
-      canvas.style.width = `${nw}px`
-      canvas.style.height = `${nh}px`
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      ctx.clearRect(0,0,nw,nh)
-      const newW = Math.min(nw * 0.8, 340)
-      drawRealisticPot(ctx, nw/2, nh * 0.08, newW, newW * 1.12)
+  const select = (id: number, idx: number) => {
+    if (submitted) return
+    setAnswers(prev => ({ ...prev, [id]: idx }))
+  }
+
+  const handleSubmit = () => {
+    const correct = quiz.reduce((acc, q) => {
+      const sel = answers[q.id]
+      return acc + (sel === q.a ? 1 : 0)
+    }, 0)
+    setCorrectCount(correct)
+    setSubmitted(true)
+    // trigger confetti if at least one correct
+    if (correct > 0) {
+      // create 24 confetti pieces
+      setConfetti(Array.from({ length: 24 }, (_, i) => i))
+      // clear after animation
+      setTimeout(() => setConfetti([]), 3000)
     }
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
-  }, [potCanvasRef, temperature])
-
-  const formatTime = (s: number) => {
-    const m = Math.floor(s / 60)
-    const r = s % 60
-    return `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`
   }
 
-  /* ===== QUALITY LOGIC ===== */
-  useEffect(() => {
-    const ideal = 1100
-    const diff = Math.abs(temperature - ideal)
-
-    setQuality((q) => {
-      let next = q
-      if (diff < 40) next += 0.15
-      else if (diff < 100) next -= 0.05
-      else next -= 0.25
-      return Math.max(0, Math.min(100, next))
-    })
-  }, [temperature])
-
-  /* ===== DRAG SLIDER ===== */
-  const handleDrag = (e: React.MouseEvent) => {
-    if (!sliderRef.current) return
-
-    const rect = sliderRef.current.getBoundingClientRect()
-    const y = e.clientY - rect.top
-    const percent = 1 - y / rect.height
-    const value = MIN + percent * (MAX - MIN)
-
-    setTemperature(Math.round(Math.max(MIN, Math.min(MAX, value))))
+  const handleContinue = () => {
+    // only navigate if perfect score achieved -> go to firing phase (phase2)
+    if (correctCount === quiz.length) {
+      navigate('/bat-trang/level-5/phase2')
+    }
   }
-
-  const bgUrl = encodeURI('/images_making_ceramic/ảnh nền nung.png')
-  const asciiFallback = '/images_making_ceramic/oven-bg.png'
 
   return (
-    <div style={{backgroundImage: `url('${bgUrl}'), url('${asciiFallback}')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', minHeight: '100vh'}} className="w-screen text-white flex flex-col items-center p-6">
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white py-12 flex items-center justify-center">
+      <div className="max-w-3xl w-full px-6">
+        <header className="relative rounded-2xl overflow-hidden bg-white shadow-xl border border-gray-100 mb-8 p-8">
+          <h1 className="text-4xl font-extrabold mb-2">Level 5 — Trắc nghiệm: Nung gốm</h1>
+          <p className="text-gray-700">Trả lời các câu hỏi ngắn sau để ôn lại kiến thức về nung trước khi vào lò.</p>
+        </header>
 
-      {/* ===== HEADER ===== */}
-      <div className="px-8 py-4 rounded-2xl bg-gradient-to-b from-[#f5d7a1] to-[#c98a4a] shadow-2xl">
-        <h1 className="text-3xl font-extrabold text-black text-center">
-          LEVEL 5: NUNG GỐM
-        </h1>
-        <p className="text-center text-black/80 text-sm">
-          Giữ nhiệt độ trong vùng lý tưởng để đạt chất lượng cao
-        </p>
-      </div>
-
-      {/* ===== MAIN ===== */}
-      <div className="grid grid-cols-12 gap-6 w-full max-w-[1200px] mt-6 flex-1">
-
-        {/* ===== LEFT ===== */}
-        <div className="col-span-3 space-y-4">
-
-          {/* Temp */}
-          <div className="bg-white/10 backdrop-blur rounded-xl p-4 shadow-lg">
-            <div className="text-sm text-gray-300">Nhiệt độ lò</div>
-            <div className="text-4xl font-bold text-red-400">
-              {temperature}°C
+        <main className="bg-white rounded-xl shadow border p-6 relative overflow-hidden">
+          {/* Confetti layer */}
+          {confetti.length > 0 && (
+            <div className="pointer-events-none absolute inset-0 z-40">
+              {confetti.map(i => (
+                <span
+                  key={i}
+                  className="confetti"
+                  style={{
+                    left: `${10 + (i * 3) % 80}%`,
+                    background: ['#F59E0B', '#10B981', '#EF4444', '#3B82F6'][i % 4],
+                    transform: `translateY(-10vh) rotate(${i * 30}deg)`,
+                    animationDelay: `${(i % 6) * 80}ms`,
+                  }}
+                />
+              ))}
             </div>
-
-            <div className="mt-2 h-2 bg-gray-700 rounded">
-              <div
-                className={`h-2 rounded ${
-                  temperature >= IDEAL_MIN && temperature <= IDEAL_MAX
-                    ? 'bg-green-400'
-                    : 'bg-red-500'
-                }`}
-                style={{
-                  width: `${((temperature - MIN) / (MAX - MIN)) * 100}%`,
-                }}
-              />
-            </div>
-
-            <div className="text-xs text-gray-400 mt-1">
-              Lý tưởng: {IDEAL_MIN} - {IDEAL_MAX}
-            </div>
-          </div>
-
-          {/* Time */}
-          <div className="bg-white/10 backdrop-blur rounded-xl p-4 shadow-lg">
-            <div className="text-sm text-gray-300">Thời gian</div>
-            <div className="text-3xl text-blue-300 font-bold">
-              {formatTime(timeLeft)}
-            </div>
-          </div>
-
-          {/* Quality */}
-          <div className="bg-white/10 backdrop-blur rounded-xl p-4 shadow-lg">
-            <div className="flex justify-between">
-              <div>
-                <div className="text-sm text-gray-300">Chất lượng</div>
-                <div className="text-2xl text-green-400 font-bold">
-                  {Math.round(quality)}%
+          )}
+          <ol className="space-y-6">
+            {quiz.map((q, i) => (
+              <li key={q.id} className="border p-4 rounded-lg">
+                <div className="mb-3 font-semibold">{i + 1}. {q.q}</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {q.options.map((opt, idx) => {
+                      const sel = answers[q.id]
+                      const isSelected = sel === idx
+                      const showCorrect = submitted && q.a === idx
+                      const wrongSelected = submitted && isSelected && sel !== q.a
+                      return (
+                        <div key={idx} className="relative">
+                          <button
+                            onClick={() => select(q.id, idx)}
+                            className={`w-full text-left px-3 py-2 rounded-md border flex items-center justify-between ${isSelected ? 'bg-amber-100 border-amber-300' : 'bg-white'} ${showCorrect ? 'ring-2 ring-emerald-300 scale-up' : ''} ${wrongSelected ? 'bg-red-100 border-red-300 shake' : ''}`}
+                          >
+                            <span>{opt}</span>
+                            <span className="ml-3">
+                              {submitted && showCorrect && (
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-emerald-600">
+                                  <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                              )}
+                              {submitted && wrongSelected && (
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-red-600">
+                                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                              )}
+                            </span>
+                          </button>
+                        </div>
+                      )
+                    })}
                 </div>
-              </div>
+              </li>
+            ))}
+          </ol>
 
-              <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
-                {Math.round(quality)}
-              </div>
+          <div className="mt-6 flex items-center justify-between">
+            <div className="text-sm text-gray-600">{submitted ? `Đúng ${correctCount} / ${QUESTIONS.length}` : 'Chọn đáp án cho mỗi câu'}</div>
+            <div className="flex gap-3">
+              {!submitted ? (
+                <button onClick={handleSubmit} className="px-4 py-2 bg-amber-500 text-white rounded-md">Nộp bài</button>
+              ) : (
+                <>
+                  <button onClick={() => { setSubmitted(false); setAnswers({}); setCorrectCount(0); setQuiz(makeShuffledQuiz()) }} className="px-4 py-2 bg-white border rounded-md">Làm lại</button>
+                  <button
+                    onClick={handleContinue}
+                    disabled={correctCount !== quiz.length}
+                    className={`px-4 py-2 rounded-md ${correctCount === quiz.length ? 'bg-emerald-600 text-white' : 'bg-gray-300 text-gray-600 cursor-not-allowed'}`}
+                  >
+                    Tiếp tục
+                  </button>
+                  {correctCount !== quiz.length && (
+                    <div className="text-sm text-red-600 mt-2">Bạn phải trả lời đúng 5/5 mới được qua màn</div>
+                  )}
+                </>
+              )}
             </div>
-
-            <div className="mt-3 h-2 bg-gray-700 rounded">
-              <div
-                className="h-2 bg-green-400 rounded"
-                style={{ width: `${quality}%` }}
-              />
-            </div>
           </div>
-        </div>
-
-        {/* ===== CENTER ===== */}
-        <div className="col-span-6 flex items-center justify-center">
-
-          <div className="relative">
-
-            {/* glow */}
-            <div className="absolute inset-0 bg-orange-500 blur-3xl opacity-30 rounded-full" />
-
-                {/* pot canvas (bigger) */}
-                <canvas ref={potCanvasRef} className="w-80 h-80 md:w-96 md:h-96 rounded shadow-2xl bg-transparent" />
-
-            {/* fire glow */}
-            <div className="absolute bottom-[-20px] left-1/2 -translate-x-1/2 w-40 h-10 bg-orange-600 blur-xl opacity-70 rounded-full" />
-
-          </div>
-        </div>
-
-        {/* ===== RIGHT SLIDER ===== */}
-        <div className="col-span-3 flex flex-col items-center">
-
-          <div
-            ref={sliderRef}
-            onMouseMove={(e) => e.buttons === 1 && handleDrag(e)}
-            onMouseDown={handleDrag}
-            className="relative h-[320px] w-20 rounded-full bg-gradient-to-b from-yellow-200 via-orange-400 to-red-800 flex items-center justify-center cursor-pointer shadow-inner"
-          >
-            {/* PERFECT ZONE */}
-            <div
-              className="absolute w-full bg-green-400/30"
-              style={{
-                bottom: `${((IDEAL_MIN - MIN) / (MAX - MIN)) * 100}%`,
-                height: `${((IDEAL_MAX - IDEAL_MIN) / (MAX - MIN)) * 100}%`,
-              }}
-            />
-
-            {/* HANDLE */}
-            <div
-              className="absolute w-14 h-14 bg-orange-400 rounded-full shadow-lg border-4 border-orange-200"
-              style={{
-                bottom: `${((temperature - MIN) / (MAX - MIN)) * 100}%`,
-                transform: 'translateY(50%)',
-              }}
-            />
-          </div>
-
-          <div className="mt-4 text-sm text-gray-400">
-            {temperature}°C
-          </div>
-        </div>
+        </main>
       </div>
     </div>
   )
 }
 
-// drawRealisticPot copied and adapted from Screen4
-function drawRealisticPot(
-  ctx: CanvasRenderingContext2D,
-  cx: number,
-  topY: number,
-  potW: number,
-  potH: number
-): Path2D {
-  const left = cx - potW / 2
-  ctx.save()
-  const path = new Path2D()
-  path.moveTo(left + potW * 0.25, topY + potH * 0.08)
-  path.bezierCurveTo(
-    left + potW * 0.1,
-    topY + potH * 0.35,
-    left + potW * 0.2,
-    topY + potH * 0.75,
-    left + potW * 0.4,
-    topY + potH * 0.92
-  )
-  path.lineTo(left + potW * 0.6, topY + potH * 0.92)
-  path.bezierCurveTo(
-    left + potW * 0.8,
-    topY + potH * 0.75,
-    left + potW * 0.9,
-    topY + potH * 0.35,
-    left + potW * 0.75,
-    topY + potH * 0.08
-  )
-  path.closePath()
-  ctx.save()
-  ctx.clip(path)
-  const base = ctx.createLinearGradient(left, topY, left, topY + potH)
-  base.addColorStop(0, '#f5dcc0')
-  base.addColorStop(0.5, '#c9895b')
-  base.addColorStop(1, '#7a4526')
-  ctx.fillStyle = base
-  ctx.fillRect(left, topY, potW, potH)
-  ctx.globalCompositeOperation = 'multiply'
-  const shade = ctx.createLinearGradient(left, 0, left + potW, 0)
-  shade.addColorStop(0, 'rgba(0,0,0,0.35)')
-  shade.addColorStop(0.5, 'rgba(0,0,0,0)')
-  shade.addColorStop(1, 'rgba(0,0,0,0.45)')
-  ctx.fillStyle = shade
-  ctx.fillRect(left, topY, potW, potH)
-  ctx.globalCompositeOperation = 'lighter'
-  const light = ctx.createRadialGradient(
-    cx - potW * 0.25,
-    topY + potH * 0.35,
-    0,
-    cx,
-    topY + potH * 0.35,
-    potW * 0.6
-  )
-  light.addColorStop(0, 'rgba(255,255,255,0.5)')
-  light.addColorStop(1, 'transparent')
-  ctx.fillStyle = light
-  ctx.fillRect(left, topY, potW, potH)
-  ctx.globalCompositeOperation = 'source-over'
-  ctx.strokeStyle = 'rgba(80,40,20,0.5)'
-  ctx.lineWidth = potW * 0.01
-  const y = topY + potH * 0.4
-  ctx.beginPath()
-  for (let i = 0; i <= 30; i++) {
-    const x = left + (i / 30) * potW
-    const wave = Math.sin(i * 0.6) * potH * 0.02
-    if (i === 0) ctx.moveTo(x, y)
-    else ctx.lineTo(x, y + wave)
-  }
-  ctx.stroke()
-  ctx.fillStyle = '#5b3a29'
-  ctx.beginPath()
-  ctx.ellipse(cx, topY + potH * 0.08, potW * 0.32, potH * 0.06, 0, 0, Math.PI * 2)
-  ctx.fill()
-  ctx.fillStyle = '#ead8c0'
-  ctx.beginPath()
-  ctx.ellipse(cx, topY + potH * 0.06, potW * 0.26, potH * 0.045, 0, 0, Math.PI * 2)
-  ctx.fill()
-  ctx.restore()
-  ctx.strokeStyle = 'rgba(60,30,20,0.6)'
-  ctx.lineWidth = potW * 0.012
-  ctx.beginPath()
-  ctx.moveTo(left + potW * 0.4, topY + potH * 0.92)
-  ctx.lineTo(left + potW * 0.6, topY + potH * 0.92)
-  ctx.stroke()
-  ctx.save()
-  ctx.fillStyle = 'rgba(0,0,0,0.35)'
-  ctx.filter = 'blur(8px)'
-  ctx.beginPath()
-  ctx.ellipse(cx, topY + potH * 0.97, potW * 0.38, potH * 0.09, 0, 0, Math.PI * 2)
-  ctx.fill()
-  ctx.restore()
-  return path
+// component-scoped styles for animations
+const styles = `
+.scale-up { animation: pop 420ms cubic-bezier(.2,.9,.3,1); }
+.shake { animation: shake 650ms ease; }
+.confetti { position: absolute; top: -10vh; width: 10px; height: 18px; border-radius: 2px; opacity: 0.95; transform-origin: center; animation: confetti-fall 2200ms cubic-bezier(.2,.8,.2,1) both; z-index:50 }
+
+@keyframes pop {
+  0% { transform: scale(.6); opacity: 0 }
+  60% { transform: scale(1.15); opacity: 1 }
+  100% { transform: scale(1); }
+}
+
+@keyframes shake {
+  0% { transform: translateX(0) }
+  20% { transform: translateX(-6px) }
+  40% { transform: translateX(6px) }
+  60% { transform: translateX(-4px) }
+  80% { transform: translateX(4px) }
+  100% { transform: translateX(0) }
+}
+
+@keyframes confetti-fall {
+  0% { transform: translateY(-10vh) rotate(0deg); opacity: 1 }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0 }
+}
+`
+
+// inject styles into document head once
+if (typeof document !== 'undefined' && !document.getElementById('phase0-animations')) {
+  const s = document.createElement('style')
+  s.id = 'phase0-animations'
+  s.innerHTML = styles
+  document.head.appendChild(s)
 }
