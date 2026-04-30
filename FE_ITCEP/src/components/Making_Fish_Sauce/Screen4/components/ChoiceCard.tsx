@@ -16,7 +16,7 @@ interface ChoiceCardProps {
   multiple?: boolean;
 }
 
-export function ChoiceCard({ choices, title = 'Chọn hành động', multiple = false }: ChoiceCardProps) {
+export function ChoiceCard({ choices, title = 'Chọn hành động' }: ChoiceCardProps) {
   return (
     <div className="space-y-3">
       {title && (

@@ -1,17 +1,19 @@
-import { Droplet } from 'lucide-react';
+import { Droplet, Target } from 'lucide-react';
 
 interface SaltRatioSliderProps {
   saltRatio: number;
   onSaltRatioChange: (ratio: number) => void;
   disabled?: boolean;
   gameStatus?: 'playing' | 'completed' | 'failed';
+  targetSaltRatio?: number;
 }
 
 export function SaltRatioSlider({
   saltRatio,
   onSaltRatioChange,
   disabled = false,
-  gameStatus = 'playing'
+
+  targetSaltRatio
 }: SaltRatioSliderProps) {
   return (
     <div className="relative w-full px-4 sm:px-6 md:px-4 py-2 sm:py-3 md:py-2 bg-gradient-to-b from-[#e8dcc8]/80 to-[#d9cbb5]/80 backdrop-blur-md border-t-2 border-[#6a5a40] shadow-2xl">
@@ -35,9 +37,17 @@ export function SaltRatioSlider({
         <span className="bg-[#c07a4a]/25 px-2 py-0.5 rounded border border-[#c07a4a]/50 whitespace-nowrap">
           2.0 Thấp
         </span>
-        <span className="font-bold text-base sm:text-lg text-[#4a3a2a] bg-[#f5ebe0] px-3 py-1 rounded-md border-2 border-[#6a5a40] shadow-md tabular-nums">
-          {saltRatio.toFixed(1)} : 1
-        </span>
+        <div className="flex flex-col items-center gap-1">
+          <span className="font-bold text-base sm:text-lg text-[#4a3a2a] bg-[#f5ebe0] px-3 py-1 rounded-md border-2 border-[#6a5a40] shadow-md tabular-nums">
+            {saltRatio.toFixed(1)} : 1
+          </span>
+          {targetSaltRatio !== undefined && (
+            <span className="flex items-center gap-1 text-xs font-semibold text-[#8b5a2b] bg-[#ffd700]/30 px-2 py-0.5 rounded border border-[#8b5a2b]/40">
+              <Target className="w-3 h-3" />
+              Mục tiêu: {targetSaltRatio.toFixed(1)} : 1
+            </span>
+          )}
+        </div>
         <span className="bg-[#c07a4a]/25 px-2 py-0.5 rounded border border-[#c07a4a]/50 whitespace-nowrap">
           5.0 Cao
         </span>

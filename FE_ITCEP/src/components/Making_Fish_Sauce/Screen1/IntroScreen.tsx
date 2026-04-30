@@ -73,7 +73,7 @@ export default function IntroScreen({ onStart }: IntroScreenProps) {
               </div>
               <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
                 <p className="font-semibold">Thời gian</p>
-                <p className="text-sm">2 phút ra khơi</p>
+                <p className="text-sm">1 phút 30 giây ra khơi</p>
               </div>
               <div className="p-4 rounded-lg bg-green-50 border border-green-200">
                 <p className="font-semibold">Thắng</p>

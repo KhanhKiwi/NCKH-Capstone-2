@@ -33,7 +33,7 @@ export function DataVisualization({
             Độ đồng đều
           </div>
           <div className="text-lg sm:text-xl md:text-lg font-bold text-[#f5ebe0] tabular-nums">
-            {mixingEvenness}%
+            {Math.round(mixingEvenness)}%
           </div>
           <div className="mt-1.5 sm:mt-2 h-1 bg-[#3d2a1f] rounded-full overflow-hidden">
             <div

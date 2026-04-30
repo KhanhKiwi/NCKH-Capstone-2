@@ -1,9 +1,13 @@
-import { X, Play } from 'lucide-react';
-import { useState } from 'react';
+import { X, Play, Lock } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router';
+import type { UserProgressResponse } from '../../../api/services/progressService';
+import { progressService } from '../../../api/services/progressService';
+import { getUserId } from '../../../utils/authUtils';
 
 interface MamNamOModalProps {
   onClose: () => void;
+  isOpen?: boolean;
 }
 
 interface GameLevel {
@@ -59,13 +63,92 @@ const gameLevels: GameLevel[] = [
   },
 ];
 
-export default function MamNamOModal({ onClose }: MamNamOModalProps) {
+export default function MamNamOModal({ onClose, isOpen }: MamNamOModalProps) {
   const [activeTab, setActiveTab] = useState<'info' | 'game'>('info');
+  const [progress, setProgress] = useState<UserProgressResponse[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const handlePlayGame = (route: string) => {
-    onClose();
-    navigate(route);
+  const fetchProgress = useCallback(async () => {
+    setLoading(true);
+    try {
+      const userId = getUserId();
+      if (userId) {
+        const userProgress = await progressService.getUserProgress(userId);
+        setProgress(userProgress);
+      }
+    } catch (error) {
+      console.error('❌ Failed to fetch progress:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Fetch when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      fetchProgress();
+    }
+  }, [isOpen, fetchProgress]);
+
+  // Also refetch when switching to 'game' tab
+  useEffect(() => {
+    if (activeTab === 'game') {
+      fetchProgress();
+    }
+  }, [activeTab, fetchProgress]);
+
+  const getProgressForLevel = (levelId: number): UserProgressResponse | undefined => {
+    const result = progress.find((p) => p.level.level_id === levelId);
+    return result;
+  };
+
+  const isLevelLocked = (levelId: number): boolean => {
+    // Check if this level is explicitly locked by admin
+    const currentLevel = getProgressForLevel(levelId);
+    if (currentLevel && currentLevel.status === 'locked') return true;
+    
+    // Level 1 doesn't need previous level unlocked
+    if (levelId === 1) return false;
+    
+    // Check if previous level is completed or unlocked by admin
+    const previousLevel = getProgressForLevel(levelId - 1);
+    return !previousLevel || (previousLevel.status !== 'completed' && previousLevel.status !== 'unlocked');
+  };
+
+  const handlePlayGame = async (levelId: number, route: string) => {
+    // Re-fetch latest progress before playing to catch admin locks
+    try {
+      const userId = getUserId();
+      if (userId) {
+        const latestProgress = await progressService.getUserProgress(userId);
+        setProgress(latestProgress);
+        
+        // Now check with fresh data
+        const freshProgressForLevel = latestProgress.find((p) => p.level.level_id === levelId);
+        
+        // Check if explicitly locked by admin
+        if (freshProgressForLevel && freshProgressForLevel.status === 'locked') {
+          alert('Màn này đã bị khóa bởi admin. Vui lòng mở khóa trước khi chơi.');
+          return;
+        }
+        
+        // For levels 2+, check if previous level is unlocked
+        if (levelId > 1) {
+          const prevLevel = latestProgress.find((p) => p.level.level_id === levelId - 1);
+          if (!prevLevel || (prevLevel.status !== 'completed' && prevLevel.status !== 'unlocked')) {
+            alert('Hoàn thành màn trước để mở màn này.');
+            return;
+          }
+        }
+        
+        onClose();
+        navigate(route);
+      }
+    } catch (error) {
+      console.error('Failed to verify level status:', error);
+      alert('Lỗi khi kiểm tra trạng thái màn. Vui lòng thử lại.');
+    }
   };
 
   return (
@@ -171,28 +254,66 @@ export default function MamNamOModal({ onClose }: MamNamOModalProps) {
             <div className="p-8 md:p-12">
               <div className="max-w-3xl mx-auto">
                 <h3 className="text-2xl font-bold text-[#4a3f2e] mb-8">Chọn Màn Chơi</h3>
-                <div className="space-y-4">
-                  {gameLevels.map((level) => (
-                    <div
-                      key={level.id}
-                      className="border-2 border-amber-200 rounded-2xl p-6 hover:bg-amber-50 hover:border-amber-400 transition-all cursor-pointer group"
-                      onClick={() => handlePlayGame(level.route)}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <span className="text-4xl">{level.icon}</span>
-                            <h4 className="text-xl font-bold text-[#4a3f2e]">{level.name}</h4>
+                {loading ? (
+                  <div className="text-center py-12">
+                    <p className="text-xl text-[#6b5638]">Đang tải dữ liệu...</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {gameLevels.map((level) => {
+                      const isLocked = isLevelLocked(level.id);
+                      const levelProgress = getProgressForLevel(level.id);
+                      
+                      return (
+                        <div
+                          key={level.id}
+                          className={`border-2 rounded-2xl p-6 transition-all ${
+                            isLocked
+                              ? 'border-gray-300 bg-gray-50 cursor-not-allowed opacity-60'
+                              : 'border-amber-200 hover:bg-amber-50 hover:border-amber-400 cursor-pointer group'
+                          }`}
+                          onClick={() => handlePlayGame(level.id, level.route)}
+                          title={isLocked ? 'Hoàn thành màn trước để mở' : ''}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <span className="text-4xl">{level.icon}</span>
+                                <div>
+                                  <h4 className="text-xl font-bold text-[#4a3f2e]">{level.name}</h4>
+                                  {levelProgress && (
+                                    <span className={`text-sm font-semibold ${
+                                      levelProgress.status === 'completed' ? 'text-green-600' : 'text-amber-600'
+                                    }`}>
+                                      {levelProgress.status === 'completed' ? '✅ Đã hoàn thành' : '🔓 Đã mở'}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <p className="text-lg text-[#6b5638] ml-[60px]">{level.description}</p>
+                            </div>
+                            <div className="flex flex-col items-center gap-2">
+                              {isLocked ? (
+                                <div className="bg-gray-400 text-white rounded-full p-3">
+                                  <Lock size={20} />
+                                </div>
+                              ) : (
+                                <button className="bg-amber-600 hover:bg-amber-700 text-white rounded-full p-3 group-hover:scale-110 transition-transform">
+                                  <Play size={20} fill="white" />
+                                </button>
+                              )}
+                              {isLocked && (
+                                <span className="text-xs text-gray-600 font-semibold text-center">
+                                  Bị khóa
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <p className="text-lg text-[#6b5638] ml-[60px]">{level.description}</p>
                         </div>
-                        <button className="bg-amber-600 hover:bg-amber-700 text-white rounded-full p-3 group-hover:scale-110 transition-transform">
-                          <Play size={20} fill="white" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           )}

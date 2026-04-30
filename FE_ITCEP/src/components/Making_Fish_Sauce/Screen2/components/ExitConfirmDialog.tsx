@@ -1,4 +1,4 @@
-import { AlertCircle, X } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 
 interface ExitConfirmDialogProps {
   onConfirm: () => void;

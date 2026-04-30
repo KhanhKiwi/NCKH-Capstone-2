@@ -8,6 +8,8 @@ import { FailureBanner } from './components/FailureBanner';
 import { ExitConfirmDialog } from './components/ExitConfirmDialog';
 import { ImageWithFallback } from '../../figma/ImageWithFallback';
 import { CheckCircle, AlertCircle } from 'lucide-react';
+import { progressService } from '../../../api/services/progressService';
+import { getUserId } from '../../../utils/authUtils';
 
 interface Particle {
   id: number;
@@ -382,9 +384,17 @@ export default function Screen2() {
   };
 
   // ========== GAME CONTROL HANDLERS ==========
-  const handleContinue = () => {
-    // Go back to craft selection page
-    navigate('/craft-selection');
+  const handleContinue = async () => {
+    try {
+      const userId = getUserId();
+      if (userId) {
+        await progressService.completeLevel(userId, 2, quality);
+      }
+      navigate('/game/wash-salt');
+    } catch (error) {
+      console.error('Failed to save progress:', error);
+      navigate('/game/wash-salt');
+    }
   };
 
   const handleRetry = () => {

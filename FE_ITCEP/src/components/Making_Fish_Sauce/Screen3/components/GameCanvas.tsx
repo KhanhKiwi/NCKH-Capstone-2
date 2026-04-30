@@ -7,7 +7,7 @@ interface GameCanvasProps {
   heatmapData: number[];
 }
 
-export function GameCanvas({ mixingEvenness, currentStep, heatmapData }: GameCanvasProps) {
+export function GameCanvas({ currentStep, heatmapData }: GameCanvasProps) {
   const isMixing = currentStep === 'mixing';
   return (
     <div className="relative w-full flex-1 max-h-[40vh] px-4 sm:px-6 md:px-4 py-2 sm:py-3 flex items-center justify-center overflow-hidden">

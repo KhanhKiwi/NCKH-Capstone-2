@@ -135,7 +135,7 @@ export function CompletionBanner({
             onClick={onContinue}
             className="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
           >
-            Tiếp tục →
+            ➡️ Đi Tiếp
           </button>
         </div>
       </div>

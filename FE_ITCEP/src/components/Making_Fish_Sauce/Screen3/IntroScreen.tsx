@@ -14,14 +14,6 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
       <div className="w-full max-w-5xl rounded-2xl overflow-hidden flex flex-col shadow-2xl bg-gradient-to-b from-[#e8dcc8] to-[#d4c4a8] max-h-[95vh] overflow-y-auto">
         {/* Header */}
         <div className="relative z-10 px-4 sm:px-6 md:px-8 py-6 md:py-8 border-b-2 border-[#4a3220]/30 flex-shrink-0">
-          <button
-            onClick={() => navigate('/craft-selection')}
-            className="flex items-center gap-2 text-[#4a3220] hover:text-[#2a1a0f] transition-colors mb-4"
-          >
-            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span className="text-xs sm:text-sm font-medium">Quay lại</span>
-          </button>
-
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -76,7 +68,7 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
               </div>
               <div className="p-3 md:p-4 bg-[#fff9e6] rounded-lg border-l-4 border-[#b8a88f]">
                 <p className="text-xs sm:text-sm md:text-base text-[#2a1a0f]">
-                  <strong>Bước 2: Trộn đều</strong> - Nhấn "Trộn đều" nhiều lần (4 lần) để muối phân bố đồng đều. Mục tiêu ≥ 75% độ đồng đều
+                  <strong>Bước 2: Trộn đều</strong> - Ấn SPACEBAR khi thanh vào vùng vàng (5-7 lần) để muối phân bố đồng đều. Mục tiêu ≥ 75% độ đồng đều
                 </p>
               </div>
               <div className="p-3 md:p-4 bg-[#fff9e6] rounded-lg border-l-4 border-[#a6934d]">
@@ -86,12 +78,12 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
               </div>
               <div className="p-3 md:p-4 bg-[#fff9e6] rounded-lg border-l-4 border-[#8b6939]">
                 <p className="text-xs sm:text-sm md:text-base text-[#2a1a0f]">
-                  <strong>Bước 4: Nén chặt</strong> - Nén chặt hỗn hợp để tạo môi trường kỵ khí (oxygen-free)
+                  <strong>Bước 4: Nén chặt</strong> - Giữ SPACEBAR để tăng áp lực nén (70-100% là tốt). Tạo môi trường kỵ khí
                 </p>
               </div>
               <div className="p-3 md:p-4 bg-[#fff9e6] rounded-lg border-l-4 border-[#c0c0c0]">
                 <p className="text-xs sm:text-sm md:text-base text-[#2a1a0f]">
-                  <strong>Bước 5: Đậy nắp</strong> - Phủ một lớp muối lên mặt và đậy kín nắp. Chuẩn bị cho quá trình lên men kỵ khí
+                  <strong>Bước 5: Đậy nắp</strong> - Kéo chuột trái phải để phủ muối (70-100% là tốt) rồi đậy kín nắp
                 </p>
               </div>
             </div>

@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, useMotionValue, AnimatePresence } from 'motion/react';
+import { progressService } from '../../../api/services/progressService';
+import { getUserId } from '../../../utils/authUtils';
 
 // Fish type definitions
 type FishType = 'correct' | 'wrong' | 'spoiled';
@@ -16,13 +19,19 @@ interface Fish {
 }
 
 export default function Screen1() {
-  const [score, setScore] = useState(0);
-  const [target] = useState(30);
-  const [time, setTime] = useState(120);
+  const navigate = useNavigate();
+  
+  const [quality, setQuality] = useState(0); // 0-100% quality rating
+  const [fishCaught, setFishCaught] = useState(0); // Count of correct fish
+  const [wrongCount, setWrongCount] = useState(0); // Count of wrong fish (3 = lose)
+  const [target] = useState(12); // Need 12 correct fish to win
+  const [time, setTime] = useState(90); // 90 seconds
   const [fish, setFish] = useState<Fish[]>([]);
   const [particles, setParticles] = useState<Array<{ id: string; x: number; y: number }>>([]);
   const [screenShake, setScreenShake] = useState(0);
   const [tooltip, setTooltip] = useState<{ text: string; x: number; y: number } | null>(null);
+  const [gameStatus, setGameStatus] = useState<'playing' | 'won' | 'lost'>('playing');
+  const [lossReason, setLossReason] = useState<'timeout' | 'spoiled' | null>(null);
 
   const boatY = useMotionValue(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
@@ -75,14 +84,21 @@ export default function Screen1() {
 
   // Timer countdown
   useEffect(() => {
-    if (time <= 0) return;
+    if (time <= 0 || gameStatus !== 'playing') return;
 
     const interval = setInterval(() => {
-      setTime(prev => Math.max(0, prev - 1));
+      setTime(prev => {
+        const newTime = Math.max(0, prev - 1);
+        if (newTime === 0) {
+          setGameStatus('lost');
+          setLossReason('timeout');
+        }
+        return newTime;
+      });
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [time]);
+  }, [time, gameStatus]);
 
   // Create new fish
   function createFish(): Fish {
@@ -104,6 +120,8 @@ export default function Screen1() {
 
   // Catch fish handler
   function catchFish(fishId: string, fishData: Fish) {
+    if (gameStatus !== 'playing') return;
+
     const fishElement = document.getElementById(fishId);
     if (!fishElement) return;
 
@@ -113,10 +131,31 @@ export default function Screen1() {
     setFish(prev => prev.filter(f => f.id !== fishId));
 
     if (fishData.type === 'correct') {
-      setScore(prev => prev + 1);
+      // Correct fish: +8.33% quality (12 fish = 100%)
+      const newQuality = Math.min(100, quality + 8.33);
+      const newFishCaught = fishCaught + 1;
+      
+      setQuality(newQuality);
+      setFishCaught(newFishCaught);
       createSplashParticles(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      
+      // Check win condition
+      if (newFishCaught >= target) {
+        setGameStatus('won');
+      }
+      
       setTimeout(() => setFish(prev => [...prev, createFish()]), 500);
     } else {
+      // Wrong/spoiled fish: increase wrong count
+      const newWrongCount = wrongCount + 1;
+      setWrongCount(newWrongCount);
+      
+      // Check lose condition: 3 wrong fish = lose
+      if (newWrongCount >= 3) {
+        setGameStatus('lost');
+        setLossReason('spoiled');
+      }
+      
       setScreenShake(Date.now());
       setTimeout(() => setScreenShake(0), 200);
       setTimeout(() => setFish(prev => [...prev, createFish()]), 500);
@@ -153,7 +192,6 @@ export default function Screen1() {
     });
   }
 
-  const progress = (score / target) * 100;
   const shakeX = screenShake ? Math.sin(Date.now() * 0.1) * 4 : 0;
 
   return (
@@ -225,19 +263,20 @@ export default function Screen1() {
               </div>
             </div>
 
-            {/* Progress Bar */}
+            {/* Quality Bar */}
             <div className="flex items-center gap-3 min-w-[280px]">
               <div className="flex-1">
                 <div className="flex justify-between text-xs text-[#7F5539]/60 mb-1 tracking-wide uppercase">
-                  <span>Số cá đã bắt</span>
-                  <span>{score}/{target}</span>
+                  <span>Sản Lượng</span>
+                  <span>{Math.round(quality)}/100</span>
                 </div>
                 <div className="h-3 bg-[#1B4965]/20 rounded-full overflow-hidden shadow-inner">
                   <motion.div
-                    className="h-full bg-gradient-to-r from-[#00C897] to-[#00E5A8] relative"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progress}%` }}
-                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                    className="h-full relative transition-all duration-300"
+                    style={{
+                      width: `${quality}%`,
+                      background: quality < 40 ? 'linear-gradient(to right, #FF4D4F, #FF7875)' : 'linear-gradient(to right, #00C897, #00E5A8)'
+                    }}
                   >
                     <motion.div
                       animate={{ x: ['0%', '100%'] }}
@@ -249,16 +288,25 @@ export default function Screen1() {
               </div>
             </div>
 
-            {/* Score */}
+            {/* Fish Caught Counter */}
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FFD166] to-[#EEC88F] flex items-center justify-center shadow-lg">
-                <svg className="w-6 h-6 text-[#7F5539]" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
-                </svg>
+                <span className="text-xl">🐟</span>
               </div>
               <div>
-                <div className="text-xs text-[#7F5539]/60 tracking-wide uppercase">Điểm</div>
-                <div className="text-xl font-semibold text-[#1B4965]">{score}</div>
+                <div className="text-xs text-[#7F5539]/60 tracking-wide uppercase">Cá Bắt</div>
+                <div className="text-xl font-semibold text-[#1B4965]">{fishCaught}/{target}</div>
+              </div>
+            </div>
+
+            {/* Wrong Fish Counter */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF4D4F] to-[#FF7875] flex items-center justify-center shadow-lg">
+                <span className="text-xl">❌</span>
+              </div>
+              <div>
+                <div className="text-xs text-[#7F5539]/60 tracking-wide uppercase">Sai Bắt</div>
+                <div className="text-xl font-semibold text-[#FF4D4F]">{wrongCount}/3</div>
               </div>
             </div>
           </div>
@@ -420,41 +468,13 @@ export default function Screen1() {
         <motion.div
           animate={{ rotate: [0, -1, 0, 1, 0] }}
           transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          className="drop-shadow-2xl"
         >
-          <svg width="180" height="80" viewBox="0 0 180 80" className="drop-shadow-2xl">
-            {/* Boat Shadow */}
-            <ellipse cx="90" cy="75" rx="80" ry="8" fill="rgba(0,0,0,0.2)" />
-
-            {/* Boat Body - Wood texture */}
-            <defs>
-              <linearGradient id="wood" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#9B7653" />
-                <stop offset="50%" stopColor="#7F5539" />
-                <stop offset="100%" stopColor="#6B4423" />
-              </linearGradient>
-            </defs>
-
-            {/* Hull */}
-            <path
-              d="M 20 50 Q 20 35 40 30 L 140 30 Q 160 35 160 50 L 155 60 Q 150 70 90 70 Q 30 70 25 60 Z"
-              fill="url(#wood)"
-              stroke="#6B4423"
-              strokeWidth="2"
-            />
-
-            {/* Wood planks detail */}
-            <line x1="40" y1="35" x2="140" y2="35" stroke="#6B4423" strokeWidth="1" opacity="0.4" />
-            <line x1="38" y1="45" x2="142" y2="45" stroke="#6B4423" strokeWidth="1" opacity="0.4" />
-            <line x1="35" y1="55" x2="145" y2="55" stroke="#6B4423" strokeWidth="1" opacity="0.4" />
-
-            {/* Boat rim highlight */}
-            <path
-              d="M 40 30 L 140 30"
-              stroke="#B89968"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-          </svg>
+          <img 
+            src="/picture/langmam/43a505bd-814f-42b6-b91c-b1b70facdaef.png" 
+            alt="Boat with Fisherman" 
+            className="h-[180px] object-contain"
+          />
         </motion.div>
       </motion.div>
 
@@ -474,9 +494,9 @@ export default function Screen1() {
         )}
       </AnimatePresence>
 
-      {/* Victory/Time's Up Modal */}
+      {/* Victory Modal */}
       <AnimatePresence>
-        {(score >= target || time === 0) && (
+        {gameStatus === 'won' && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -488,40 +508,183 @@ export default function Screen1() {
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
               className="bg-gradient-to-br from-[#FFF8E7] to-[#FFE5B4] rounded-3xl p-12 shadow-2xl border-4 border-[#EEC88F] max-w-md text-center"
             >
-              {score >= target ? (
-                <>
-                  <motion.div
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 0.5, repeat: 3 }}
-                    className="text-7xl mb-4"
-                  >
-                    🎉
-                  </motion.div>
-                  <h2 className="text-4xl font-bold text-[#1B4965] mb-3">Xuất sắc!</h2>
-                  <p className="text-xl text-[#7F5539] mb-6">
-                    Bạn đã bắt đủ {target} con cá cơm than!
-                  </p>
-                  <div className="text-6xl font-bold text-[#00C897] mb-8">{score} cá</div>
-                </>
-              ) : (
-                <>
-                  <div className="text-7xl mb-4">⏰</div>
-                  <h2 className="text-4xl font-bold text-[#1B4965] mb-3">Hết giờ!</h2>
-                  <p className="text-xl text-[#7F5539] mb-6">
-                    Bạn đã bắt được {score}/{target} con cá
-                  </p>
-                  <div className="text-4xl font-bold text-[#2C7DA0] mb-8">{score} cá</div>
-                </>
-              )}
-
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-gradient-to-r from-[#00C897] to-[#00E5A8] text-white px-10 py-4 rounded-2xl shadow-xl font-semibold text-lg"
-                onClick={() => window.location.reload()}
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 0.5, repeat: 3 }}
+                className="text-7xl mb-4"
               >
-                Chơi lại
-              </motion.button>
+                🎉
+              </motion.div>
+              <h2 className="text-4xl font-bold text-[#1B4965] mb-2">Thắng Cuộc!</h2>
+              <p className="text-lg text-[#7F5539] mb-6">
+                Bạn bắt được {fishCaught} con cá cơm than tươi không lỗi!
+              </p>
+              <div className="bg-[#FFF9E6] rounded-lg p-4 mb-6 text-left">
+                <p className="text-sm text-[#2a1a0f] font-semibold mb-2">✅ Lý do thắng:</p>
+                <ul className="text-xs text-[#5d7a8c] space-y-1">
+                  <li>• Đạt đủ {target} con cá</li>
+                  <li>• Không bắt cá sai/hỏng</li>
+                  <li>• Chọn lựa cá tốt</li>
+                </ul>
+              </div>
+              <div className="bg-[#E8F4E8] rounded-lg p-4 mb-6 text-left">
+                <p className="text-sm text-[#2a1a0f] font-semibold mb-2">💡 Mẹo cho lần tới:</p>
+                <ul className="text-xs text-[#5d7a8c] space-y-1">
+                  <li>• Tìm cá nhỏ, sáng bạc</li>
+                  <li>• Chọn cá bơi nhanh</li>
+                  <li>• Tránh cá mờ nhạt hoặc hỏng</li>
+                </ul>
+              </div>
+
+              <div className="flex gap-3">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex-1 bg-gradient-to-r from-[#FFD166] to-[#EEC88F] text-[#1B4965] px-6 py-3 rounded-2xl shadow-xl font-semibold"
+                  onClick={() => window.location.reload()}
+                >
+                  🔄 Chơi lại
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex-1 bg-gradient-to-r from-[#00C897] to-[#00E5A8] text-white px-6 py-3 rounded-2xl shadow-xl font-semibold"
+                  onClick={async () => {
+                    try {
+                      const userId = getUserId();
+                      if (userId) {
+                        await progressService.completeLevel(userId, 1, quality);
+                      }
+                      navigate('/game/wash-fish');
+                    } catch (error) {
+                      console.error('Failed to save progress:', error);
+                      navigate('/game/wash-fish');
+                    }
+                  }}
+                >
+                  ➡️ Đi Tiếp
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Loss Modal - Timeout */}
+      <AnimatePresence>
+        {gameStatus === 'lost' && lossReason === 'timeout' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 50 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="bg-gradient-to-br from-[#FFF8E7] to-[#FFE5B4] rounded-3xl p-12 shadow-2xl border-4 border-[#EEC88F] max-w-md text-center"
+            >
+              <div className="text-7xl mb-4">⏰</div>
+              <h2 className="text-4xl font-bold text-[#1B4965] mb-2">Thua Cuộc!</h2>
+              <p className="text-lg text-[#7F5539] mb-4">Hết giờ ra khơi rồi!</p>
+              <p className="text-sm text-[#5d7a8c] mb-6">Bạn bắt được {fishCaught}/{target} con cá</p>
+              
+              <div className="bg-[#FFF9E6] rounded-lg p-4 mb-6 text-left">
+                <p className="text-sm text-[#2a1a0f] font-semibold mb-2">❌ Lý do thua:</p>
+                <ul className="text-xs text-[#5d7a8c] space-y-1">
+                  <li>• Hết thời gian 90 giây</li>
+                  <li>• Chỉ bắt được {fishCaught}/12 con cá</li>
+                  <li>• Cần bắt nhanh hơn</li>
+                </ul>
+              </div>
+              
+              <div className="bg-[#E8F4E8] rounded-lg p-4 mb-6 text-left">
+                <p className="text-sm text-[#2a1a0f] font-semibold mb-2">💡 Cách cải thiện:</p>
+                <ul className="text-xs text-[#5d7a8c] space-y-1">
+                  <li>• Xác định vị trí cá nhanh hơn</li>
+                  <li>• Ưu tiên cá sáng bạc ở trên</li>
+                  <li>• Click liên tục, không chần chừ</li>
+                </ul>
+              </div>
+
+              <div className="flex gap-3">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex-1 bg-gradient-to-r from-[#8B7355] to-[#6B5839] text-white px-6 py-3 rounded-2xl shadow-xl font-semibold"
+                  onClick={() => navigate('/craft-selection')}
+                >
+                  ⬅️ Quay lại
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex-1 bg-gradient-to-r from-[#FF4D4F] to-[#FF7875] text-white px-6 py-3 rounded-2xl shadow-xl font-semibold"
+                  onClick={() => window.location.reload()}
+                >
+                  🔄 Chơi lại
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Loss Modal - Spoiled (3 wrong fish) */}
+      <AnimatePresence>
+        {gameStatus === 'lost' && lossReason === 'spoiled' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 50 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="bg-gradient-to-br from-[#FFF8E7] to-[#FFE5B4] rounded-3xl p-12 shadow-2xl border-4 border-[#EEC88F] max-w-md text-center"
+            >
+              <div className="text-7xl mb-4">😢</div>
+              <h2 className="text-4xl font-bold text-[#1B4965] mb-2">Thua Cuộc!</h2>
+              <p className="text-lg text-[#7F5539] mb-4">Bắt quá nhiều cá sai rồi!</p>
+              <p className="text-sm text-[#5d7a8c] mb-6">Bạn bắt {wrongCount}/3 con cá không đủ tươi</p>
+              
+              <div className="bg-[#FFF9E6] rounded-lg p-4 mb-6 text-left">
+                <p className="text-sm text-[#2a1a0f] font-semibold mb-2">❌ Lý do thua:</p>
+                <ul className="text-xs text-[#5d7a8c] space-y-1">
+                  <li>• Bắt 3 con cá không tươi</li>
+                  <li>• Mỗi cá sai mất 1 trái tim ❤️</li>
+                  <li>• Phải chọn cá tươi hoàn toàn</li>
+                </ul>
+              </div>
+              
+              <div className="bg-[#E8F4E8] rounded-lg p-4 mb-6 text-left">
+                <p className="text-sm text-[#2a1a0f] font-semibold mb-2">💡 Cách phân biệt cá tốt:</p>
+                <ul className="text-xs text-[#5d7a8c] space-y-1">
+                  <li>• Cá tươi: ánh sáng bạc, chuyển động nhanh</li>
+                  <li>• Cá sai: màu nhạt, di chuyển chậm</li>
+                  <li>• Cá hỏng: mờ, nâu, bơi kỳ lạ</li>
+                </ul>
+              </div>
+
+              <div className="flex gap-3">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex-1 bg-gradient-to-r from-[#8B7355] to-[#6B5839] text-white px-6 py-3 rounded-2xl shadow-xl font-semibold"
+                  onClick={() => navigate('/craft-selection')}
+                >
+                  ⬅️ Quay lại
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex-1 bg-gradient-to-r from-[#FF4D4F] to-[#FF7875] text-white px-6 py-3 rounded-2xl shadow-xl font-semibold"
+                  onClick={() => window.location.reload()}
+                >
+                  🔄 Chơi lại
+                </motion.button>
+              </div>
             </motion.div>
           </motion.div>
         )}
