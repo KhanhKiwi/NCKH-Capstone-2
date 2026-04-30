@@ -24,6 +24,7 @@ export default function Phase2({ onComplete }: Phase2Props) {
 	const required = useRef(INITIAL_REQUIRED);
 	const knead = useRef(0);
 	const particles = useRef<{x:number;y:number;vx:number;vy:number;life:number}[]>([]);
+	const dents = useRef<{x:number;y:number;strength:number;life:number}[]>([]);
 	const lastPos = useRef<{x:number,y:number}|null>(null);
 	const [btnHover, setBtnHover] = useState(false);
 
@@ -101,11 +102,25 @@ export default function Phase2({ onComplete }: Phase2Props) {
 
 			// overlay subtle clay grain using pattern with low alpha
 			if (noisePattern) {
-				ctx.globalAlpha = 0.06;
+				// slightly stronger grain and use multiply to give texture depth
+				ctx.save();
+				ctx.globalAlpha = 0.08;
+				ctx.globalCompositeOperation = 'multiply';
 				ctx.fillStyle = noisePattern;
 				ctx.fill();
-				ctx.globalAlpha = 1;
+				ctx.restore();
 			}
+
+			// ambient occlusion / soft contact shadow under the blob
+			ctx.save();
+			const shadowG = ctx.createRadialGradient(cx, cy + baseR*0.9 + 12, baseR*0.2, cx, cy + baseR*0.9 + 12, baseR*1.6);
+			shadowG.addColorStop(0, 'rgba(0,0,0,0.26)');
+			shadowG.addColorStop(1, 'rgba(0,0,0,0)');
+			ctx.globalCompositeOperation = 'multiply';
+			ctx.globalAlpha = 0.28;
+			ctx.fillStyle = shadowG;
+			ctx.beginPath(); ctx.ellipse(cx, cy + baseR*0.9 + 12, baseR*1.1, baseR*0.5, 0, 0, Math.PI*2); ctx.fill();
+			ctx.restore();
 
 			// crisp rim: inner light stroke and outer darker thin stroke for definition
 			ctx.lineWidth = 3;
@@ -127,6 +142,24 @@ export default function Phase2({ onComplete }: Phase2Props) {
 			ctx.fill();
 
 			ctx.restore();
+
+			// render dents (interaction scars) - subtle darkening using multiply
+			if (dents.current.length) {
+				ctx.save();
+				ctx.globalCompositeOperation = 'multiply';
+				for (let i=dents.current.length-1;i>=0;i--) {
+					const d = dents.current[i];
+					const dg = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, 36 + d.strength*80);
+					dg.addColorStop(0, `rgba(0,0,0,${0.22 * d.strength * d.life})`);
+					dg.addColorStop(0.4, `rgba(0,0,0,${0.12 * d.strength * d.life})`);
+					dg.addColorStop(1, 'rgba(0,0,0,0)');
+					ctx.fillStyle = dg;
+					ctx.beginPath(); ctx.arc(d.x, d.y, 36 + d.strength*80, 0, Math.PI*2); ctx.fill();
+					d.life -= 0.014;
+					if (d.life <= 0) dents.current.splice(i,1);
+				}
+				ctx.restore();
+			}
 
 			// particles
 			for (let i=particles.current.length-1;i>=0;i--){
@@ -198,6 +231,8 @@ export default function Phase2({ onComplete }: Phase2Props) {
 		function toLocal(e:PointerEvent){ const r=c.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
 		const down = (e:PointerEvent)=>{
 			if (state!=='playing') return; c.setPointerCapture(e.pointerId); const p=toLocal(e); lastPos.current=p; spawn(p.x,p.y,10);
+			// create a small dent on initial press
+			dents.current.push({ x: p.x, y: p.y, strength: 0.6 + Math.random()*0.4, life: 1.0 });
 		};
 		const move = (e:PointerEvent)=>{
 			if (state!=='playing') return; if (e.buttons===0) return; const p=toLocal(e);
@@ -205,6 +240,8 @@ export default function Phase2({ onComplete }: Phase2Props) {
 				// harder: reduce per-move contribution and require more total effort
 				knead.current += Math.min(2.2, dist*0.07);
 				spawn(p.x,p.y,2);
+				// add small dent based on stroke intensity
+				dents.current.push({ x: p.x, y: p.y, strength: Math.min(1, dist/60), life: 1.0 });
 				lastPos.current=p; const pr = Math.min(1, knead.current/required.current); setProgress(pr);
 				if (pr>=1){ setState('won'); setTimeout(()=>onComplete&&onComplete({smoothness:1}),650); }
 			}

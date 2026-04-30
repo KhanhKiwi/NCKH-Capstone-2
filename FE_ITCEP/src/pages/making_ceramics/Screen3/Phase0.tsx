@@ -44,13 +44,13 @@ export default function Phase0() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="p-6 border rounded-lg">
-              <h3 className="text-xl font-semibold mb-2">Mục tiêu</h3>
-              <p className="text-gray-600">Đạt được độ ẩm 100% trước khi hết giờ để hoàn thành màn. Thời gian mức cao hơn cho sao nhiều hơn.</p>
+              <h3 className="text-xl font-semibold mb-2">Màn 1 — Trắc nghiệm phơi khô</h3>
+              <p className="text-gray-600">Bộ câu hỏi trắc nghiệm (5 câu) về phơi khô và quản lý độ ẩm; trả lời đúng để mở khóa Màn 2.</p>
             </div>
 
             <div className="p-6 border rounded-lg">
-              <h3 className="text-xl font-semibold mb-2">Lưu ý</h3>
-              <p className="text-gray-600">Nếu độ ẩm giảm xuống 0% gốm sẽ hỏng và bạn cần thử lại.</p>
+              <h3 className="text-xl font-semibold mb-2">Màn 2 — Phơi khô và quản lý độ ẩm (Thực hành)</h3>
+              <p className="text-gray-600">Trò chơi thực hành: đưa gốm ra/vào theo thời tiết để điều chỉnh tốc độ khô và giữ gốm an toàn.</p>
             </div>
           </div>
 

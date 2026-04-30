@@ -251,8 +251,8 @@ export default function BatTrangModal({ open = true, onClose }: { open?: boolean
                               return
                             }
                           }
-                          // navigate to level by level_number (routes use level-number not DB id)
-                          navigate(`/bat-trang/level-${levelNumber}`)
+                          // navigate to level by level_number (open phase0 first)
+                          navigate(`/bat-trang/level-${levelNumber}/phase0`)
                         }}
                         className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg text-white text-base font-bold transform transition-all duration-300 ${lvl?.unlocked ? 'bg-gradient-to-br from-emerald-500 to-emerald-700 ring-4 ring-emerald-100/50' : 'bg-gray-300'}`}
                         aria-label={`Cấp ${lvl?.level_number ?? lvl?.id}`}
@@ -271,7 +271,7 @@ export default function BatTrangModal({ open = true, onClose }: { open?: boolean
                                 onClick={() => {
                                   // animate retract to this node, then navigate
                                   const p = pathRef.current
-                                  const targetPath = `/bat-trang/level-${Number(lvl.level_number ?? lvl.id)}`
+                                  const targetPath = `/bat-trang/level-${Number(lvl.level_number ?? lvl.id)}/phase0`
                                   if (!p) { navigate(targetPath); return }
                                   const total = p.getTotalLength()
                                   const nodeLen = nodeLengths[i] ?? ((i + 1) / (levels.filter(l => l.id !== 0).length + 1)) * total
@@ -326,7 +326,7 @@ export default function BatTrangModal({ open = true, onClose }: { open?: boolean
                 </div>
                 <div>
                   {level.unlocked ? (
-                    <Link to={`/bat-trang/level-${Number(level.level_number ?? level.id)}`}>
+                    <Link to={`/bat-trang/level-${Number(level.level_number ?? level.id)}/phase0`}>
                       <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-full text-sm font-semibold transition-colors">Chơi ngay</button>
                     </Link>
                   ) : (
