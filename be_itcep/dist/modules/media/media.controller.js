@@ -44,14 +44,6 @@ exports.MediaController = MediaController;
 __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create media' }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            example: {
-                village_id: 1,
-                url: 'https://example.com/media.jpg',
-            },
-        },
-    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),

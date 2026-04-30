@@ -52,7 +52,7 @@ exports.DatabaseModule = DatabaseModule = __decorate([
                         user_action_log_entity_1.UserActionLog,
                         analytics_event_entity_1.AnalyticsEvent,
                     ],
-                    synchronize: true,
+                    synchronize: false,
                     logging: ['error', 'warn'],
                 }),
             }),

@@ -26,10 +26,10 @@ let CraftsService = class CraftsService {
         return this.repo.save(dto);
     }
     findAll() {
-        return this.repo.find({ relations: ['village'] });
+        return this.repo.find();
     }
     findOne(id) {
-        return this.repo.findOne({ where: { craft_id: id }, relations: ['village'] });
+        return this.repo.findOne({ where: { craft_id: id } });
     }
     async update(id, dto) {
         await this.repo.update(id, dto);

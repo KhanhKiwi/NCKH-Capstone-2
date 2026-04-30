@@ -44,16 +44,6 @@ exports.VillagesController = VillagesController;
 __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create village' }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            example: {
-                name: 'Làng gốm Bát Tràng',
-                description: 'Làng nghề truyền thống về gốm sứ',
-                image: 'https://example.com/village.jpg',
-                city: 'Hà Nội',
-            },
-        },
-    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -74,16 +64,6 @@ __decorate([
 ], VillagesController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            example: {
-                name: 'Làng gốm Bát Tràng',
-                description: 'Cập nhật mô tả mới',
-                image: 'https://example.com/village-new.jpg',
-                city: 'Hà Nội',
-            },
-        },
-    }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -93,13 +73,6 @@ __decorate([
 __decorate([
     (0, common_1.Patch)(':id/open'),
     (0, swagger_1.ApiOperation)({ summary: 'Set village open/closed status' }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            example: {
-                open: true,
-            },
-        },
-    }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)('open')),
     __metadata("design:type", Function),

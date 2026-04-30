@@ -68,14 +68,6 @@ __decorate([
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: 'Update current user profile (name, avatar URL)' }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            example: {
-                name: 'Nguyen Van B',
-                avatar: 'https://example.com/avatar.png',
-            },
-        },
-    }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Profile updated successfully' }),
     __param(0, (0, get_user_decorator_1.GetUser)()),
     __param(1, (0, common_1.Body)()),
@@ -88,14 +80,6 @@ __decorate([
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: 'Change current user password' }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            example: {
-                currentPassword: 'oldPassword123',
-                newPassword: 'newPassword123',
-            },
-        },
-    }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Password changed successfully' }),
     __param(0, (0, get_user_decorator_1.GetUser)()),
     __param(1, (0, common_1.Body)()),

@@ -17,73 +17,32 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const level_entity_1 = require("./entities/level.entity");
-const user_progress_entity_1 = require("../progress/entities/user-progress.entity");
-const user_entity_1 = require("../users/entities/user.entity");
 let LevelsService = class LevelsService {
-    levelRepo;
-    progressRepo;
-    userRepo;
-    constructor(levelRepo, progressRepo, userRepo) {
-        this.levelRepo = levelRepo;
-        this.progressRepo = progressRepo;
-        this.userRepo = userRepo;
+    repo;
+    constructor(repo) {
+        this.repo = repo;
     }
     create(dto) {
-        return this.levelRepo.save(dto);
+        return this.repo.save(dto);
     }
     findAll() {
-        return this.levelRepo.find();
+        return this.repo.find({ relations: ['craft', 'craft.village'], withDeleted: true });
     }
     findOne(id) {
-        return this.levelRepo.findOne({ where: { level_id: id } });
+        return this.repo.findOne({ where: { level_id: id }, relations: ['craft', 'craft.village'], withDeleted: true });
     }
     async update(id, dto) {
-        await this.levelRepo.update(id, dto);
+        await this.repo.update(id, dto);
         return this.findOne(id);
     }
     remove(id) {
-        return this.levelRepo.softDelete(id);
-    }
-    async unlockLevel(userId, levelId) {
-        const level = await this.levelRepo.findOne({ where: { level_id: levelId } });
-        if (!level) {
-            throw new common_1.BadRequestException('Level not found');
-        }
-        const user = await this.userRepo.findOne({ where: { user_id: userId } });
-        if (!user) {
-            throw new common_1.BadRequestException('User not found');
-        }
-        let userProgress = await this.progressRepo.findOne({
-            where: { user: { user_id: userId }, level: { level_id: levelId } },
-            relations: ['user', 'level'],
-        });
-        if (!userProgress) {
-            userProgress = this.progressRepo.create({
-                user,
-                level,
-                status: 'unlocked',
-                score: 0,
-            });
-        }
-        else {
-            if (userProgress.status === 'completed') {
-            }
-            else {
-                userProgress.status = 'unlocked';
-            }
-        }
-        const saved = await this.progressRepo.save(userProgress);
-        return saved;
+        return this.repo.softDelete(id);
     }
 };
 exports.LevelsService = LevelsService;
 exports.LevelsService = LevelsService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(level_entity_1.Level)),
-    __param(1, (0, typeorm_1.InjectRepository)(user_progress_entity_1.UserProgress)),
-    __param(2, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
-    __metadata("design:paramtypes", [typeorm_2.Repository,
-        typeorm_2.Repository,
-        typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository])
 ], LevelsService);
 //# sourceMappingURL=levels.service.js.map

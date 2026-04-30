@@ -16,9 +16,6 @@ exports.LevelsController = void 0;
 const common_1 = require("@nestjs/common");
 const levels_service_1 = require("./levels.service");
 const swagger_1 = require("@nestjs/swagger");
-const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
-const get_user_decorator_1 = require("../../auth/get-user.decorator");
-const unlock_level_response_1 = require("./dto/unlock-level.response");
 let LevelsController = class LevelsController {
     levelsService;
     constructor(levelsService) {
@@ -27,22 +24,17 @@ let LevelsController = class LevelsController {
     create(dto) {
         return this.levelsService.create(dto);
     }
-    findAll(userId) {
-        const uid = userId ? Number(userId) : undefined;
-        return this.levelsService.findAll(uid);
+    findAll() {
+        return this.levelsService.findAll();
     }
-    findOne(id, userId) {
-        const uid = userId ? Number(userId) : undefined;
-        return this.levelsService.findOne(id, uid);
+    findOne(id) {
+        return this.levelsService.findOne(id);
     }
     update(id, dto) {
         return this.levelsService.update(id, dto);
     }
     remove(id) {
         return this.levelsService.remove(id);
-    }
-    async unlockLevel(levelId, userId) {
-        return this.levelsService.unlockLevel(userId, levelId);
     }
 };
 exports.LevelsController = LevelsController;
@@ -56,17 +48,15 @@ __decorate([
 ], LevelsController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
-    __param(0, (0, common_1.Query)('user_id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], LevelsController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
-    __param(1, (0, common_1.Query)('user_id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, String]),
+    __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", void 0)
 ], LevelsController.prototype, "findOne", null);
 __decorate([
@@ -84,44 +74,6 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", void 0)
 ], LevelsController.prototype, "remove", null);
-__decorate([
-    (0, common_1.Post)(':levelId/unlock'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Unlock a level for the current user',
-        description: 'Unlocks a specific level for the authenticated user. Creates or updates user progress record.',
-    }),
-    (0, swagger_1.ApiParam)({ name: 'levelId', description: 'ID of the level to unlock', required: true, example: 1 }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Level unlocked successfully',
-        type: unlock_level_response_1.UnlockLevelResponseDto,
-        example: {
-            progress_id: 1,
-            user_id: 1,
-            level_id: 1,
-            status: 'unlocked',
-            score: 0,
-            completed_at: null,
-            created_at: '2026-04-21T10:30:00Z',
-            updated_at: '2026-04-21T10:30:00Z',
-        },
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 401,
-        description: 'Unauthorized - Missing or invalid authentication token',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 400,
-        description: 'Bad request - Level not found or invalid input',
-    }),
-    __param(0, (0, common_1.Param)('levelId', common_1.ParseIntPipe)),
-    __param(1, (0, get_user_decorator_1.GetUser)('user_id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Number]),
-    __metadata("design:returntype", Promise)
-], LevelsController.prototype, "unlockLevel", null);
 exports.LevelsController = LevelsController = __decorate([
     (0, swagger_1.ApiTags)('levels'),
     (0, common_1.Controller)('levels'),

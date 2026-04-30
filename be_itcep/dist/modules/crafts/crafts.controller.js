@@ -41,15 +41,6 @@ exports.CraftsController = CraftsController;
 __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create craft' }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            example: {
-                name: 'Nặn gốm',
-                description: 'Craft truyền thống của làng gốm',
-                village_id: 1,
-            },
-        },
-    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -70,15 +61,6 @@ __decorate([
 ], CraftsController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            example: {
-                name: 'Nặn gốm',
-                description: 'Cập nhật tên và mô tả craft',
-                village_id: 1,
-            },
-        },
-    }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
