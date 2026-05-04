@@ -1,6 +1,9 @@
 import React from 'react'
 import GuidePerson from './GuidePerson'
 import Phase2Dialogues from '../shared_ceramics/phase2Dialogues'
+import Phase3Dialogues from '../shared_ceramics/phase3Dialogues'
+import Phase4Dialogues from '../shared_ceramics/phase4Dialogues'
+import Phase5Dialogues from '../shared_ceramics/phase5Dialogues'
 import { useEffect, useState } from 'react'
 
 export default function GuideDialog({
@@ -12,7 +15,8 @@ export default function GuideDialog({
   phase,
   weather,
   event,
-  onNext
+  onNext,
+  avatarFirst
 }: {
   started: boolean
   showRequireStart: boolean
@@ -23,6 +27,7 @@ export default function GuideDialog({
   weather?: string
   event?: string
   onNext?: () => void
+  avatarFirst?: boolean
 }){
   const hintsByPhase: Record<string, string[]> = {
     phase1: [
@@ -68,6 +73,48 @@ export default function GuideDialog({
         else message = Phase2Dialogues.progressHints?.complete || ''
         // fallback to first step if empty
         if (!message) message = (Phase2Dialogues.steps && Phase2Dialogues.steps[0]) || ''
+      }
+    } else if (phaseKey === 'phase3') {
+      // Use Phase3Dialogues for ceramics Phase 3 (drying)
+      if (!started) {
+        message = showRequireStart ? "Nhấn 'Bắt đầu' để bắt đầu phơi gốm" : "Nhấn 'Bắt đầu' để chơi trò chơi"
+      } else if (win) {
+        message = Phase3Dialogues.end?.win || "Hoàn thành!"
+      } else {
+        const p = Math.max(0, Math.min(100, Math.round(progress)))
+        if (p < 25) message = Phase3Dialogues.progressHints?.low || ''
+        else if (p < 60) message = Phase3Dialogues.progressHints?.mid || ''
+        else if (p < 95) message = Phase3Dialogues.progressHints?.high || ''
+        else message = Phase3Dialogues.progressHints?.complete || ''
+        if (!message) message = (Phase3Dialogues.steps && Phase3Dialogues.steps[0]) || ''
+      }
+    } else if (phaseKey === 'phase4') {
+      // Use Phase4Dialogues for decoration phase
+      if (!started) {
+        message = showRequireStart ? "Nhấn 'Bắt đầu' để bắt đầu trang trí" : "Nhấn 'Bắt đầu' để chơi trò chơi"
+      } else if (win) {
+        message = Phase4Dialogues.end?.win || "Hoàn thành!"
+      } else {
+        const p = Math.max(0, Math.min(100, Math.round(progress)))
+        if (p < 25) message = Phase4Dialogues.progressHints?.low || ''
+        else if (p < 60) message = Phase4Dialogues.progressHints?.mid || ''
+        else if (p < 95) message = Phase4Dialogues.progressHints?.high || ''
+        else message = Phase4Dialogues.progressHints?.complete || ''
+        if (!message) message = (Phase4Dialogues.steps && Phase4Dialogues.steps[0]) || ''
+      }
+    } else if (phaseKey === 'phase5') {
+      // Use Phase5Dialogues for firing phase
+      if (!started) {
+        message = showRequireStart ? "Nhấn 'Bắt đầu' để bắt đầu nung" : "Nhấn 'Bắt đầu' để chơi trò chơi"
+      } else if (win) {
+        message = Phase5Dialogues.end?.win || "Hoàn thành!"
+      } else {
+        const p = Math.max(0, Math.min(100, Math.round(progress)))
+        if (p < 25) message = Phase5Dialogues.progressHints?.low || ''
+        else if (p < 60) message = Phase5Dialogues.progressHints?.mid || ''
+        else if (p < 95) message = Phase5Dialogues.progressHints?.high || ''
+        else message = Phase5Dialogues.progressHints?.complete || ''
+        if (!message) message = (Phase5Dialogues.steps && Phase5Dialogues.steps[0]) || ''
       }
     } else {
       if (showRequireStart && !started) {
@@ -179,16 +226,29 @@ export default function GuideDialog({
         @keyframes pulse { 0% { transform: scale(1) } 50% { transform: scale(1.03) } 100% { transform: scale(1) } }
         @keyframes bob { 0% { transform: translateY(0) } 50% { transform: translateY(-6px) } 100% { transform: translateY(0) } }
       `}</style>
-
-      <div style={{ ...bubbleBase, ...bubbleAnim, ...(!started ? { border: '1px solid rgba(6,120,60,0.06)' } : {}), ...( !started ? pulseWhenIdle : {} ) }}>
-        {displayText}
-      </div>
-
-      <div style={{ ...avatarWrap }}>
-        <div style={{ borderRadius: '50%', padding: 6, background: 'white', boxShadow: '0 8px 22px rgba(0,0,0,0.06)', animation: started ? 'bob 1400ms ease-in-out infinite' : 'bob 2400ms ease-in-out infinite' }}>
-          <GuidePerson size={64} />
-        </div>
-      </div>
+      {avatarFirst ? (
+        <>
+          <div style={{ ...avatarWrap }}>
+            <div style={{ borderRadius: '50%', padding: 6, background: 'white', boxShadow: '0 8px 22px rgba(0,0,0,0.06)', animation: started ? 'bob 1400ms ease-in-out infinite' : 'bob 2400ms ease-in-out infinite' }}>
+              <GuidePerson size={64} />
+            </div>
+          </div>
+          <div style={{ ...bubbleBase, ...bubbleAnim, ...(!started ? { border: '1px solid rgba(6,120,60,0.06)' } : {}), ...( !started ? pulseWhenIdle : {} ) }}>
+            {displayText}
+          </div>
+        </>
+      ) : (
+        <>
+          <div style={{ ...bubbleBase, ...bubbleAnim, ...(!started ? { border: '1px solid rgba(6,120,60,0.06)' } : {}), ...( !started ? pulseWhenIdle : {} ) }}>
+            {displayText}
+          </div>
+          <div style={{ ...avatarWrap }}>
+            <div style={{ borderRadius: '50%', padding: 6, background: 'white', boxShadow: '0 8px 22px rgba(0,0,0,0.06)', animation: started ? 'bob 1400ms ease-in-out infinite' : 'bob 2400ms ease-in-out infinite' }}>
+              <GuidePerson size={64} />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }

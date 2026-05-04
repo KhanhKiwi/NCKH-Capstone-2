@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { levelsService } from '../../../api/levels/levelsService'
 import { progressService } from '../../../api/progress/progressService'
 import { useNavigate } from 'react-router'
+import confetti from 'canvas-confetti'
 import GuideDialog from '../../../util/shared/GuideDialog'
 
 export default function BatTrangLevel2() {
@@ -29,6 +30,8 @@ export default function BatTrangLevel2() {
   const progressRef = useRef(progress)
   const pullTrail = useRef<Array<{x:number,y:number,t:number}>>([])
   const particles = useRef<Array<{x:number,y:number,vx:number,vy:number,life:number,maxLife:number,size:number,color:string}>>([])
+  const [summaryOpen, setSummaryOpen] = useState(false)
+  const [starCount, setStarCount] = useState(3)
 
   useEffect(()=>{ document.title = 'Bát Tràng — Level 2: Tạo hình' }, [])
 
@@ -329,6 +332,20 @@ export default function BatTrangLevel2() {
     return ()=>{ c.removeEventListener('pointerdown', down); c.removeEventListener('pointermove', move); c.removeEventListener('pointerup', up); c.removeEventListener('pointercancel', up) }
   },[state])
 
+  // confetti on win
+  useEffect(()=>{
+    if (state === 'won') {
+      try { confetti({ particleCount: 120, spread: 70, origin: { y: 0.4 } }) } catch(e){}
+    }
+  },[state])
+
+  // compute star rating when the player wins (user requested thresholds)
+  useEffect(()=>{
+    if (state !== 'won') return
+    const s = timeLeft > 40 ? 3 : timeLeft > 20 ? 2 : 1
+    setStarCount(s)
+  },[state, timeLeft])
+
   const start = ()=>{ work.current = 0; setProgress(0); required.current = 650; setTimeLeft(60); setState('playing'); rodVisible.current = true; rodLenRef.current = 0; rodTargetLen.current = 0; rodAngle.current = -Math.PI/2 }
   const pause = ()=> setState('paused')
   const resume = ()=> setState('playing')
@@ -407,29 +424,69 @@ export default function BatTrangLevel2() {
           </div>
 
           {state === 'won' && (
-            <div className="absolute inset-0 flex items-center justify-center z-40">
-              <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-                <h2 className="text-xl font-bold">Hoàn thành!</h2>
-                <p className="mt-2">Bạn đã tạo hình thành công.</p>
-                <div className="mt-4 flex gap-2 justify-center">
-                  <button onClick={async () => {
-                    // unlock next level (level_number 3) for village 1
-                      try {
-                        let userId: number | undefined
-                        try { const profile = await import('../../../api/services/authService').then(m => m.authService.getProfile()); userId = Number(profile?.user_id ?? profile?.id ?? profile?.userId) } catch { userId = undefined }
-                        const all = await levelsService.getByVillage(1, userId)
-                        if (Array.isArray(all)) {
-                          // mark current level (level_number 2) as completed via progress API;
-                          // backend will create/update progress and unlock the next level automatically
-                          const current = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === 2)
-                          if (current) {
-                            await progressService.saveProgress({ user_id: 1, level_id: Number(current.level_id ?? current.id), status: 'completed', score: 100 })
-                          }
+            <div className="absolute inset-0 flex items-center justify-center z-80">
+              <style>{`@keyframes popIn { from { transform: scale(.92); opacity: 0 } to { transform: scale(1); opacity: 1 } }`}</style>
+              <div style={{width:360,background:'linear-gradient(180deg,#ffffff,#f8fff7)',padding:22,borderRadius:16,boxShadow:'0 30px 90px rgba(20,30,10,0.22)',textAlign:'center',animation:'popIn 320ms cubic-bezier(.2,.9,.2,1) both',border:'1px solid rgba(0,0,0,0.06)'}}>
+                <div style={{display:'flex',alignItems:'center',justifyContent:'center',marginBottom:12}}>
+                  <div style={{width:72,height:72,borderRadius:999,display:'flex',alignItems:'center',justifyContent:'center',background:'linear-gradient(180deg,#fff7f0,#fffbf6)',boxShadow:'0 10px 30px rgba(245,158,11,0.12)',marginRight:12}}>
+                    <span style={{fontSize:34}}>🏅</span>
+                  </div>
+                  <div style={{textAlign:'left'}}>
+                    <h2 style={{margin:'0 0 6px',fontSize:22,color:'#6b3f1a'}}>Hoàn thành!</h2>
+                    <div style={{color:'#7a5236'}}>Bạn đã tạo hình thành công.</div>
+                  </div>
+                </div>
+                <div style={{display:'flex',gap:12,justifyContent:'center',marginTop:16}}>
+                  <button onClick={() => setSummaryOpen(true)} style={{padding:'10px 18px',background:'linear-gradient(90deg,#10b981,#06a86b)',color:'white',borderRadius:12,border:'none',fontWeight:800,boxShadow:'0 10px 30px rgba(16,185,129,0.18)'}}>Tổng kết</button>
+                  <button onClick={reset} style={{padding:'10px 18px',background:'white',borderRadius:12,border:'1px solid rgba(0,0,0,0.06)',fontWeight:700}}>Chơi lại</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {summaryOpen && (
+            <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',zIndex:120}}>
+              <div style={{width:440,background:'linear-gradient(180deg,#fffef8,#fff7f0)',padding:28,borderRadius:16,boxShadow:'0 40px 120px rgba(10,20,10,0.28)',textAlign:'center',animation:'popIn 320ms cubic-bezier(.2,.9,.2,1) both',border:'1px solid rgba(0,0,0,0.06)'}}>
+                <h2 style={{margin:'0 0 8px',fontSize:22,color:'#6b3f1a'}}>Tổng kết</h2>
+                <div style={{color:'#7a5236',marginBottom:14}}>Chúc mừng — bạn đã hoàn thành phần Tạo hình</div>
+                <div style={{display:'flex',justifyContent:'center',gap:12,marginBottom:14}}>
+                  {[1,2,3].map(i=> (
+                    <span key={i} style={{fontSize:46, transform: i<=starCount ? 'scale(1.06)' : 'scale(.92)', transition:'transform 260ms cubic-bezier(.2,.9,.2,1)', color: i<=starCount ? '#6b3f1a' : '#e9dfd4'}} aria-hidden>
+                      {i<=starCount ? '★' : '☆'}
+                    </span>
+                  ))}
+                </div>
+                <div style={{color:'#5b3a26',marginBottom:10}}>Tiến độ: <strong>{Math.round(progress*100)}%</strong></div>
+                <div style={{color:'#5b3a26',marginBottom:18}}>Thời gian còn lại: <strong>{timeLeft}s</strong></div>
+                <div style={{display:'flex',gap:12,justifyContent:'center'}}>
+                  <button onClick={async ()=>{
+                    try{ localStorage.setItem('screen2_phase1_stars', String(starCount)); localStorage.setItem('screen2_phase1_result','won') }catch{}
+                    // save progress and map stars to score
+                    try {
+                      let userId: number | undefined
+                      try { const profile = await import('../../../api/services/authService').then(m => m.authService.getProfile()); userId = Number(profile?.user_id ?? profile?.id ?? profile?.userId) } catch { userId = undefined }
+                      const all = await levelsService.getByVillage(1, userId)
+                      if (Array.isArray(all)) {
+                        const current = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === 2)
+                        if (current) {
+                          const score = starCount === 3 ? 100 : starCount === 2 ? 70 : 40
+                          await progressService.saveProgress({ user_id: 1, level_id: Number(current.level_id ?? current.id), status: 'completed', score })
+                          try {
+                            // attempt to unlock the next level (level_number + 1)
+                            const curNum = Number(current.level_number ?? current.level_id ?? current.id)
+                            const next = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === curNum + 1)
+                            if (next) {
+                              const nextId = Number(next.level_id ?? next.id)
+                              if (nextId) await progressService.unlockLevel(nextId)
+                            }
+                          } catch (er) { console.warn('unlock next level failed', er) }
                         }
-                      } catch (e) { console.warn('complete level failed', e) }
+                      }
+                    } catch (e) { console.warn('complete level failed', e) }
+                    setSummaryOpen(false)
                     navigate('/craft-selection?openName=B%C3%A1t%20Tr%C3%A0ng')
-                  }} className="px-4 py-2 bg-emerald-500 text-white rounded">Hoàn tất</button>
-                  <button onClick={reset} className="px-4 py-2 bg-white border rounded">Chơi lại</button>
+                  }} style={{padding:'10px 18px',background:'linear-gradient(90deg,#10b981,#06a86b)',color:'white',borderRadius:12,border:'none',fontWeight:800}}>Hoàn tất</button>
+                  <button onClick={()=>{ setSummaryOpen(false); reset(); }} style={{padding:'10px 18px',background:'white',borderRadius:12,border:'1px solid rgba(0,0,0,0.06)',fontWeight:700}}>Chơi lại</button>
                 </div>
               </div>
             </div>

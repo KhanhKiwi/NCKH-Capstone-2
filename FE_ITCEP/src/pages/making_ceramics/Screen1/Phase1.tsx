@@ -67,11 +67,11 @@ export default function BatTrangLevel1Screen1() {
     }
 
     try {
-      // Save progress to backend (use seeded dev user id=1 for local testing)
-      await progressService.saveProgress({ user_id: 1, level_id: 2, status: 'unlocked', score: 0 })
-      // mark completed for this level as well
+      // mark completed for this level (dev user)
       await progressService.saveProgress({ user_id: 1, level_id: 2, status: 'completed', score: 100 })
-    } catch (e) { console.warn('progress save failed', e) }
+    } catch (e) {
+      console.warn('progress save failed', e)
+    }
 
     navigate('/bat-trang/level-1/phase2')
   }

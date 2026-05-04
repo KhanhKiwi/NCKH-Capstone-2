@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { levelsService } from '../../../api/levels/levelsService'
 import { progressService } from '../../../api/progress/progressService'
+import GuideDialog from '../../../util/shared/GuideDialog'
 
 export default function Level4() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -125,6 +126,7 @@ export default function Level4() {
     }, 2000)
     return () => clearInterval(id)
   }, [running])
+
 
   useEffect(() => {
     if (!showColorModal) return
@@ -257,6 +259,7 @@ export default function Level4() {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
     }
   }, [showFinishModal])
+
 
   function drawRealisticPot(
     ctx: CanvasRenderingContext2D,
@@ -532,6 +535,18 @@ export default function Level4() {
                 </button>
               </div>
             )}
+          {/* Guide dialog placed under the time card for decoration guidance */}
+          <div style={{ marginTop: 10 }}>
+            <GuideDialog
+              started={started}
+              showRequireStart={true}
+              win={showFinishModal}
+              progress={Math.round(decorProgress)}
+              phase="phase4"
+              onNext={() => {}}
+              avatarFirst={true}
+            />
+          </div>
         </div>
 
         {/* Right tools (larger, styled, responsive) */}

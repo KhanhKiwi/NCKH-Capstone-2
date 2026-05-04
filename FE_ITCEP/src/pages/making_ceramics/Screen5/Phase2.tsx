@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
+import GuideDialog from '../../../util/shared/GuideDialog'
 
 export default function BatTrangLevel5Phase1() {
   const navigate = useNavigate()
@@ -421,6 +422,18 @@ export default function BatTrangLevel5Phase1() {
                 </button>
               </div>
             </div>
+          </div>
+          {/* Guide dialog for Level 5 (firing) */}
+          <div style={{ marginTop: 10 }}>
+            <GuideDialog
+              started={started}
+              showRequireStart={true}
+              win={showSuccess}
+              progress={Math.round(quality)}
+              phase="phase5"
+              onNext={() => {}}
+              avatarFirst={true}
+            />
           </div>
         </div>
 

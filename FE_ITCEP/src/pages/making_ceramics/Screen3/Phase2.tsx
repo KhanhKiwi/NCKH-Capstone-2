@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import GuideDialog from '../../../util/shared/GuideDialog'
 import { useNavigate } from "react-router";
 
 export default function Level3() {
@@ -441,6 +442,8 @@ export default function Level3() {
         ref={containerRef}
         className="relative w-full h-screen overflow-hidden bg-center bg-cover"
       >
+
+        {/* Guide dialog will be rendered inside the left stat column under the time card */}
         {/* Confetti layer */}
         <div className="confetti-layer" aria-hidden>
           <style>{`
@@ -507,6 +510,20 @@ export default function Level3() {
             <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow">
               ⏱️
             </div>
+          </div>
+          {/* Guide dialog placed directly under the time card */}
+          <div style={{ marginTop: 8 }}>
+            <GuideDialog
+              started={started}
+              showRequireStart={true}
+              win={showSuccess}
+              progress={Math.round(humidity)}
+              phase="phase3"
+              weather={selectedWeather}
+              event={!started ? undefined : (selectedWeather === 'rain' ? 'raining' : (weatherTimer <= 5 ? 'soon_sunny' : 'started'))}
+              onNext={() => {}}
+              avatarFirst={true}
+            />
           </div>
         </div>
 

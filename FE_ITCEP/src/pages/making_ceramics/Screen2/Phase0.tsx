@@ -35,22 +35,17 @@ export default function Phase0() {
         </header>
 
         <main className="bg-white rounded-xl shadow border p-6">
-          <p className="mb-6 text-gray-700">Dưới đây là hai màn thực hành trong Level 2. Bắt đầu từ Màn 0 (giới thiệu) để xem hướng dẫn, sau đó sang Màn 1 để thực hành kéo.</p>
+          <p className="mb-6 text-gray-700">Dưới đây là màn thực hành trong Level 2. Bắt đầu từ Màn 0 (giới thiệu) để xem hướng dẫn, sau đó sang Màn 1 để thực hành kéo.</p>
 
           <div className="flex gap-4 mb-6">
             <button onClick={() => navigate('/bat-trang/level-2/phase1')} className="px-6 py-3 bg-amber-500 text-white rounded-md font-semibold">Bắt đầu Màn 1</button>
             <Link to="/craft-selection" className="px-6 py-3 border rounded-md text-gray-700 font-semibold">Quay lại chọn nghề</Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             <div className="p-6 border rounded-lg">
               <h3 className="text-xl font-semibold mb-2">Màn 1: Kéo tạo hình</h3>
               <p className="text-gray-600">Học cách kéo theo thanh hướng dẫn để làm mịn và định hình đất.</p>
-            </div>
-
-            <div className="p-6 border rounded-lg">
-              <h3 className="text-xl font-semibold mb-2">Màn 2: Hoàn thiện</h3>
-              <p className="text-gray-600">Sử dụng kỹ năng từ Màn 1 để hoàn thiện bề mặt và đạt chuẩn.</p>
             </div>
           </div>
 
