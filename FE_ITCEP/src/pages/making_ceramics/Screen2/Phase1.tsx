@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router'
 import confetti from 'canvas-confetti'
 import GuideDialog from '../../../util/shared/GuideDialog'
 
-export default function BatTrangLevel2() {
+export default function BatTrangLevel2({ onComplete }: { onComplete?: (result?: any) => void }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [state, setState] = useState<'idle'|'playing'|'paused'|'won'|'lost'>('idle')
   const [progress, setProgress] = useState(0) // 0..1
@@ -26,12 +26,40 @@ export default function BatTrangLevel2() {
   const pullPenaltyApplied = useRef(false)
   const flashStart = useRef<number | null>(null)
   const navigate = useNavigate()
+  const [topShift, setTopShift] = useState(0)
+
+  // If this screen is embedded under the challenge runner, detect the runner header
+  // and shift absolute-positioned elements so the game sits 20px below it.
+  useEffect(()=>{
+    function compute(){
+      try{
+        const headers = Array.from(document.querySelectorAll('h2'))
+        const runnerHeader = headers.find(h => (h.textContent||'').includes('Chế độ Thử thách'))
+        if (!runnerHeader) { setTopShift(0); return }
+        const rect = runnerHeader.getBoundingClientRect()
+        const desiredTop = rect.bottom + 20 + window.scrollY
+        // header card normally uses top:28, game container top:120 — compute shift to apply
+        const baseHeaderTop = 28
+        const shift = Math.max(0, desiredTop - baseHeaderTop)
+        setTopShift(shift)
+      }catch(e){ setTopShift(0) }
+    }
+    compute()
+    // sometimes the runner header isn't present immediately; recompute shortly after
+    const t = window.setTimeout(()=>{
+      try{ compute(); requestAnimationFrame(compute) }catch(e){}
+    }, 120)
+    window.addEventListener('resize', compute)
+    window.addEventListener('scroll', compute)
+    return ()=>{ window.clearTimeout(t); window.removeEventListener('resize', compute); window.removeEventListener('scroll', compute) }
+  },[])
   const stateRef = useRef(state)
   const progressRef = useRef(progress)
   const pullTrail = useRef<Array<{x:number,y:number,t:number}>>([])
   const particles = useRef<Array<{x:number,y:number,vx:number,vy:number,life:number,maxLife:number,size:number,color:string}>>([])
   const [summaryOpen, setSummaryOpen] = useState(false)
   const [starCount, setStarCount] = useState(3)
+  const finishedRef = useRef(false)
 
   useEffect(()=>{ document.title = 'Bát Tràng — Level 2: Tạo hình' }, [])
 
@@ -346,6 +374,45 @@ export default function BatTrangLevel2() {
     setStarCount(s)
   },[state, timeLeft])
 
+  // helper to finish level: save progress, unlock next, then notify parent or navigate
+  const finishAndNotify = useCallback(async (triggeredByAuto = false) => {
+    if (finishedRef.current) return
+    finishedRef.current = true
+    try{ localStorage.setItem('screen2_phase1_stars', String(starCount)); localStorage.setItem('screen2_phase1_result','won') }catch{}
+    try {
+      let userId: number | undefined
+      try { const profile = await import('../../../api/services/authService').then(m => m.authService.getProfile()); userId = Number(profile?.user_id ?? profile?.id ?? profile?.userId) } catch { userId = undefined }
+      const all = await levelsService.getByVillage(1, userId)
+      if (Array.isArray(all)) {
+        const current = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === 2)
+        if (current) {
+          const score = starCount === 3 ? 100 : starCount === 2 ? 70 : 40
+          await progressService.saveProgress({ user_id: 1, level_id: Number(current.level_id ?? current.id), status: 'completed', score })
+          try {
+            const curNum = Number(current.level_number ?? current.level_id ?? current.id)
+            const next = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === curNum + 1)
+            if (next) {
+              const nextId = Number(next.level_id ?? next.id)
+              if (nextId) await progressService.unlockLevel(nextId)
+            }
+          } catch (er) { console.warn('unlock next level failed', er) }
+        }
+      }
+    } catch (e) { console.warn('complete level failed', e) }
+    setSummaryOpen(false)
+    if (onComplete) return onComplete({ stars: starCount })
+    if (!triggeredByAuto) navigate('/craft-selection?openName=B%C3%A1t%20Tr%C3%A0ng')
+  }, [onComplete, starCount, navigate])
+
+  // auto-finish when won and embedded in runner (onComplete present)
+  useEffect(()=>{
+    if (state === 'won' && onComplete) {
+      // small delay so confetti/animations show briefly
+      const id = setTimeout(()=>{ finishAndNotify(true) }, 900)
+      return ()=> clearTimeout(id)
+    }
+  },[state, onComplete, finishAndNotify])
+
   const start = ()=>{ work.current = 0; setProgress(0); required.current = 650; setTimeLeft(60); setState('playing'); rodVisible.current = true; rodLenRef.current = 0; rodTargetLen.current = 0; rodAngle.current = -Math.PI/2 }
   const pause = ()=> setState('paused')
   const resume = ()=> setState('playing')
@@ -367,7 +434,7 @@ export default function BatTrangLevel2() {
     <div className="h-screen overflow-hidden bg-gradient-to-b from-amber-50 to-white py-6">
       <div className="max-w-4xl mx-auto px-6 h-full flex flex-col">
         {/* Header card (top center) */}
-        <div style={{position:'absolute',left:'50%',top:28,transform:'translateX(-50%)',width:'min(920px,92%)',zIndex:40}}>
+        <div style={{position:'absolute',left:'50%',top:28 + topShift,transform:'translateX(-50%)',width:'min(920px,92%)',zIndex:40}}>
           <div style={{background:'linear-gradient(90deg,#fffaf0,#fff7ed)',borderRadius:18,padding:'18px 20px',boxShadow:'0 18px 48px rgba(0,0,0,0.12)',border:'1px solid rgba(201,166,107,0.12)',display:'flex',gap:16,alignItems:'center'}} className="fade-in-up">
             <div style={{width:56,height:56,borderRadius:12,background:'linear-gradient(135deg,#f59e0b,#d97706)',display:'flex',alignItems:'center',justifyContent:'center',color:'#fff',fontWeight:800,boxShadow:'0 8px 22px rgba(213,125,42,0.18)'}}>
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
@@ -386,7 +453,7 @@ export default function BatTrangLevel2() {
           <style>{`.fade-in-up { animation: fadeInUp 520ms cubic-bezier(.2,.9,.2,1) both } @keyframes fadeInUp { from { transform: translateY(8px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }`}</style>
         </div>
 
-        <div style={{position:'absolute',left:'50%',top:120,transform:'translateX(-50%)',width:900,maxWidth:'92%',height:600,borderRadius:20,background:'linear-gradient(135deg,#fffaf0,#fff7ed)',border:'10px solid #C9A66B',boxShadow:'0 30px 80px rgba(0,0,0,0.25)',zIndex:20}}>
+        <div style={{position:'absolute',left:'50%',top:120 + topShift,transform:'translateX(-50%)',width:900,maxWidth:'92%',height:600,borderRadius:20,background:'linear-gradient(135deg,#fffaf0,#fff7ed)',border:'10px solid #C9A66B',boxShadow:'0 30px 80px rgba(0,0,0,0.25)',zIndex:20}}>
           <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center'}}>
             <canvas ref={canvasRef} style={{width:'100%',height:'100%',display:'block',borderRadius:12}} />
           </div>
@@ -484,6 +551,7 @@ export default function BatTrangLevel2() {
                       }
                     } catch (e) { console.warn('complete level failed', e) }
                     setSummaryOpen(false)
+                    if (onComplete) return onComplete({ stars: starCount })
                     navigate('/craft-selection?openName=B%C3%A1t%20Tr%C3%A0ng')
                   }} style={{padding:'10px 18px',background:'linear-gradient(90deg,#10b981,#06a86b)',color:'white',borderRadius:12,border:'none',fontWeight:800}}>Hoàn tất</button>
                   <button onClick={()=>{ setSummaryOpen(false); reset(); }} style={{padding:'10px 18px',background:'white',borderRadius:12,border:'1px solid rgba(0,0,0,0.06)',fontWeight:700}}>Chơi lại</button>

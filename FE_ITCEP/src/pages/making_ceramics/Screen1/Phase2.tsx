@@ -20,7 +20,32 @@ export default function Phase2({ onComplete }: Phase2Props) {
 	const [timeLeft, setTimeLeft] = useState(INITIAL_TIME);
 	const [summaryOpen, setSummaryOpen] = useState(false);
 	const [starCount, setStarCount] = useState(3);
+	const finishedRef = useRef(false)
 	const navigate = useNavigate()
+
+	const finishAndNotify = useCallback(async (result?: { smoothness?: number; stars?: number }) => {
+		if (finishedRef.current) return
+		finishedRef.current = true
+		try{ localStorage.setItem('phase2_stars', String(result?.stars ?? starCount)); localStorage.setItem('phase2_result','won') }catch{}
+		try {
+			let userId: number | undefined
+			try { const profile = await import('../../../api/services/authService').then(m => m.authService.getProfile()); userId = Number(profile?.user_id ?? profile?.id ?? profile?.userId) } catch { userId = undefined }
+			const all = await levelsService.getByVillage(1, userId)
+			if (Array.isArray(all)) {
+				const current = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === 1)
+				if (current) {
+					await progressService.saveProgress({ user_id: 1, level_id: Number(current.level_id ?? current.id), status: 'completed', score: 100 })
+				}
+			}
+		} catch (e) { console.warn('complete level failed', e) }
+		setSummaryOpen(false)
+		if (onComplete) {
+			try { onComplete(result) } catch (e) {}
+			return
+		}
+		navigate('/craft-selection?openName=B%C3%A1t%20Tr%C3%A0ng')
+	}, [navigate, onComplete, starCount])
+
 	const required = useRef(INITIAL_REQUIRED);
 	const knead = useRef(0);
 	const particles = useRef<{x:number;y:number;vx:number;vy:number;life:number}[]>([]);
@@ -243,7 +268,13 @@ export default function Phase2({ onComplete }: Phase2Props) {
 				// add small dent based on stroke intensity
 				dents.current.push({ x: p.x, y: p.y, strength: Math.min(1, dist/60), life: 1.0 });
 				lastPos.current=p; const pr = Math.min(1, knead.current/required.current); setProgress(pr);
-				if (pr>=1){ setState('won'); setTimeout(()=>onComplete&&onComplete({smoothness:1}),650); }
+				if (pr>=1){
+					setState('won');
+					// If running inside the challenge runner (onComplete provided) auto-finish.
+					// In standalone mode, open the summary modal and wait for the user to confirm.
+					if (onComplete) setTimeout(()=>finishAndNotify({ smoothness: 1 }),650);
+					else setTimeout(()=>setSummaryOpen(true),650);
+				}
 			}
 		};
 		const up = (e:PointerEvent)=>{ try{ if (typeof c.releasePointerCapture === 'function') c.releasePointerCapture(e.pointerId);}catch(err){ console.warn('releasePointerCapture failed', err); } lastPos.current=null; };
@@ -364,29 +395,9 @@ export default function Phase2({ onComplete }: Phase2Props) {
 								<div style={{color:'#5b3a26',marginBottom:18}}>Thời gian còn lại: <strong>{timeLeft}s</strong></div>
 								<div style={{display:'flex',gap:12,justifyContent:'center'}}>
 									<button onClick={async ()=>{
-										try{ localStorage.setItem('phase2_stars', String(starCount)); localStorage.setItem('phase2_result','won') }catch{}
-										if (onComplete) onComplete({ smoothness: progress, stars: starCount });
-										// unlock next level (level_number = 2) for Bát Tràng (village_id = 1)
-										try {
-											// include authenticated user id so backend returns per-user progress where available
-											let userId: number | undefined
-											try { const profile = await import('../../../api/services/authService').then(m => m.authService.getProfile()); userId = Number(profile?.user_id ?? profile?.id ?? profile?.userId) } catch { userId = undefined }
-											const all = await levelsService.getByVillage(1, userId)
-											if (Array.isArray(all)) {
-												// complete current level via progress API so backend unlocks next level
-												const current = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === 1)
-																								if (current) {
-													await progressService.saveProgress({ user_id: 1, level_id: Number(current.level_id ?? current.id), status: 'completed', score: 100 })
-												}
-											}
-										} catch (e) {
-											console.warn('complete level failed', e)
-										}
-
-										setSummaryOpen(false);
-										navigate('/craft-selection?openName=B%C3%A1t%20Tr%C3%A0ng');
+										finishAndNotify({ smoothness: progress, stars: starCount })
 									}} style={{padding:'10px 18px',background:'linear-gradient(90deg,#10b981,#06a86b)',color:'white',borderRadius:12,border:'none',fontWeight:800}}>Hoàn tất</button>
-									<button onClick={()=>{ setSummaryOpen(false); reset(); navigate('/bat-trang/level-1'); }} style={{padding:'10px 18px',background:'white',borderRadius:12,border:'1px solid rgba(0,0,0,0.06)',fontWeight:700}}>Chơi lại</button>
+									<button onClick={()=>{ setSummaryOpen(false); reset(); }} style={{padding:'10px 18px',background:'white',borderRadius:12,border:'1px solid rgba(0,0,0,0.06)',fontWeight:700}}>Chơi lại</button>
 								</div>
 							</div>
 						</div>

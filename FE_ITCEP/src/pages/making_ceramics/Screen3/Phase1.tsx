@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router'
 import { QUESTIONS_LEVEL3 as QUESTIONS } from '../../../util/question_ceramics/questions_level3'
 import { progressService } from '../../../api/progress/progressService'
 import type { Q } from '../../../util/question_ceramics/questions'
-export default function BatTrangLevel3Screen3() {
+export default function BatTrangLevel3Screen3({ onComplete }: { onComplete?: () => void }) {
   function shuffle<T>(arr: T[]) {
     const a = arr.slice()
     for (let i = a.length - 1; i > 0; i--) {
@@ -83,6 +83,7 @@ export default function BatTrangLevel3Screen3() {
       await progressService.saveProgress({ user_id: 1, level_id: 2, status: 'completed', score: 100 })
     } catch (e) { console.warn('progress save failed', e) }
 
+    if (onComplete) return onComplete()
     navigate('/bat-trang/level-3/phase2')
   }
 

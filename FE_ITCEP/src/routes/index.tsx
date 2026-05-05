@@ -23,6 +23,8 @@ import BatTrangLevel5Phase1 from '../pages/making_ceramics/Screen5/Phase1'
 import BatTrangLevel5Phase0 from '../pages/making_ceramics/Screen5/Phase0'
 import BatTrangLevel5Phase2 from '../pages/making_ceramics/Screen5/Phase2'
 import VillageDetailPage from '../pages/VillageDetailPage'
+import ChallengePage from '../pages/ChallengePage'
+import ChallengeMakingCere from '../pages/challenge_making_cere'
 import AdminPage from '../pages/admin/AdminPage'
 import Screen1 from '../components/making_mats/Screen1'
 import RootLayout from './RootLayout'
@@ -57,6 +59,8 @@ export const router = createBrowserRouter([
 
       { index: true, Component: HomePage },
       { path: 'game', Component: GamePage },
+      { path: 'challenge', Component: ChallengePage },
+      { path: 'challenge-making-cere', Component: ChallengeMakingCere },
       { path: 'game/catch-fish', Component: CatchFishGamePage },
       { path: 'game/wash-fish', Component: WashFishGamePage },
       { path: 'game/wash-salt', Component: WashSaltGamePage },

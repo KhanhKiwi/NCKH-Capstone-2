@@ -40,7 +40,7 @@ VALUES
 
 INSERT INTO `UserProgress` (`status`, `score`, `completed_at`, `created_at`, `updated_at`, `deleted_at`, `user_id`, `level_id`)
 VALUES
-  ('unlocked', 0, NULL, '2026-04-10 10:00:00', '2026-04-10 10:00:00', NULL, 1, 1),
+  ('completed', 100, NULL, '2026-04-10 10:00:00', '2026-04-10 10:00:00', NULL, 1, 1),
   ('unlocked', 0, NULL, '2026-04-10 10:01:00', '2026-04-10 10:01:00', NULL, 1, 2),
   ('locked', 0, NULL, '2026-04-10 10:02:00', '2026-04-10 10:02:00', NULL, 1, 3),
   ('locked', 0, NULL, '2026-04-10 10:03:00', '2026-04-10 10:03:00', NULL, 1, 4),

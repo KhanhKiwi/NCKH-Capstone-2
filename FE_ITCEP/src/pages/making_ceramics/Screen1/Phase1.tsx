@@ -1,9 +1,9 @@
- import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { QUESTIONS } from '../../../util/question_ceramics/questions'
 import { progressService } from '../../../api/progress/progressService'
 import type { Q } from '../../../util/question_ceramics/questions'
-export default function BatTrangLevel1Screen1() {
+export default function BatTrangLevel1Screen1({ onComplete }: { onComplete?: () => void }) {
   // shuffle choices so correct answer isn't always in the same position
   function shuffle<T>(arr: T[]) {
     const a = arr.slice()
@@ -67,12 +67,10 @@ export default function BatTrangLevel1Screen1() {
     }
 
     try {
-      // mark completed for this level (dev user)
       await progressService.saveProgress({ user_id: 1, level_id: 2, status: 'completed', score: 100 })
-    } catch (e) {
-      console.warn('progress save failed', e)
-    }
+    } catch (e) { console.warn('progress save failed', e) }
 
+    if (onComplete) return onComplete()
     navigate('/bat-trang/level-1/phase2')
   }
 

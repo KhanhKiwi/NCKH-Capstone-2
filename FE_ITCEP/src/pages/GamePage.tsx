@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Play, GraduationCap, Trophy } from 'lucide-react';
+import { useNavigate } from 'react-router'
+import { authService } from '../api/services/authService'
+import { levelsService } from '../api/levels/levelsService'
+import CenteredModal from '../components/ui/CenteredModal'
 import { Link } from 'react-router';
 import { Logo } from '../components/Game/Logo';
 import { PlayButton } from '../components/Game/PlayButton';
@@ -61,6 +65,92 @@ export default function GamePage() {
     }
   ];
 
+  const navigate = useNavigate()
+
+  const [modalMessage, setModalMessage] = useState<string | null>(null)
+
+  async function handleChallengeClick() {
+    try {
+      // try get user id from profile or token
+      let userId: number | undefined
+      try { const profile = await authService.getProfile(); userId = Number(profile?.user_id ?? profile?.id ?? profile?.userId) } catch { userId = undefined }
+      if (!userId) {
+        try {
+          const token = localStorage.getItem('access_token')
+          if (token) {
+            const parts = token.split('.')
+            if (parts.length >= 2) {
+              const payload = JSON.parse(atob(parts[1]))
+              userId = Number(payload?.user_id ?? payload?.sub ?? payload?.id)
+            }
+          }
+        } catch (e) { }
+      }
+
+      const all = await levelsService.getAll(userId)
+      if (!Array.isArray(all) || all.length === 0) {
+        setModalMessage('Không có dữ liệu level để kiểm tra.')
+        return
+      }
+
+      // gather candidate village ids from level.craft.village if present
+      const vids = new Set<number>()
+      for (const l of all) {
+        const vid = l?.craft?.village?.village_id ?? l?.craft?.village_id ?? l?.craft?.village?.id
+        if (vid != null) vids.add(Number(vid))
+      }
+
+      // if no village ids found, try to infer from craft_id -> assume craft_id maps to village id (best-effort)
+      if (vids.size === 0) {
+        for (const l of all) {
+          if (l?.craft_id) vids.add(Number(l.craft_id))
+        }
+      }
+
+      // check each village: are all levels completed?
+      for (const vid of Array.from(vids)) {
+        try {
+          const vlevels = await levelsService.getByVillage(vid, userId)
+          if (!Array.isArray(vlevels) || vlevels.length === 0) continue
+
+          // consider level completed if any of these fields indicate 'completed'
+          const isLevelCompleted = (lvl: any) => {
+            if (!lvl) return false
+            const s = lvl?.progress?.status ?? lvl?.user_progress?.status ?? lvl?.userProgress?.status ?? lvl?.status ?? lvl?.user_status
+            if (s === 'completed') return true
+            // check local fallback entries
+            try {
+              const raw = localStorage.getItem('local_progress') || '[]'
+              const arr = JSON.parse(raw)
+              const lvlId = Number(lvl.level_id ?? lvl.id)
+              if (arr.find((e: any) => Number(e.level_id) === lvlId && (e.status === 'completed' || e.status === 'completed'))) return true
+            } catch (e) { }
+            return false
+          }
+
+          // ignore intro level id 0 when deciding full completion
+          const nonIntro = vlevels.filter((x:any) => Number(x.level_id ?? x.id) !== 0)
+          if (nonIntro.length === 0) continue
+          const allComplete = nonIntro.every(isLevelCompleted)
+          if (allComplete) {
+            // open challenge for this village
+            navigate('/challenge', { state: { villageId: vid } })
+            return
+          }
+        } catch (e) {
+          console.warn('check village failed', vid, e)
+        }
+      }
+
+      setModalMessage('Bạn hãy hoàn thành toàn bộ level của một làng bất kỳ để mở Thử thách.')
+    } catch (e) {
+      console.error('handleChallengeClick error', e)
+      setModalMessage('Không thể kiểm tra trạng thái thử thách. Vui lòng thử lại sau.')
+    }
+  }
+
+  function closeModal() { setModalMessage(null) }
+
   return (
     <div className="min-h-screen relative overflow-hidden bg-black">
       {/* Background with Village Scene - Auto rotate */}
@@ -101,8 +191,12 @@ export default function GamePage() {
               title={card.title}
               description={card.description}
               delay={card.delay}
+              onClick={card.title === 'Thử thách' ? handleChallengeClick : undefined}
             />
           ))}
+          {modalMessage && (
+            <CenteredModal message={modalMessage} onClose={closeModal} />
+          )}
         </div>
       </div>
 

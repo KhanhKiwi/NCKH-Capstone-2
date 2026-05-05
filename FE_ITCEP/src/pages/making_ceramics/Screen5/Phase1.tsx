@@ -34,7 +34,7 @@ const QUESTIONS = [
   },
 ]
 
-export default function BatTrangLevel5Phase0() {
+export default function BatTrangLevel5Phase0({ onComplete }: { onComplete?: () => void }) {
   const navigate = useNavigate()
   type Q = { id: number; q: string; options: string[]; a: number }
   const shuffleArray = <T,>(arr: T[]) => {
@@ -92,6 +92,7 @@ export default function BatTrangLevel5Phase0() {
   const handleContinue = () => {
     // only navigate if perfect score achieved -> go to firing phase (phase2)
     if (correctCount === quiz.length) {
+      if (onComplete) return onComplete()
       navigate('/bat-trang/level-5/phase2')
     }
   }

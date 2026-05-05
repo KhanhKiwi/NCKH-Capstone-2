@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import GuideDialog from '../../../util/shared/GuideDialog'
 
-export default function BatTrangLevel5Phase1() {
+export default function BatTrangLevel5Phase1({ onComplete }: { onComplete?: (result?: any) => void }) {
   const navigate = useNavigate()
 
   const [temperature, setTemperature] = useState(900)
@@ -359,6 +359,11 @@ export default function BatTrangLevel5Phase1() {
                 } catch (e) { console.warn('complete level failed', e) }
 
                 setSummaryOpen(false);
+                if (onComplete) {
+                  try { onComplete({ stars: starCount }) } catch (e) {}
+                  navigate('/challenge')
+                  return
+                }
                 navigate('/craft-selection?openName=B%C3%A1t%20Tr%C3%A0ng');
               }} style={{padding:'10px 18px',background:'linear-gradient(90deg,#10b981,#06a86b)',color:'white',borderRadius:12,border:'none',fontWeight:800}}>Hoàn tất</button>
               <button onClick={()=>{ setSummaryOpen(false); setShowSuccess(false); setQuality(100); setTimeLeft(3 * 60); setRunning(false); setStarted(false); navigate('/craft-selection'); }} style={{padding:'10px 18px',background:'white',borderRadius:12,border:'1px solid rgba(0,0,0,0.06)',fontWeight:700,color:'#6b3f1a'}}>Thoát</button>

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import GuideDialog from '../../../util/shared/GuideDialog'
 import { useNavigate } from "react-router";
 
-export default function Level3() {
+export default function Level3({ onComplete }: { onComplete?: (result?: any) => void }) {
   const [humidity, setHumidity] = useState(100);
   // crackRisk removed per design — keep minimal state
   const INITIAL_TIME = 180; // 20 minutes
@@ -20,6 +20,7 @@ export default function Level3() {
   const [summaryOpen, setSummaryOpen] = useState<boolean>(false);
   const [starCount, setStarCount] = useState<number>(3);
   const [confetti, setConfetti] = useState<Array<{id:number; left:number; delay:number; color:string; rotate:number}>>([]);
+  const finishedRef = useRef<boolean>(false);
   const timeLeftRef = useRef<number>(timeLeft);
   useEffect(() => { timeLeftRef.current = timeLeft; }, [timeLeft]);
   const navigate = useNavigate();
@@ -356,7 +357,7 @@ export default function Level3() {
         if (!potVisible) return prev;
 
         if (selectedWeather === 'sun') {
-          const next = Math.min(100, prev +10);
+          const next = Math.min(100, prev +50);
           if (next >= 100) {
             // success
             const t = timeLeftRef.current ?? 0;
@@ -402,6 +403,44 @@ export default function Level3() {
     const t = setTimeout(() => setConfetti([]), 1600);
     return () => clearTimeout(t);
   }, [showSuccess]);
+
+  // helper to finish level: save progress, unlock next, then notify parent or navigate
+  const finishAndNotify = React.useCallback(async (auto=false) => {
+    if (finishedRef.current) return
+    finishedRef.current = true
+    try{ localStorage.setItem('level3_stars', String(starCount)); localStorage.setItem('level3_result','won') }catch{}
+    try {
+      let userId: number | undefined
+      try { const profile = await import('../../../api/services/authService').then(m => m.authService.getProfile()); userId = Number(profile?.user_id ?? profile?.id ?? profile?.userId) } catch { userId = undefined }
+      const all = await import('../../../api/levels/levelsService').then(m => m.levelsService.getByVillage(1, userId))
+      if (Array.isArray(all)) {
+        const current = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === 3)
+        if (current) {
+          await import('../../../api/progress/progressService').then(m => m.progressService.saveProgress({ user_id: 1, level_id: Number(current.level_id ?? current.id), status: 'completed', score: 100 }))
+          try {
+            const currentNum = Number(current.level_number ?? current.level_id ?? current.id)
+            const next = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === (currentNum + 1))
+            if (next) {
+              const nextId = Number(next.level_id ?? next.id)
+              await import('../../../api/progress/progressService').then(m => m.progressService.unlockLevel(nextId))
+            }
+          } catch (e) { console.warn('unlock next level failed', e) }
+        }
+      }
+    } catch (e) { console.warn('complete level failed', e) }
+    setSummaryOpen(false)
+    if (onComplete) return onComplete({ stars: starCount })
+    if (!auto) navigate('/craft-selection?openName=B%C3%A1t%20Tr%C3%A0ng')
+  }, [onComplete, starCount, navigate])
+
+  // Auto-open summary and notify parent when showSuccess occurs inside challenge runner
+  useEffect(()=>{
+    if (showSuccess && onComplete) {
+      setSummaryOpen(true)
+      const id = setTimeout(()=>{ finishAndNotify(true) }, 900)
+      return ()=> clearTimeout(id)
+    }
+  },[showSuccess, onComplete, finishAndNotify])
 
   // weather durations (seconds)
   const weatherDurations: Record<string, number> = {
@@ -776,6 +815,7 @@ export default function Level3() {
                   } catch (e) { console.warn('complete level failed', e) }
 
                   setSummaryOpen(false);
+                  if (onComplete) return onComplete({ stars: starCount })
                   navigate('/craft-selection?openName=B%C3%A1t%20Tr%C3%A0ng');
                 }} style={{padding:'10px 18px',background:'linear-gradient(90deg,#10b981,#06a86b)',color:'white',borderRadius:12,border:'none',fontWeight:800}}>Hoàn tất</button>
                 <button onClick={()=>{ setSummaryOpen(false); setShowSuccess(false); setHumidity(0); setTimeLeft(INITIAL_TIME); setSelectedWeather(INITIAL_WEATHER); setWeatherTimer(30); startedRef.current = false; setStarted(false); navigate('/bat-trang/level-3'); }} style={{padding:'10px 18px',background:'white',borderRadius:12,border:'1px solid rgba(0,0,0,0.06)',fontWeight:700}}>Chơi lại</button>

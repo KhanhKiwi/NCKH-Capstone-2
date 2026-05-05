@@ -4,7 +4,7 @@ import { levelsService } from '../../../api/levels/levelsService'
 import { progressService } from '../../../api/progress/progressService'
 import GuideDialog from '../../../util/shared/GuideDialog'
 
-export default function Level4() {
+export default function Level4({ onComplete }: { onComplete?: (result?: any) => void }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const drawCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -24,6 +24,7 @@ export default function Level4() {
   const [showFinishModal, setShowFinishModal] = useState(false)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [rating, setRating] = useState<number>(3)
+  const finishedRef = useRef(false)
   const isDrawingRef = useRef(false)
   const lastPointRef = useRef<{x:number,y:number}|null>(null)
   const potPathRef = useRef<Path2D | null>(null)
@@ -40,7 +41,7 @@ export default function Level4() {
     const canvas = canvasRef.current
     const container = containerRef.current
     if (!canvas || !container) return
-    const ctx = canvas.getContext('2d')!
+      const ctx = canvas.getContext('2d')!
 
     let raf = 0
     let start = performance.now()
@@ -750,11 +751,11 @@ export default function Level4() {
                 <div className="flex items-center gap-4">
                   <button
                     onClick={async () => {
-                      // close modal first for UX
                       setShowFinishModal(false)
-
-                      // Export the decorated pot (crop to pot area) so Level 5 can reuse it.
-                      try {
+                      if (finishedRef.current) return
+                      finishedRef.current = true
+                      try{
+                        // export decorated pot
                         const main = canvasRef.current
                         const overlay = drawCanvasRef.current
                         if (main && overlay) {
@@ -762,80 +763,38 @@ export default function Level4() {
                           const w = rect.width
                           const h = rect.height
                           const dpr = window.devicePixelRatio || 1
-
-                          // same pot layout logic as render loop
                           const vw = Math.min(w * 0.20, 320)
                           const vh = vw * 1.05
                           const sx = Math.floor((w / 2 - vw / 2) * dpr)
                           const sy = Math.floor((h * 0.55 - vh * 0.45) * dpr)
                           const sw = Math.floor(vw * dpr)
                           const sh = Math.floor(vh * dpr)
-
-                          // create offscreen canvas and draw only the pot (transparent background)
                           const tmp = document.createElement('canvas')
-                          tmp.width = sw
-                          tmp.height = sh
-                          tmp.style.width = `${sw / dpr}px`
-                          tmp.style.height = `${sh / dpr}px`
+                          tmp.width = sw; tmp.height = sh
                           const tctx = tmp.getContext('2d')!
-                          // ensure correct pixel density
-                          tctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-
-                          // Re-render the pot shape into the temporary canvas so background stays transparent.
-                          try {
-                            // vw/vh are CSS pixels; drawRealisticPot expects those units.
-                            drawRealisticPot(tctx, (sw / dpr) / 2, 0, vw, vh, dpr)
-                          } catch (e) {
-                            // fallback: if pot redraw fails, try copying from main canvas crop
-                            tctx.clearRect(0, 0, sw, sh)
-                            tctx.drawImage(main, sx, sy, sw, sh, 0, 0, sw, sh)
-                          }
-
-                          // draw only overlay (user decorations) from the overlay canvas into tmp
+                          tctx.setTransform(dpr,0,0,dpr,0,0)
+                          try { drawRealisticPot(tctx, (sw/dpr)/2, 0, vw, vh, dpr) } catch(e) { tctx.drawImage(main, sx, sy, sw, sh, 0, 0, sw, sh) }
                           tctx.drawImage(overlay, sx, sy, sw, sh, 0, 0, sw, sh)
-                          try {
-                            const data = tmp.toDataURL('image/png')
-                            localStorage.setItem('batTrang_decorated_pot', data)
-                          } catch (e) {
-                            console.warn('export decorated pot failed', e)
-                          }
+                          try { localStorage.setItem('batTrang_decorated_pot', tmp.toDataURL('image/png')) } catch(e){ console.warn('export decorated pot failed', e) }
                         }
-                      } catch (e) {
-                        console.warn('capture error', e)
-                      }
+                      } catch(e){ console.warn('capture error', e) }
 
                       try {
-                        // Attempt to map levels via API (village id 1 = Bát Tràng)
                         const lvls = await levelsService.getByVillage(1)
                         const getNum = (l: any) => Number(l?.level_number ?? l?.levelNumber ?? l?.level ?? l?.level_id ?? l?.id)
                         const current = lvls.find((l: any) => getNum(l) === 4)
                         const next = lvls.find((l: any) => getNum(l) === 5)
-
-                        // save current progress if we can determine current level id
                         if (current) {
                           const currentId = Number(current.level_id ?? current.id)
-                          try {
-                            await progressService.saveProgress({ level_id: currentId, status: 'completed', score: Math.round((rating / 3) * 100) })
-                          } catch (e) {
-                            console.warn('saveProgress failed', e)
-                          }
+                          try { await progressService.saveProgress({ level_id: currentId, status: 'completed', score: Math.round((rating/3)*100) }) } catch(e){ console.warn('saveProgress failed', e) }
                         }
-
                         if (next) {
                           const nextId = Number(next.level_id ?? next.id)
-                          try {
-                            await progressService.unlockLevel(nextId)
-                          } catch (e) {
-                            console.warn('unlockLevel failed', e)
-                          }
+                          try { await progressService.unlockLevel(nextId) } catch(e){ console.warn('unlockLevel failed', e) }
                         }
-
-                        // always return to craft selection and open Bat Tràng modal
+                        if (onComplete) return onComplete({ rating })
                         navigate('/craft-selection?openName=B%C3%A1t%20Tr%C3%A0ng')
-                      } catch (err) {
-                        console.error('finish handler error', err)
-                        navigate('/craft-selection?openName=B%C3%A1t%20Tr%C3%A0ng')
-                      }
+                      } catch(err) { console.error('finish handler error', err); if (onComplete) return onComplete({ rating }); navigate('/craft-selection?openName=B%C3%A1t%20Tr%C3%A0ng') }
                     }}
                     className="px-5 py-2 rounded-md bg-gradient-to-r from-amber-400 to-amber-600 text-white btn-accent"
                     style={{border:'1px solid rgba(255,160,38,0.12)'}}

@@ -6,9 +6,10 @@ interface GameCardProps {
   title: string;
   description: string;
   delay: number;
+  onClick?: () => void;
 }
 
-export function GameCard({ icon: Icon, title, description, delay }: GameCardProps) {
+export function GameCard({ icon: Icon, title, description, delay, onClick }: GameCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -17,6 +18,7 @@ export function GameCard({ icon: Icon, title, description, delay }: GameCardProp
       whileHover={{ scale: 1.05, y: -8 }}
       whileTap={{ scale: 0.98 }}
       className="group cursor-pointer"
+      onClick={onClick}
     >
       <div className="backdrop-blur-xl bg-white/15 border border-white/30 rounded-2xl p-6 shadow-2xl hover:shadow-[0_20px_60px_rgba(240,212,176,0.3)] transition-all duration-300 relative overflow-hidden">
         {/* Glow effect */}
