@@ -241,11 +241,11 @@ export default function BatTrangLevel5Phase1({ onComplete }: { onComplete?: (res
   const asciiFallback = '/images_making_ceramic/oven-bg.png'
 
   return (
-    <div style={{backgroundImage: `url('${bgUrl}'), url('${asciiFallback}')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', minHeight: '100vh'}} className="w-screen text-white flex flex-col items-center p-6">
+    <div style={{backgroundImage: `url('${bgUrl}'), url('${asciiFallback}')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', minHeight: '100vh'}} className="w-full overflow-x-hidden text-white flex flex-col items-center p-6">
 
       {/* ===== HEADER (match Level 4 style) ===== */}
-      <div className="absolute left-1/2 -translate-x-1/2 text-center z-40 w-full px-4 pointer-events-none top-2 sm:top-4 md:top-8">
-        <div className="inline-block py-2 px-6 sm:px-8" style={{background: 'transparent', paddingLeft: 'calc(1.5rem + 2.5px)', paddingRight: 'calc(1.5rem + 2.5px)'}}>
+      <div className="absolute inset-x-0 text-center z-50 px-4 pointer-events-none top-14 sm:top-16 md:top-20">
+        <div className="inline-block py-2 px-6 sm:px-8 max-w-[1100px] mx-auto" style={{background: 'transparent', paddingLeft: 'calc(1.5rem + 2.5px)', paddingRight: 'calc(1.5rem + 2.5px)'}}>
           <h1
             className="text-3xl sm:text-4xl md:text-6xl font-extrabold tracking-tight leading-tight"
             style={{

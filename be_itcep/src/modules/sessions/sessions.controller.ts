@@ -13,12 +13,17 @@ export class SessionsController {
 		schema: {
 			example: {
 				user_id: 1,
-				level_id: 2,
+				craft_id: 2,
 				start_time: '2026-04-20T08:00:00.000Z',
 			},
 		},
 	})
 	create(@Body() dto: any) {
+		// accept craft_id in payload and map to relation object for TypeORM
+		if (dto?.craft_id) {
+			dto.craft = { craft_id: dto.craft_id }
+			delete dto.craft_id
+		}
 		return this.sessionsService.create(dto);
 	}
 
@@ -42,6 +47,10 @@ export class SessionsController {
 		},
 	})
 	update(@Param('id', ParseIntPipe) id: number, @Body() dto: any) {
+		if (dto?.craft_id) {
+			dto.craft = { craft_id: dto.craft_id }
+			delete dto.craft_id
+		}
 		return this.sessionsService.update(id, dto);
 	}
 

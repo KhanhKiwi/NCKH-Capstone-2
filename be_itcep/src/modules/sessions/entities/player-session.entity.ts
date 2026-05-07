@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { Level } from '../../levels/entities/level.entity';
+import { Craft } from '../../crafts/entities/craft.entity';
 
 @Entity('Player_Sessions')
 export class PlayerSession {
@@ -11,9 +11,9 @@ export class PlayerSession {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => Level, (level) => level.sessions)
-  @JoinColumn({ name: 'level_id' })
-  level: Level;
+  @ManyToOne(() => Craft, (craft) => craft.sessions)
+  @JoinColumn({ name: 'craft_id' })
+  craft: Craft;
 
   @Column({ nullable: true })
   start_time: Date;
