@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useMotionValue, AnimatePresence } from 'motion/react';
+import { villageService } from '../../../api/services/villageService';
+import { progressService } from '../../../api/services/progressService';
+import { getUserId } from '../../../utils/authUtils';
 
 // Fish type definitions
 type FishType = 'correct' | 'wrong' | 'spoiled';
@@ -30,6 +33,15 @@ export default function Screen1() {
   const [tooltip, setTooltip] = useState<{ text: string; x: number; y: number } | null>(null);
   const [gameStatus, setGameStatus] = useState<'playing' | 'won' | 'lost'>('playing');
   const [lossReason, setLossReason] = useState<'timeout' | 'spoiled' | null>(null);
+  const [isUnlocking, setIsUnlocking] = useState(false);
+  const [userId, setUserId] = useState<number | null>(null);
+
+  // Get user ID from authUtils on mount
+  useEffect(() => {
+    const id = getUserId();
+    setUserId(id);
+    console.log('[Screen1] User ID loaded:', id);
+  }, []);
 
   const boatY = useMotionValue(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
@@ -188,6 +200,34 @@ export default function Screen1() {
       x: e.clientX,
       y: e.clientY - 60
     });
+  }
+
+  // Handle continue to next level with village unlock
+  async function handleContinueLevel() {
+    setIsUnlocking(true);
+    try {
+      // Unlock the fish sauce village (Nam Ô) - Village ID 6
+      const FISH_SAUCE_VILLAGE_ID = 6;
+      
+      if (userId) {
+        // Save progress for this level (Level 1 = Bắt Cá)
+        await progressService.completeLevel(userId, 1, quality);
+        
+        // Unlock the village
+        await villageService.unlockVillage(FISH_SAUCE_VILLAGE_ID);
+        
+        console.log('Village unlocked successfully!');
+      }
+      
+      // Navigate to next level
+      navigate('/game/wash-fish');
+    } catch (error) {
+      console.error('Error unlocking village:', error);
+      // Still navigate even if unlock fails (graceful degradation)
+      navigate('/game/wash-fish');
+    } finally {
+      setIsUnlocking(false);
+    }
   }
 
   const shakeX = screenShake ? Math.sin(Date.now() * 0.1) * 4 : 0;
@@ -546,10 +586,11 @@ export default function Screen1() {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex-1 bg-gradient-to-r from-[#00C897] to-[#00E5A8] text-white px-6 py-3 rounded-2xl shadow-xl font-semibold"
-                  onClick={() => navigate('/game/wash-fish')}
+                  disabled={isUnlocking}
+                  className="flex-1 bg-gradient-to-r from-[#00C897] to-[#00E5A8] text-white px-6 py-3 rounded-2xl shadow-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleContinueLevel}
                 >
-                  ➡️ Đi Tiếp
+                  {isUnlocking ? '⏳ Đang xử lý...' : '➡️ Đi Tiếp'}
                 </motion.button>
               </div>
             </motion.div>

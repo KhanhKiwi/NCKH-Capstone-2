@@ -1,12 +1,30 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { progressService } from '../../../../api/services/progressService';
 
 interface WinScreenProps {
   quality: number;
+  userId: number | null;
 }
 
-export function WinScreen({ quality }: WinScreenProps) {
+export function WinScreen({ quality, userId }: WinScreenProps) {
   const navigate = useNavigate();
+
+  const handleContinue = async () => {
+    try {
+      // Save progress for level 3 (Pha Muối & Ướp Cá)
+      if (userId) {
+        console.log('[Screen3] Completing level 3 with quality:', quality);
+        await progressService.completeLevel(userId, 3, quality);
+        console.log('[Screen3] Level 3 completed, Level 4 unlocked!');
+      }
+    } catch (error) {
+      console.error('[Screen3] Error saving progress:', error);
+    }
+    
+    // Navigate to next level
+    navigate('/game/close-jar-ferment');
+  };
 
   const getEncouragingMessage = (q: number) => {
     if (q >= 90) {
@@ -147,7 +165,7 @@ export function WinScreen({ quality }: WinScreenProps) {
         {/* Buttons */}
         <div className="flex flex-col sm:flex-row gap-2">
           <motion.button
-            onClick={() => navigate('/game/close-jar-ferment')}
+            onClick={handleContinue}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex-1 px-4 py-2 sm:py-3 bg-[#1a1a1a] text-[#d4af37] font-bold rounded-lg hover:bg-[#2a2a2a] transition-colors text-sm sm:text-base"

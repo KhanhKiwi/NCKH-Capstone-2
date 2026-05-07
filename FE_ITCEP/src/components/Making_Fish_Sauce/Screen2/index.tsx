@@ -8,6 +8,8 @@ import { FailureBanner } from './components/FailureBanner';
 import { ExitConfirmDialog } from './components/ExitConfirmDialog';
 import { ImageWithFallback } from '../../figma/ImageWithFallback';
 import { CheckCircle, AlertCircle } from 'lucide-react';
+import { progressService } from '../../../api/services/progressService';
+import { getUserId } from '../../../utils/authUtils';
 
 interface Particle {
   id: number;
@@ -28,6 +30,15 @@ interface BrushStroke {
 
 export default function Screen2() {
   const navigate = useNavigate();
+  const [userId, setUserId] = useState<number | null>(null);
+  
+  // Get user ID from authUtils on mount
+  useEffect(() => {
+    const id = getUserId();
+    setUserId(id);
+    console.log('[Screen2] User ID loaded:', id);
+  }, []);
+  
   // Main state
   const [quality, setQuality] = useState(50); // Base quality
   const [currentStage, setCurrentStage] = useState<0 | 1 | 2>(0);
@@ -382,9 +393,20 @@ export default function Screen2() {
   };
 
   // ========== GAME CONTROL HANDLERS ==========
-  const handleContinue = () => {
-    // Go back to craft selection page
-    navigate('/craft-selection');
+  const handleContinue = async () => {
+    try {
+      // Save progress for level 2 (Rửa Cá)
+      if (userId) {
+        console.log('[Screen2] Completing level 2 with quality:', quality);
+        await progressService.completeLevel(userId, 2, quality);
+        console.log('[Screen2] Level 2 completed, Level 3 unlocked!');
+      }
+    } catch (error) {
+      console.error('[Screen2] Error saving progress:', error);
+    }
+    
+    // Navigate to next level
+    navigate('/game/wash-salt');
   };
 
   const handleRetry = () => {

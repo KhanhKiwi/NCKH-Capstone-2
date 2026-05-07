@@ -14,9 +14,19 @@ import { PressureGauge } from './components/PressureGauge';
 import { SealingDragGame } from './components/SealingDragGame';
 import { WinScreen } from './components/WinScreen';
 import { LossScreen } from './components/LossScreen';
+import { progressService } from '../../../api/services/progressService';
+import { getUserId } from '../../../utils/authUtils';
 
 export default function Screen3() {
   const navigate = useNavigate();
+  const [userId, setUserId] = useState<number | null>(null);
+  
+  // Get user ID from authUtils on mount
+  useEffect(() => {
+    const id = getUserId();
+    setUserId(id);
+    console.log('[Screen3] User ID loaded:', id);
+  }, []);
 
   // Main state
   const [quality, setQuality] = useState(60);
@@ -521,7 +531,7 @@ export default function Screen3() {
 
       {/* Win Screen */}
       <AnimatePresence>
-        {gameStatus === 'completed' && <WinScreen quality={quality} />}
+        {gameStatus === 'completed' && <WinScreen quality={quality} userId={userId} />}
       </AnimatePresence>
 
       {/* Loss Screen */}
