@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const CONFIG_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
-const API_BASE_URL = CONFIG_BASE; // Always use backend URL, not frontend
+const API_BASE_URL = CONFIG_BASE;
 
 // Create axios instance
 const apiClient = axios.create({
@@ -66,14 +66,43 @@ export const progressService = {
   },
 
   /**
-   * Complete a level and unlock next level
+   * Unlock a specific level for a user
    */
-  async completeLevel(userId: number, levelId: number, score: number): Promise<UserProgressResponse> {
+  async unlockLevel(userId: number, levelId: number): Promise<UserProgressResponse> {
     return this.saveProgress({
       user_id: userId,
       level_id: levelId,
-      status: 'completed',
-      score,
+      status: 'unlocked',
     });
+  },
+
+  /**
+   * Complete a level and unlock next level
+   */
+  async completeLevel(userId: number, levelId: number, score: number): Promise<UserProgressResponse> {
+    try {
+      // First, complete the current level
+      await this.saveProgress({
+        user_id: userId,
+        level_id: levelId,
+        status: 'completed',
+        score,
+      });
+
+      // Then, unlock the next level
+      const nextLevelId = levelId + 1;
+      await this.unlockLevel(userId, nextLevelId);
+
+      console.log(`[Progress] Level ${levelId} completed, Level ${nextLevelId} unlocked!`);
+      return this.saveProgress({
+        user_id: userId,
+        level_id: levelId,
+        status: 'completed',
+        score,
+      });
+    } catch (error) {
+      console.error('[Progress] Error completing level:', error);
+      throw error;
+    }
   },
 };

@@ -1,65 +1,44 @@
 /**
- * Get userId from JWT token stored in localStorage
+ * Get current user ID from authentication token or storage
  */
-export const getUserIdFromToken = (): number | null => {
+export function getUserId(): number | null {
   try {
-    const token = localStorage.getItem('access_token') || localStorage.getItem('token');
-    if (!token) return null;
-
-    // Decode JWT (basic decoding without validation)
-    const parts = token.split('.');
-    if (parts.length !== 3) return null;
-
-    const payload = JSON.parse(atob(parts[1]));
-    
-    // Try different field names (sub, user_id, userId, id)
-    return payload.sub || payload.user_id || payload.userId || payload.id || null;
-  } catch (error) {
-    console.error('Failed to decode token:', error);
-    return null;
-  }
-};
-
-/**
- * Save token and extract userId to localStorage
- */
-export const saveAuthToken = (token: string): void => {
-  localStorage.setItem('access_token', token);
-  
-  try {
-    const userId = getUserIdFromToken();
-    if (userId) {
-      localStorage.setItem('userId', userId.toString());
-    }
-  } catch (error) {
-    console.error('Failed to save userId:', error);
-  }
-};
-
-/**
- * Get userId from localStorage or decode from token
- */
-export const getUserId = (): number | null => {
-  try {
-    // First try to get from localStorage
-    let userId = localStorage.getItem('userId');
+    // Try to get from localStorage first
+    const userId = localStorage.getItem('user_id');
     if (userId) {
       return parseInt(userId, 10);
     }
-    
-    // If not in localStorage, decode from token
-    return getUserIdFromToken();
+
+    // Try to get from JWT token (if stored as 'access_token')
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      // Decode JWT payload (simple base64 decode)
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        try {
+          const payload = JSON.parse(atob(parts[1]));
+          if (payload.sub) {
+            // Also save to localStorage for faster future access
+            localStorage.setItem('user_id', String(payload.sub));
+            return parseInt(payload.sub, 10);
+          }
+          if (payload.id) {
+            localStorage.setItem('user_id', String(payload.id));
+            return parseInt(payload.id, 10);
+          }
+          if (payload.user_id) {
+            localStorage.setItem('user_id', String(payload.user_id));
+            return parseInt(payload.user_id, 10);
+          }
+        } catch (e) {
+          console.warn('Failed to decode JWT token:', e);
+        }
+      }
+    }
+
+    return null;
   } catch (error) {
-    console.error('Failed to get userId:', error);
+    console.error('Error getting user ID:', error);
     return null;
   }
-};
-
-/**
- * Clear auth data from localStorage
- */
-export const clearAuth = (): void => {
-  localStorage.removeItem('access_token');
-  localStorage.removeItem('token');
-  localStorage.removeItem('userId');
-};
+}
