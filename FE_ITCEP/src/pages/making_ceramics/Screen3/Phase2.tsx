@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import GuideDialog from '../../../util/shared/GuideDialog'
 import { useNavigate } from "react-router";
 
-export default function Level3({ onComplete }: { onComplete?: (result?: any) => void }) {
+export default function Level3({ onComplete, challengeMode }: { onComplete?: (result?: any) => void, challengeMode?: boolean }) {
   const [humidity, setHumidity] = useState(100);
   // crackRisk removed per design — keep minimal state
   const INITIAL_TIME = 180; // 20 minutes
@@ -36,12 +36,6 @@ export default function Level3({ onComplete }: { onComplete?: (result?: any) => 
   const potTargetRef = useRef<number>(1);
   const startedRef = useRef<boolean>(false);
   const [started, setStarted] = useState(false);
-                      <button
-                        onClick={() => { setShowSuccess(false); setSummaryOpen(true); }}
-                        className="px-5 py-2 rounded-2xl bg-white border border-gray-200 text-gray-700 hover:shadow-lg transition"
-                      >
-                        Tổng kết
-                      </button>
 
   // draw pot on canvas (responsive) — re-run when selectedWeather changes so background updates
   useEffect(() => {
@@ -387,7 +381,7 @@ export default function Level3({ onComplete }: { onComplete?: (result?: any) => 
 
   // confetti: generate burst when showSuccess becomes true
   useEffect(() => {
-    if (!showSuccess) {
+    if (!showSuccess || challengeMode) {
       setConfetti([]);
       return;
     }
@@ -436,6 +430,10 @@ export default function Level3({ onComplete }: { onComplete?: (result?: any) => 
   // Auto-open summary and notify parent when showSuccess occurs inside challenge runner
   useEffect(()=>{
     if (showSuccess && onComplete) {
+      if (challengeMode) {
+        const id = setTimeout(()=>{ finishAndNotify(true) }, 300)
+        return ()=> clearTimeout(id)
+      }
       setSummaryOpen(true)
       const id = setTimeout(()=>{ finishAndNotify(true) }, 900)
       return ()=> clearTimeout(id)
@@ -551,6 +549,7 @@ export default function Level3({ onComplete }: { onComplete?: (result?: any) => 
             </div>
           </div>
           {/* Guide dialog placed directly under the time card */}
+          {!challengeMode && (
           <div style={{ marginTop: 8 }}>
             <GuideDialog
               started={started}
@@ -564,6 +563,7 @@ export default function Level3({ onComplete }: { onComplete?: (result?: any) => 
               avatarFirst={true}
             />
           </div>
+          )}
         </div>
 
         {/* right weather panel (redesigned) */}
@@ -724,7 +724,7 @@ export default function Level3({ onComplete }: { onComplete?: (result?: any) => 
           </button>
         </div>
         {/* pot toggle moved into weather panel */}
-        {showSuccess && (
+        {showSuccess && !challengeMode && (
           <div className="fixed inset-0 z-60 flex items-center justify-center p-6">
             <style>{`@keyframes popIn { from { transform: scale(.92); opacity: 0 } to { transform: scale(1); opacity: 1 } } @keyframes floatUp { 0%{ transform: translateY(8px)} 50%{transform:translateY(0)} 100%{transform:translateY(6px)} }`}</style>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => {}} />
@@ -746,7 +746,7 @@ export default function Level3({ onComplete }: { onComplete?: (result?: any) => 
                   <p className="text-gray-700 text-center mb-6">Bạn hoàn thành màn này. Xem tổng kết để nhận sao hoặc chơi lại.</p>
                   <div className="flex gap-4 justify-center">
                     <button
-                      onClick={() => { setShowSuccess(false); setSummaryOpen(true); }}
+                      onClick={() => { if (challengeMode) { setShowSuccess(false); finishAndNotify(false); return } setShowSuccess(false); setSummaryOpen(true); }}
                       className="px-5 py-2 rounded-2xl bg-white border border-gray-200 text-gray-700 hover:shadow-lg transition"
                     >
                       Tổng kết
@@ -815,7 +815,7 @@ export default function Level3({ onComplete }: { onComplete?: (result?: any) => 
                   } catch (e) { console.warn('complete level failed', e) }
 
                   setSummaryOpen(false);
-                  if (onComplete) return onComplete({ stars: starCount })
+                  if (onComplete) { try { onComplete({ stars: starCount }) } catch (e) {} ; if (challengeMode) return }
                   navigate('/craft-selection?openName=B%C3%A1t%20Tr%C3%A0ng');
                 }} style={{padding:'10px 18px',background:'linear-gradient(90deg,#10b981,#06a86b)',color:'white',borderRadius:12,border:'none',fontWeight:800}}>Hoàn tất</button>
                 <button onClick={()=>{ setSummaryOpen(false); setShowSuccess(false); setHumidity(0); setTimeLeft(INITIAL_TIME); setSelectedWeather(INITIAL_WEATHER); setWeatherTimer(30); startedRef.current = false; setStarted(false); navigate('/bat-trang/level-3'); }} style={{padding:'10px 18px',background:'white',borderRadius:12,border:'1px solid rgba(0,0,0,0.06)',fontWeight:700}}>Chơi lại</button>

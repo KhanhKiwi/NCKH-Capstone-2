@@ -4,7 +4,7 @@ import { levelsService } from '../../../api/levels/levelsService'
 import { progressService } from '../../../api/progress/progressService'
 import GuideDialog from '../../../util/shared/GuideDialog'
 
-export default function Level4({ onComplete }: { onComplete?: (result?: any) => void }) {
+export default function Level4({ onComplete, challengeMode }: { onComplete?: (result?: any) => void, challengeMode?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const drawCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -537,6 +537,7 @@ export default function Level4({ onComplete }: { onComplete?: (result?: any) => 
               </div>
             )}
           {/* Guide dialog placed under the time card for decoration guidance */}
+          {!challengeMode && (
           <div style={{ marginTop: 10 }}>
             <GuideDialog
               started={started}
@@ -548,6 +549,7 @@ export default function Level4({ onComplete }: { onComplete?: (result?: any) => 
               avatarFirst={true}
             />
           </div>
+          )}
         </div>
 
         {/* Right tools (larger, styled, responsive) */}
@@ -699,18 +701,26 @@ export default function Level4({ onComplete }: { onComplete?: (result?: any) => 
                 >
                   Tiếp tục
                 </button>
-                <button
-                  onClick={() => { setShowConfirmModal(false); setShowFinishModal(true) }}
-                  className="px-4 py-2 rounded-md bg-gradient-to-r from-amber-400 to-amber-600 text-white btn-accent"
-                >
-                  Chắc chắn
-                </button>
+                  <button
+                    onClick={() => {
+                      setShowConfirmModal(false)
+                      if (challengeMode && onComplete) {
+                        finishedRef.current = true
+                        try { onComplete({ rating }) } catch(e) {}
+                        return
+                      }
+                      setShowFinishModal(true)
+                    }}
+                    className="px-4 py-2 rounded-md bg-gradient-to-r from-amber-400 to-amber-600 text-white btn-accent"
+                  >
+                    Chắc chắn
+                  </button>
               </div>
             </div>
           </div>
         )}
 
-        {showFinishModal && (
+        {!challengeMode && showFinishModal && (
           <div className="fixed inset-0 z-70 flex items-center justify-center modal-overlay">
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowFinishModal(false)} />
             <div className="relative bg-white modal-box p-6 shadow-2xl w-full max-w-lg mx-4 transform transition-all duration-200">

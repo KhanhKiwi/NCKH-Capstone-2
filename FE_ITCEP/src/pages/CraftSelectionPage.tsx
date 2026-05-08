@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import { Lock, CheckCircle, Star, X } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { Link } from 'react-router';
@@ -83,6 +83,11 @@ export default function CraftSelectionPage() {
 
   // If URL contains ?openName=..., auto-open that craft modal (useful for deep links)
   const location = useLocation();
+  const navigate = useNavigate();
+  const handleBack = () => {
+    // Always navigate to GamePage
+    navigate('/game', { replace: true });
+  }
   useEffect(() => {
     try {
       const params = new URLSearchParams(location.search || '');
@@ -107,6 +112,19 @@ export default function CraftSelectionPage() {
       </svg>
 
       <div className={`relative z-10 pt-16 pb-8 transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+        <div className="absolute left-6 top-6">
+          <button
+            onClick={handleBack}
+            aria-label="Quay lại"
+            title="Quay lại"
+            className="flex items-center gap-3 px-4 py-2 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 text-white shadow-xl hover:translate-x-0.5 hover:shadow-2xl transform transition-all ring-0 focus:outline-none focus:ring-2 focus:ring-amber-300"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            <span className="font-semibold">Quay lại</span>
+          </button>
+        </div>
         <div className="text-center">
           <div className="inline-block mb-4">
             <div className="h-1 w-36 mx-auto mb-6 rounded-full bg-gradient-to-r from-[#b7843b] to-[#e6d7b3]"></div>

@@ -10,7 +10,7 @@ type Phase2Props = {
 };
 
 // Redesigned Phase2: cleaner UI, clear states, start/pause/reset, result modal.
-export default function Phase2({ onComplete }: Phase2Props) {
+export default function Phase2({ onComplete, challengeMode }: Phase2Props & { challengeMode?: boolean }) {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const rafRef = useRef<number | null>(null);
 	const [state, setState] = useState<'idle'|'playing'|'paused'|'won'|'lost'>('idle');
@@ -218,10 +218,10 @@ export default function Phase2({ onComplete }: Phase2Props) {
 
 	// confetti on win
 	useEffect(()=>{
-		if (state === 'won') {
+		if (state === 'won' && !challengeMode) {
 			try { confetti({ particleCount: 120, spread: 70, origin: { y: 0.4 } }) } catch(e){}
 		}
-	},[state]);
+	},[state, challengeMode])
 
 	// compute star rating (1..3) when the player wins
 	useEffect(()=>{
@@ -354,7 +354,7 @@ export default function Phase2({ onComplete }: Phase2Props) {
 
 
 
-				{state==='won' && (
+				{state==='won' && !challengeMode && (
 					<div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',zIndex:80}}>
 						<style>{`
 						@keyframes popIn { from { transform: scale(.92); opacity: 0 } to { transform: scale(1); opacity: 1 } }
@@ -371,7 +371,7 @@ export default function Phase2({ onComplete }: Phase2Props) {
 								</div>
 							</div>
 							<div style={{display:'flex',gap:12,justifyContent:'center',marginTop:16}}>
-								<button onClick={() => setSummaryOpen(true)} style={{padding:'10px 18px',background:'linear-gradient(90deg,#10b981,#06a86b)',color:'white',borderRadius:12,border:'none',fontWeight:800,boxShadow:'0 10px 30px rgba(16,185,129,0.18)'}}>Tổng kết</button>
+								<button onClick={() => { if (challengeMode) { finishAndNotify({ smoothness: progress, stars: starCount }); return } setSummaryOpen(true) }} style={{padding:'10px 18px',background:'linear-gradient(90deg,#10b981,#06a86b)',color:'white',borderRadius:12,border:'none',fontWeight:800,boxShadow:'0 10px 30px rgba(16,185,129,0.18)'}}>Tổng kết</button>
 								<button onClick={reset} style={{padding:'10px 18px',background:'white',borderRadius:12,border:'1px solid rgba(0,0,0,0.06)',fontWeight:700}}>Chơi lại</button>
 							</div>
 							</div>
@@ -426,6 +426,7 @@ export default function Phase2({ onComplete }: Phase2Props) {
 			</div>
 
 			{/* Guide dialog (mimic Screen3 weaving) */}
+			{!challengeMode && (
 			<div style={{position:'absolute', right:40, top:96, zIndex:40, transition: 'transform 320ms ease'}}>
 				<GuideDialog
 					started={state === 'playing'}
@@ -437,6 +438,7 @@ export default function Phase2({ onComplete }: Phase2Props) {
 					message={state === 'won' ? 'Hoàn thành! Bạn đã làm mịn tốt — tiếp tục nhé.' : undefined}
 				/>
 			</div>
+			)}
 		</div>
 	);
 }

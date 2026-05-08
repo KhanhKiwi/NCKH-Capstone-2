@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router'
 import confetti from 'canvas-confetti'
 import GuideDialog from '../../../util/shared/GuideDialog'
 
-export default function BatTrangLevel2({ onComplete }: { onComplete?: (result?: any) => void }) {
+export default function BatTrangLevel2({ onComplete, challengeMode }: { onComplete?: (result?: any) => void, challengeMode?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [state, setState] = useState<'idle'|'playing'|'paused'|'won'|'lost'>('idle')
   const [progress, setProgress] = useState(0) // 0..1
@@ -362,7 +362,7 @@ export default function BatTrangLevel2({ onComplete }: { onComplete?: (result?: 
 
   // confetti on win
   useEffect(()=>{
-    if (state === 'won') {
+    if (state === 'won' && !challengeMode) {
       try { confetti({ particleCount: 120, spread: 70, origin: { y: 0.4 } }) } catch(e){}
     }
   },[state])
@@ -407,11 +407,15 @@ export default function BatTrangLevel2({ onComplete }: { onComplete?: (result?: 
   // auto-finish when won and embedded in runner (onComplete present)
   useEffect(()=>{
     if (state === 'won' && onComplete) {
+      if (challengeMode) {
+        const id = setTimeout(()=>{ finishAndNotify(true) }, 300)
+        return ()=> clearTimeout(id)
+      }
       // small delay so confetti/animations show briefly
       const id = setTimeout(()=>{ finishAndNotify(true) }, 900)
       return ()=> clearTimeout(id)
     }
-  },[state, onComplete, finishAndNotify])
+  },[state, onComplete, finishAndNotify, challengeMode])
 
   const start = ()=>{ work.current = 0; setProgress(0); required.current = 650; setTimeLeft(60); setState('playing'); rodVisible.current = true; rodLenRef.current = 0; rodTargetLen.current = 0; rodAngle.current = -Math.PI/2 }
   const pause = ()=> setState('paused')
@@ -490,7 +494,7 @@ export default function BatTrangLevel2({ onComplete }: { onComplete?: (result?: 
             </div>
           </div>
 
-          {state === 'won' && (
+          {state === 'won' && !challengeMode && (
             <div className="absolute inset-0 flex items-center justify-center z-80">
               <style>{`@keyframes popIn { from { transform: scale(.92); opacity: 0 } to { transform: scale(1); opacity: 1 } }`}</style>
               <div style={{width:360,background:'linear-gradient(180deg,#ffffff,#f8fff7)',padding:22,borderRadius:16,boxShadow:'0 30px 90px rgba(20,30,10,0.22)',textAlign:'center',animation:'popIn 320ms cubic-bezier(.2,.9,.2,1) both',border:'1px solid rgba(0,0,0,0.06)'}}>
@@ -504,7 +508,13 @@ export default function BatTrangLevel2({ onComplete }: { onComplete?: (result?: 
                   </div>
                 </div>
                 <div style={{display:'flex',gap:12,justifyContent:'center',marginTop:16}}>
-                  <button onClick={() => setSummaryOpen(true)} style={{padding:'10px 18px',background:'linear-gradient(90deg,#10b981,#06a86b)',color:'white',borderRadius:12,border:'none',fontWeight:800,boxShadow:'0 10px 30px rgba(16,185,129,0.18)'}}>Tổng kết</button>
+                  <button onClick={() => {
+                    if (challengeMode) {
+                      finishAndNotify(false)
+                      return
+                    }
+                    setSummaryOpen(true)
+                  }} style={{padding:'10px 18px',background:'linear-gradient(90deg,#10b981,#06a86b)',color:'white',borderRadius:12,border:'none',fontWeight:800,boxShadow:'0 10px 30px rgba(16,185,129,0.18)'}}>Tổng kết</button>
                   <button onClick={reset} style={{padding:'10px 18px',background:'white',borderRadius:12,border:'1px solid rgba(0,0,0,0.06)',fontWeight:700}}>Chơi lại</button>
                 </div>
               </div>
@@ -574,16 +584,18 @@ export default function BatTrangLevel2({ onComplete }: { onComplete?: (result?: 
           )}
 
           {/* Guide dialog for Level 2 */}
-          <div style={{position:'absolute', right:40, top:96, zIndex:40, transition: 'transform 320ms ease'}}>
-            <GuideDialog
-              started={state === 'playing'}
-              showRequireStart={false}
-              win={state === 'won'}
-              progress={Math.round(progress * 100)}
-              onNext={() => { /* nothing for now */ }}
-              phase="phase2"
-            />
-          </div>
+          {!challengeMode && (
+            <div style={{position:'absolute', right:40, top:96, zIndex:40, transition: 'transform 320ms ease'}}>
+              <GuideDialog
+                started={state === 'playing'}
+                showRequireStart={false}
+                win={state === 'won'}
+                progress={Math.round(progress * 100)}
+                onNext={() => { /* nothing for now */ }}
+                phase="phase2"
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router'
 import { QUESTIONS_LEVEL3 as QUESTIONS } from '../../../util/question_ceramics/questions_level3'
 import { progressService } from '../../../api/progress/progressService'
 import type { Q } from '../../../util/question_ceramics/questions'
-export default function BatTrangLevel3Screen3({ onComplete }: { onComplete?: () => void }) {
+export default function BatTrangLevel3Screen3({ onComplete, challengeMode }: { onComplete?: () => void, challengeMode?: boolean }) {
   function shuffle<T>(arr: T[]) {
     const a = arr.slice()
     for (let i = a.length - 1; i > 0; i--) {
@@ -49,8 +49,10 @@ export default function BatTrangLevel3Screen3({ onComplete }: { onComplete?: () 
     if (q.correct === choiceId) {
       setFeedback('Đúng — lựa chọn phù hợp')
       setCorrectId(choiceId)
-      setConfetti(Array.from({ length: 18 }, (_, i) => i))
-      setTimeout(() => setConfetti([]), 1400)
+      if (!challengeMode) {
+        setConfetti(Array.from({ length: 18 }, (_, i) => i))
+        setTimeout(() => setConfetti([]), 1400)
+      }
       setTimeout(() => setCorrectId(null), 800)
     } else {
       setFeedback('Sai — vui lòng thử lại')

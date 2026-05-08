@@ -125,7 +125,20 @@ export default function ChallengePage() {
         .meta-pill{font-family:'Playfair Display', serif}
         .cta-btn{font-family:Inter, system-ui, sans-serif;font-weight:600}
       `}</style>
-      <div className="max-w-screen-xl mx-auto px-4">
+      <div className="max-w-screen-xl mx-auto px-4 relative">
+            <div className="absolute left-6 top-6">
+              <button
+                onClick={() => navigate('/game', { replace: true })}
+                aria-label="Quay lại"
+                title="Quay lại"
+                className="flex items-center gap-3 px-4 py-2 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 text-white shadow-xl hover:translate-x-0.5 hover:shadow-2xl transform transition-all ring-0 focus:outline-none focus:ring-2 focus:ring-amber-300"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                <span className="font-semibold">Quay lại</span>
+              </button>
+            </div>
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/60 backdrop-blur-sm mx-auto mb-4 shadow-sm">
             <Trophy className="text-amber-500" />
