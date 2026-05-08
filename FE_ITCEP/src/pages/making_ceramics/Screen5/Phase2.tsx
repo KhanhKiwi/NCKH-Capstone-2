@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import GuideDialog from '../../../util/shared/GuideDialog'
 
-export default function BatTrangLevel5Phase1({ onComplete }: { onComplete?: (result?: any) => void }) {
+export default function BatTrangLevel5Phase1({ onComplete, challengeMode }: { onComplete?: (result?: any) => void, challengeMode?: boolean }) {
   const navigate = useNavigate()
 
   const [temperature, setTemperature] = useState(900)
@@ -161,7 +161,7 @@ export default function BatTrangLevel5Phase1({ onComplete }: { onComplete?: (res
         if (cancelled) return
         const t = temperatureRef.current
         setQuality((q) => {
-          if (t >= IDEAL_MIN && t <= IDEAL_MAX) return Math.min(100, q + 10)
+          if (t >= IDEAL_MIN && t <= IDEAL_MAX) return Math.min(100, q + 50)
           return Math.max(0, q - 10)
         })
         // schedule next
@@ -187,7 +187,7 @@ export default function BatTrangLevel5Phase1({ onComplete }: { onComplete?: (res
 
     // confetti: generate burst when showSuccess becomes true
     useEffect(() => {
-      if (!showSuccess) {
+      if (!showSuccess || challengeMode) {
         setConfetti([])
         return
       }
@@ -202,7 +202,17 @@ export default function BatTrangLevel5Phase1({ onComplete }: { onComplete?: (res
       setConfetti(pieces)
       const t = setTimeout(() => setConfetti([]), 1600)
       return () => clearTimeout(t)
-    }, [showSuccess])
+    }, [showSuccess, challengeMode])
+
+    // Auto-finish: call onComplete when local success occurs so the runner advances to the finished screen.
+    useEffect(() => {
+      if (showSuccess && onComplete) {
+        const id = setTimeout(()=>{
+          try { onComplete({ stars: starCount }) } catch(e) {}
+        }, 300)
+        return () => clearTimeout(id)
+      }
+    }, [showSuccess, onComplete, starCount])
 
     /* ===== AUTO-NUDGE TEMPERATURE WHEN IDLE ===== */
     useEffect(() => {
@@ -273,7 +283,7 @@ export default function BatTrangLevel5Phase1({ onComplete }: { onComplete?: (res
         ))}
       </div>
 
-      {showSuccess && (
+      {showSuccess && !challengeMode && (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-6">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => {}} />
           <div className="relative z-50 max-w-lg w-full mx-auto">
@@ -294,7 +304,15 @@ export default function BatTrangLevel5Phase1({ onComplete }: { onComplete?: (res
                 <p className="text-gray-700 text-center mb-6">Bạn đã hoàn thành quá trình nung. Xem tổng kết để nhận sao hoặc chơi lại.</p>
                 <div className="flex gap-4 justify-center">
                   <button
-                    onClick={() => { setShowSuccess(false); setSummaryOpen(true); }}
+                    onClick={() => {
+                      if (challengeMode) {
+                        setShowSuccess(false)
+                        try { if (onComplete) onComplete({ stars: starCount }) } catch (e) {}
+                        return
+                      }
+                      setShowSuccess(false)
+                      setSummaryOpen(true)
+                    }}
                     className="px-5 py-2 rounded-2xl bg-white border border-gray-200 text-gray-700 hover:shadow-lg transition"
                   >
                     Tổng kết
@@ -333,7 +351,7 @@ export default function BatTrangLevel5Phase1({ onComplete }: { onComplete?: (res
             </div>
             <div style={{color:'#5b3a26',marginBottom:10}}>Chất lượng cuối: <strong>{Math.round(quality)}%</strong></div>
             <div style={{color:'#5b3a26',marginBottom:18}}>Thời gian còn lại: <strong>{timeLeft}s</strong></div>
-            <div style={{display:'flex',gap:12,justifyContent:'center'}}>
+              <div style={{display:'flex',gap:12,justifyContent:'center'}}>
               <button onClick={async ()=>{
                 try{ localStorage.setItem('level5_stars', String(starCount)); localStorage.setItem('level5_result','won') }catch{}
                 try {
@@ -361,6 +379,7 @@ export default function BatTrangLevel5Phase1({ onComplete }: { onComplete?: (res
                 setSummaryOpen(false);
                 if (onComplete) {
                   try { onComplete({ stars: starCount }) } catch (e) {}
+                  if (challengeMode) return
                   navigate('/challenge')
                   return
                 }
@@ -430,15 +449,17 @@ export default function BatTrangLevel5Phase1({ onComplete }: { onComplete?: (res
           </div>
           {/* Guide dialog for Level 5 (firing) */}
           <div style={{ marginTop: 10 }}>
-            <GuideDialog
-              started={started}
-              showRequireStart={true}
-              win={showSuccess}
-              progress={Math.round(quality)}
-              phase="phase5"
-              onNext={() => {}}
-              avatarFirst={true}
-            />
+            {!challengeMode && (
+              <GuideDialog
+                started={started}
+                showRequireStart={true}
+                win={showSuccess}
+                progress={Math.round(quality)}
+                phase="phase5"
+                onNext={() => {}}
+                avatarFirst={true}
+              />
+            )}
           </div>
         </div>
 
