@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 // IMPORT ENTITIES CỦA BẠN
 import { User } from '../modules/users/entities/user.entity';
 import { UserProgress } from '../modules/progress/entities/user-progress.entity';
+import { UserChallenge } from '../modules/user-challenges/entities/user-challenge.entity';
 import { Level } from '../modules/levels/entities/level.entity';
 import { Step } from '../modules/steps/entities/step.entity';
 import { Craft } from '../modules/crafts/entities/craft.entity';
@@ -37,6 +38,7 @@ import { AnalyticsEvent } from '../modules/analytics/entities/analytics-event.en
         entities: [
           User,
           UserProgress,
+          UserChallenge,
           Level,
           Step,
           Craft,
@@ -47,7 +49,7 @@ import { AnalyticsEvent } from '../modules/analytics/entities/analytics-event.en
           AnalyticsEvent,
         ],
 
-        synchronize: false,
+        synchronize: false, // Đặt thành false trong production để tránh mất dữ liệu
         logging: ['error', 'warn'],
       }),
     }),

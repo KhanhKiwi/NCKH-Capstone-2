@@ -161,7 +161,7 @@ export default function BatTrangLevel5Phase1({ onComplete, challengeMode }: { on
         if (cancelled) return
         const t = temperatureRef.current
         setQuality((q) => {
-          if (t >= IDEAL_MIN && t <= IDEAL_MAX) return Math.min(100, q + 50)
+          if (t >= IDEAL_MIN && t <= IDEAL_MAX) return Math.min(100, q + 100)
           return Math.max(0, q - 10)
         })
         // schedule next

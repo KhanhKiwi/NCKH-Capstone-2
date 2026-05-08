@@ -8,15 +8,17 @@ import Screen3P2 from '../making_ceramics/Screen3/Phase2'
 import Screen4P1 from '../making_ceramics/Screen4/Phase1'
 import Screen5P1 from '../making_ceramics/Screen5/Phase1'
 import Screen5P2 from '../making_ceramics/Screen5/Phase2'
+import { userChallengesService } from '../../api/userChallenges/userChallengesService'
+import { levelsService } from '../../api/levels/levelsService'
 
 const SEQUENCE = [
-  { id: '1-1', comp: Screen1P1 },
-  { id: '1-2', comp: Screen1P2 },
-  { id: '2-1', comp: Screen2P1 },
-  { id: '3-1', comp: Screen3P1 },
-  { id: '3-2', comp: Screen3P2 },
-  { id: '4-1', comp: Screen4P1 },
-  { id: '5-1', comp: Screen5P1 },
+  //{ id: '1-1', comp: Screen1P1 },
+  //{ id: '1-2', comp: Screen1P2 },
+  //{ id: '2-1', comp: Screen2P1 },
+  //{ id: '3-1', comp: Screen3P1 },
+  //{ id: '3-2', comp: Screen3P2 },
+ // { id: '4-1', comp: Screen4P1 },
+  //{ id: '5-1', comp: Screen5P1 },
   { id: '5-2', comp: Screen5P2 },
 ]
 
@@ -75,6 +77,51 @@ export default function ChallengeMakingCere() {
       return () => clearTimeout(t)
     }
     setConfettiPieces([])
+  }, [index])
+
+  // when the challenge finishes, send result to backend (best-effort)
+  React.useEffect(() => {
+    if (! (index >= SEQUENCE.length)) return
+    const elapsedSec = (typeof window !== 'undefined') ? Number((window as any).__challengeElapsed ?? 0) : 0
+    let cancelled = false
+    ;(async () => {
+      try {
+        // infer craft id for ceramics (fallback to 1)
+        const craftId = await userChallengesService.inferCraftIdForCeramics()
+
+        // get existing records for current user and check if we should save
+        let shouldSave = true
+        try {
+          const my = await userChallengesService.getMyChallenges()
+          if (Array.isArray(my) && my.length > 0) {
+            const existing = my.find((r: any) => {
+              const id = Number(r?.craft_id ?? r?.craft?.craft_id ?? r?.craft?.id ?? null)
+              return id === Number(craftId)
+            })
+            if (existing && typeof existing.time !== 'undefined' && existing.time !== null) {
+              const existingTime = Number(existing.time)
+              const incoming = Number(elapsedSec)
+              if (Number.isFinite(existingTime) && Number.isFinite(incoming)) {
+                shouldSave = incoming < existingTime
+              }
+            }
+          }
+        } catch (e) {
+          // if checking fails, fall back to attempting to save
+          shouldSave = true
+        }
+
+        if (shouldSave) {
+          await userChallengesService.saveChallenge({ craft_id: Number(craftId), time: Number(elapsedSec) })
+          if (!cancelled) console.log('[challenge] saved user challenge', { craft_id: craftId, time: elapsedSec })
+        } else {
+          console.log('[challenge] not saving slower/equal time', { craft_id: craftId, time: elapsedSec })
+        }
+      } catch (e) {
+        console.warn('[challenge] failed saving user challenge', e)
+      }
+    })()
+    return () => { cancelled = true }
   }, [index])
 
   const step = SEQUENCE[index]
@@ -172,6 +219,8 @@ export default function ChallengeMakingCere() {
       </div>
     )
   }
+
+  
 
   const Comp: any = step.comp
 
