@@ -4,6 +4,7 @@ import { authService } from '../api/services/authService'
 import { levelsService } from '../api/levels/levelsService'
 import { villagesService } from '../api/villages/villagesService'
 import { ImageWithFallback } from '../components/figma/ImageWithFallback'
+import { userChallengesService } from '../api/userChallenges/userChallengesService'
 import { MapPin, Trophy, Star } from 'lucide-react'
 import confetti from 'canvas-confetti'
 
@@ -106,6 +107,17 @@ export default function ChallengePage() {
     else { vid = v.id; name = v.name }
 
     try { confetti({ particleCount: 120, spread: 160, origin: { y: 0.6 } }) } catch {}
+
+    // best-effort: create a UserChallenge record when starting (doesn't block nav)
+    ;(async () => {
+      try {
+        const craftId = Number(vid ?? await userChallengesService.inferCraftIdForCeramics())
+        await userChallengesService.saveChallenge({ craft_id: craftId })
+        console.debug('[ChallengePage] created user-challenge for craft', craftId)
+      } catch (e) {
+        console.warn('[ChallengePage] failed to create user-challenge', e)
+      }
+    })()
 
     // If this is the ceramics village (Bát Tràng) open the challenge runner
     const isCeramics = vid === 1 || (typeof name === 'string' && /b(á|a)t\s*tràng/i.test(name))
