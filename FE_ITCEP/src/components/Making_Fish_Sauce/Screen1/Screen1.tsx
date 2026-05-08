@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useMotionValue, AnimatePresence } from 'motion/react';
-import { villageService } from '../../../api/services/villageService';
-import { progressService } from '../../../api/services/progressService';
-import { getUserId } from '../../../utils/authUtils';
+import { levelsService } from '../../../api/levels/levelsService';
+import { progressService } from '../../../api/progress/progressService';
 
 // Fish type definitions
 type FishType = 'correct' | 'wrong' | 'spoiled';
@@ -202,27 +201,37 @@ export default function Screen1() {
     });
   }
 
-  // Handle continue to next level with village unlock
+  // Handle continue to next level with level unlock
   async function handleContinueLevel() {
     setIsUnlocking(true);
     try {
-      // Unlock the fish sauce village (Nam Ô) - Village ID 6
-      const FISH_SAUCE_VILLAGE_ID = 6;
-      
       if (userId) {
-        // Save progress for this level (Level 1 = Bắt Cá)
-        await progressService.completeLevel(userId, 1, quality);
+        // Get all levels for fish sauce village (village_id = 6)
+        const levels = await levelsService.getByVillage(6, userId);
+        const level1 = levels.find((l: any) => l.level_number === 1);
         
-        // Unlock the village
-        await villageService.unlockVillage(FISH_SAUCE_VILLAGE_ID);
-        
-        console.log('Village unlocked successfully!');
+        if (level1) {
+          // Save progress for level 1
+          await progressService.saveProgress({
+            level_id: level1.level_id,
+            status: 'completed',
+            score: quality
+          });
+          
+          // Unlock level 2
+          const level2 = levels.find((l: any) => l.level_number === 2);
+          if (level2) {
+            await progressService.unlockLevel(level2.level_id);
+          }
+          
+          console.log('[Screen1] Level 1 completed, Level 2 unlocked!');
+        }
       }
       
       // Navigate to next level
       navigate('/game/wash-fish');
     } catch (error) {
-      console.error('Error unlocking village:', error);
+      console.error('[Screen1] Error saving progress:', error);
       // Still navigate even if unlock fails (graceful degradation)
       navigate('/game/wash-fish');
     } finally {

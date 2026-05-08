@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { progressService } from '../../../../api/services/progressService';
+import { levelsService } from '../../../../api/levels/levelsService';
+import { progressService } from '../../../../api/progress/progressService';
 
 interface WinScreenProps {
   quality: number;
@@ -12,11 +13,27 @@ export function WinScreen({ quality, userId }: WinScreenProps) {
 
   const handleContinue = async () => {
     try {
-      // Save progress for level 3 (Pha Muối & Ướp Cá)
       if (userId) {
-        console.log('[Screen3] Completing level 3 with quality:', quality);
-        await progressService.completeLevel(userId, 3, quality);
-        console.log('[Screen3] Level 3 completed, Level 4 unlocked!');
+        // Get level 3 from fish sauce village (village_id = 6)
+        const levels = await levelsService.getByVillage(6, userId);
+        const level3 = levels.find((l: any) => l.level_number === 3);
+        
+        if (level3) {
+          // Save progress for level 3
+          await progressService.saveProgress({
+            level_id: level3.level_id,
+            status: 'completed',
+            score: quality
+          });
+          
+          // Unlock level 4
+          const level4 = levels.find((l: any) => l.level_number === 4);
+          if (level4) {
+            await progressService.unlockLevel(level4.level_id);
+          }
+          
+          console.log('[Screen3] Level 3 completed, Level 4 unlocked!');
+        }
       }
     } catch (error) {
       console.error('[Screen3] Error saving progress:', error);

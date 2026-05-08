@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Droplets, Layers, FlaskConical, Award, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { levelsService } from '../../../api/levels/levelsService';
+import { progressService } from '../../../api/progress/progressService';
 import { FlavorRadarChart } from './components/FlavorRadarChart';
 import { FiltrationStation } from './components/FiltrationStation';
 import { LiquidPreview } from './components/LiquidPreview';
@@ -10,6 +13,8 @@ import { Toaster } from '../../ui/sonner';
 import { toast } from 'sonner';
 
 export default function Screen5() {
+  const navigate = useNavigate();
+  const userId = localStorage.getItem('userId') ? Number(localStorage.getItem('userId')) : null;
   const [filteringStage, setFilteringStage] = useState(0);
   const [clarity, setClarity] = useState(45);
   const [harvestComplete, setHarvestComplete] = useState(false);
@@ -85,16 +90,48 @@ export default function Screen5() {
     }
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     const avgQuality = Math.round(
       (flavorProfile.umami + flavorProfile.saltiness + flavorProfile.aroma + flavorProfile.aftertaste + flavorProfile.colorQuality) / 5
     );
 
     if (avgQuality >= 80 && filteringStage >= 3) {
+      try {
+        if (userId) {
+          // Get level 5 from fish sauce village (village_id = 6)
+          const levels = await levelsService.getByVillage(6, userId);
+          const level5 = levels.find((l: any) => l.level_number === 5);
+          
+          if (level5) {
+            // Save progress for level 5
+            await progressService.saveProgress({
+              level_id: level5.level_id,
+              status: 'completed',
+              score: avgQuality
+            });
+            
+            // Unlock level 6 (final level)
+            const level6 = levels.find((l: any) => l.level_number === 6);
+            if (level6) {
+              await progressService.unlockLevel(level6.level_id);
+            }
+            
+            console.log('[Screen5] Level 5 completed, Level 6 unlocked!');
+          }
+        }
+      } catch (error) {
+        console.error('[Screen5] Error saving progress:', error);
+      }
+      
       toast.success('🎉 Hoàn thành Di sản Giọt Cuối!', {
         description: 'Bạn đã gìn giữ được tinh hoa của làng mắm Nam Ô',
         duration: 5000,
       });
+      
+      // Navigate to final level after a short delay
+      setTimeout(() => {
+        navigate('/game/bottling-heritage');
+      }, 2000);
     } else {
       toast.error('Chưa đạt tiêu chuẩn', {
         description: 'Vui lòng hoàn thiện các công đoạn lọc',

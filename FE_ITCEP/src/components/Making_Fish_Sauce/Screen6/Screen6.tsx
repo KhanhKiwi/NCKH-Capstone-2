@@ -1,9 +1,14 @@
 import { useState } from 'react';
 import { ArrowLeft, Droplet, Wine, Sparkles, Award } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useNavigate } from 'react-router-dom';
+import { levelsService } from '../../../api/levels/levelsService';
+import { progressService } from '../../../api/progress/progressService';
 import { ImageWithFallback } from '../../figma/ImageWithFallback';
 
 export default function Screen6() {
+  const navigate = useNavigate();
+  const userId = localStorage.getItem('userId') ? Number(localStorage.getItem('userId')) : null;
   const [selectedBottle, setSelectedBottle] = useState(2);
   const [isFilling, setIsFilling] = useState(false);
   const [isSealed, setIsSealed] = useState(false);
@@ -22,6 +27,35 @@ export default function Screen6() {
       setIsFilling(false);
       setIsSealed(true);
     }, 3000);
+  };
+
+  const handleCompletion = async () => {
+    try {
+      if (userId && isSealed) {
+        // Get level 6 from fish sauce village (village_id = 6) - FINAL LEVEL
+        const levels = await levelsService.getByVillage(6, userId);
+        const level6 = levels.find((l: any) => l.level_number === 6);
+        
+        if (level6) {
+          // Save progress for level 6 (final level)
+          const finalScore = 96; // Heritage score
+          await progressService.saveProgress({
+            level_id: level6.level_id,
+            status: 'completed',
+            score: finalScore
+          });
+          
+          console.log('[Screen6] Level 6 (FINAL) completed! Craft village will be unlocked by backend.');
+        }
+      }
+    } catch (error) {
+      console.error('[Screen6] Error saving progress:', error);
+    }
+    
+    // Navigate back to craft selection after completion
+    setTimeout(() => {
+      navigate('/craft-selection');
+    }, 1500);
   };
 
   return (
@@ -369,9 +403,11 @@ export default function Screen6() {
           </motion.button>
 
           <motion.button
-            className="group relative bg-gradient-to-br from-amber-600/50 via-amber-700/40 to-amber-800/50 backdrop-blur-sm rounded-2xl border-2 border-amber-500/60 p-6 md:p-8 text-left overflow-hidden hover:border-amber-400/80 transition-all duration-500 shadow-2xl hover:shadow-3xl hover:shadow-amber-700/50"
-            whileHover={{ scale: 1.05, y: -6 }}
-            whileTap={{ scale: 0.98 }}
+            onClick={handleCompletion}
+            disabled={!isSealed}
+            className="group relative bg-gradient-to-br from-amber-600/50 via-amber-700/40 to-amber-800/50 backdrop-blur-sm rounded-2xl border-2 border-amber-500/60 p-6 md:p-8 text-left overflow-hidden hover:border-amber-400/80 transition-all duration-500 shadow-2xl hover:shadow-3xl hover:shadow-amber-700/50 disabled:opacity-50 disabled:cursor-not-allowed"
+            whileHover={{ scale: isSealed ? 1.05 : 1, y: isSealed ? -6 : 0 }}
+            whileTap={{ scale: isSealed ? 0.98 : 1 }}
           >
             <motion.div
               className="absolute inset-0 bg-gradient-to-br from-amber-400/20 via-amber-500/10 to-amber-600/20"
@@ -382,7 +418,7 @@ export default function Screen6() {
             />
             <Award className="w-8 h-8 md:w-10 md:h-10 text-amber-200 mb-4 relative z-10" />
             <div className="text-amber-50 text-base md:text-lg font-serif mb-2 relative z-10">
-              Hoàn tất Di sản
+              {isSealed ? 'Hoàn tất Di sản' : 'Chưa niêm phong'}
             </div>
             <div className="text-amber-300/70 text-xs md:text-sm relative z-10">
               Lưu giữ cho muôn đời

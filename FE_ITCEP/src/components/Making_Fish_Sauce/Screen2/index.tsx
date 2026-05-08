@@ -8,8 +8,8 @@ import { FailureBanner } from './components/FailureBanner';
 import { ExitConfirmDialog } from './components/ExitConfirmDialog';
 import { ImageWithFallback } from '../../figma/ImageWithFallback';
 import { CheckCircle, AlertCircle } from 'lucide-react';
-import { progressService } from '../../../api/services/progressService';
-import { getUserId } from '../../../utils/authUtils';
+import { levelsService } from '../../../api/levels/levelsService';
+import { progressService } from '../../../api/progress/progressService';
 
 interface Particle {
   id: number;
@@ -395,11 +395,27 @@ export default function Screen2() {
   // ========== GAME CONTROL HANDLERS ==========
   const handleContinue = async () => {
     try {
-      // Save progress for level 2 (Rửa Cá)
       if (userId) {
-        console.log('[Screen2] Completing level 2 with quality:', quality);
-        await progressService.completeLevel(userId, 2, quality);
-        console.log('[Screen2] Level 2 completed, Level 3 unlocked!');
+        // Get all levels for fish sauce village (village_id = 6)
+        const levels = await levelsService.getByVillage(6, userId);
+        const level2 = levels.find((l: any) => l.level_number === 2);
+        
+        if (level2) {
+          // Save progress for level 2
+          await progressService.saveProgress({
+            level_id: level2.level_id,
+            status: 'completed',
+            score: quality
+          });
+          
+          // Unlock level 3
+          const level3 = levels.find((l: any) => l.level_number === 3);
+          if (level3) {
+            await progressService.unlockLevel(level3.level_id);
+          }
+          
+          console.log('[Screen2] Level 2 completed, Level 3 unlocked!');
+        }
       }
     } catch (error) {
       console.error('[Screen2] Error saving progress:', error);
