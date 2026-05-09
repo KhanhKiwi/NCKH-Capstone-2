@@ -1,9 +1,9 @@
 import { User } from '../../users/entities/user.entity';
-import { Level } from '../../levels/entities/level.entity';
+import { Craft } from '../../crafts/entities/craft.entity';
 export declare class PlayerSession {
     session_id: number;
     user: User;
-    level: Level;
+    craft: Craft;
     start_time: Date;
     end_time: Date;
     total_time: number;

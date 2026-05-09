@@ -18,6 +18,7 @@ const auth_service_1 = require("./auth.service");
 const register_dto_1 = require("./dto/register.dto");
 const login_dto_1 = require("./dto/login.dto");
 const passport_1 = require("@nestjs/passport");
+const swagger_1 = require("@nestjs/swagger");
 let AuthController = class AuthController {
     authService;
     constructor(authService) {
@@ -28,6 +29,12 @@ let AuthController = class AuthController {
     }
     login(loginDto) {
         return this.authService.login(loginDto);
+    }
+    async forgotPassword(email) {
+        return this.authService.forgotPassword(email);
+    }
+    async resetPassword(body) {
+        return this.authService.resetPassword(body.token, body.password);
     }
     async googleAuth(req) {
     }
@@ -42,16 +49,21 @@ let AuthController = class AuthController {
             return res.redirect(`${frontendUrl}/login?error=Google login failed`);
         }
     }
-    async forgotPassword(email) {
-        return this.authService.forgotPassword(email);
-    }
-    async resetPassword(body) {
-        return this.authService.resetPassword(body.token, body.password);
-    }
 };
 exports.AuthController = AuthController;
 __decorate([
     (0, common_1.Post)('/register'),
+    (0, swagger_1.ApiOperation)({ summary: 'Register new user' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            example: {
+                email: 'user@example.com',
+                username: 'user123',
+                password: 'password123',
+                name: 'Nguyen Van A',
+            },
+        },
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [register_dto_1.RegisterDto]),
@@ -60,11 +72,51 @@ __decorate([
 __decorate([
     (0, common_1.Post)('/login'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ summary: 'Login with email and password' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            example: {
+                email: 'user@example.com',
+                password: 'password123',
+            },
+        },
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [login_dto_1.LoginDto]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "login", null);
+__decorate([
+    (0, common_1.Post)('forgot-password'),
+    (0, swagger_1.ApiOperation)({ summary: 'Request password reset email' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            example: {
+                email: 'user@example.com',
+            },
+        },
+    }),
+    __param(0, (0, common_1.Body)('email')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "forgotPassword", null);
+__decorate([
+    (0, common_1.Post)('reset-password'),
+    (0, swagger_1.ApiOperation)({ summary: 'Reset password with token' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            example: {
+                token: 'reset-token-123',
+                password: 'newPassword123',
+            },
+        },
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "resetPassword", null);
 __decorate([
     (0, common_1.Get)('google'),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('google')),
@@ -82,21 +134,8 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "googleAuthRedirect", null);
-__decorate([
-    (0, common_1.Post)('forgot-password'),
-    __param(0, (0, common_1.Body)('email')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "forgotPassword", null);
-__decorate([
-    (0, common_1.Post)('reset-password'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "resetPassword", null);
 exports.AuthController = AuthController = __decorate([
+    (0, swagger_1.ApiTags)('auth'),
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [auth_service_1.AuthService])
 ], AuthController);

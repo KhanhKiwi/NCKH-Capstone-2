@@ -22,6 +22,10 @@ let SessionsController = class SessionsController {
         this.sessionsService = sessionsService;
     }
     create(dto) {
+        if (dto?.craft_id) {
+            dto.craft = { craft_id: dto.craft_id };
+            delete dto.craft_id;
+        }
         return this.sessionsService.create(dto);
     }
     findAll() {
@@ -31,6 +35,10 @@ let SessionsController = class SessionsController {
         return this.sessionsService.findOne(id);
     }
     update(id, dto) {
+        if (dto?.craft_id) {
+            dto.craft = { craft_id: dto.craft_id };
+            delete dto.craft_id;
+        }
         return this.sessionsService.update(id, dto);
     }
     remove(id) {
@@ -41,6 +49,15 @@ exports.SessionsController = SessionsController;
 __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create session' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            example: {
+                user_id: 1,
+                craft_id: 2,
+                start_time: '2026-04-20T08:00:00.000Z',
+            },
+        },
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -61,6 +78,14 @@ __decorate([
 ], SessionsController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            example: {
+                end_time: '2026-04-20T08:30:00.000Z',
+                total_time: 1800,
+            },
+        },
+    }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),

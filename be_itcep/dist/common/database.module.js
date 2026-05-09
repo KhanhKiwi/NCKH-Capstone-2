@@ -12,6 +12,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const config_1 = require("@nestjs/config");
 const user_entity_1 = require("../modules/users/entities/user.entity");
 const user_progress_entity_1 = require("../modules/progress/entities/user-progress.entity");
+const user_challenge_entity_1 = require("../modules/user-challenges/entities/user-challenge.entity");
 const level_entity_1 = require("../modules/levels/entities/level.entity");
 const step_entity_1 = require("../modules/steps/entities/step.entity");
 const craft_entity_1 = require("../modules/crafts/entities/craft.entity");
@@ -20,6 +21,7 @@ const media_entity_1 = require("../modules/media/entities/media.entity");
 const player_session_entity_1 = require("../modules/sessions/entities/player-session.entity");
 const user_action_log_entity_1 = require("../modules/logs/entities/user-action-log.entity");
 const analytics_event_entity_1 = require("../modules/analytics/entities/analytics-event.entity");
+const feedback_entity_1 = require("../modules/feedback/entities/feedback.entity");
 let DatabaseModule = class DatabaseModule {
 };
 exports.DatabaseModule = DatabaseModule;
@@ -43,16 +45,18 @@ exports.DatabaseModule = DatabaseModule = __decorate([
                     entities: [
                         user_entity_1.User,
                         user_progress_entity_1.UserProgress,
+                        user_challenge_entity_1.UserChallenge,
                         level_entity_1.Level,
                         step_entity_1.Step,
                         craft_entity_1.Craft,
                         craft_village_entity_1.CraftVillage,
                         media_entity_1.Media,
+                        feedback_entity_1.Feedback,
                         player_session_entity_1.PlayerSession,
                         user_action_log_entity_1.UserActionLog,
                         analytics_event_entity_1.AnalyticsEvent,
                     ],
-                    synchronize: false,
+                    synchronize: true,
                     logging: ['error', 'warn'],
                 }),
             }),

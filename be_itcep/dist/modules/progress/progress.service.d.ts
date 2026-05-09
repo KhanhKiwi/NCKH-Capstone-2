@@ -7,6 +7,7 @@ export declare class ProgressService {
     private readonly progressRepo;
     private readonly levelRepo;
     private readonly userRepo;
+    private readonly logger;
     constructor(progressRepo: Repository<UserProgress>, levelRepo: Repository<Level>, userRepo: Repository<User>);
     saveProgress(dto: CreateProgressDto): Promise<UserProgress>;
     getProgressForUser(user_id: number): Promise<UserProgress[]>;

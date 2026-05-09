@@ -12,11 +12,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PlayerSession = void 0;
 const typeorm_1 = require("typeorm");
 const user_entity_1 = require("../../users/entities/user.entity");
-const level_entity_1 = require("../../levels/entities/level.entity");
+const craft_entity_1 = require("../../crafts/entities/craft.entity");
 let PlayerSession = class PlayerSession {
     session_id;
     user;
-    level;
+    craft;
     start_time;
     end_time;
     total_time;
@@ -35,10 +35,10 @@ __decorate([
     __metadata("design:type", user_entity_1.User)
 ], PlayerSession.prototype, "user", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => level_entity_1.Level, (level) => level.sessions),
-    (0, typeorm_1.JoinColumn)({ name: 'level_id' }),
-    __metadata("design:type", level_entity_1.Level)
-], PlayerSession.prototype, "level", void 0);
+    (0, typeorm_1.ManyToOne)(() => craft_entity_1.Craft, (craft) => craft.sessions),
+    (0, typeorm_1.JoinColumn)({ name: 'craft_id' }),
+    __metadata("design:type", craft_entity_1.Craft)
+], PlayerSession.prototype, "craft", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", Date)

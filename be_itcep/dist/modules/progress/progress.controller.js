@@ -34,7 +34,16 @@ __decorate([
     (0, common_1.Post)(),
     (0, common_1.UsePipes)(new common_1.ValidationPipe({ transform: true })),
     (0, swagger_1.ApiOperation)({ summary: 'Create or update user progress' }),
-    (0, swagger_1.ApiBody)({ type: create_progress_dto_1.CreateProgressDto }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            example: {
+                user_id: 1,
+                level_id: 2,
+                status: 'completed',
+                score: 95,
+            },
+        },
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_progress_dto_1.CreateProgressDto]),

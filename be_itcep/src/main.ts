@@ -13,6 +13,7 @@ import { SessionsModule } from './modules/sessions/sessions.module';
 import { MediaModule } from './modules/media/media.module';
 import { LevelsModule } from './modules/levels/levels.module';
 import { UserChallengesModule } from './modules/user-challenges/user-challenges.module';
+import { FeedbackModule } from './modules/feedback/feedback.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -37,7 +38,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config, {
-    include: [AuthModule, UsersModule, VillagesModule, CraftsModule, ProgressModule, SessionsModule, MediaModule, LevelsModule, UserChallengesModule],
+    include: [AuthModule, UsersModule, VillagesModule, CraftsModule, ProgressModule, SessionsModule, MediaModule, LevelsModule, UserChallengesModule, FeedbackModule],
   });
   SwaggerModule.setup('api/docs', app, document);
   await app.listen(process.env.PORT ?? 3000);
