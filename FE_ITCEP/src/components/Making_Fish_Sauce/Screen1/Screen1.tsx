@@ -214,6 +214,7 @@ export default function Screen1() {
         if (level1) {
           // Save progress for level 1
           await progressService.saveProgress({
+            user_id: userId,
             level_id: level1.level_id,
             status: 'completed',
             score: quality

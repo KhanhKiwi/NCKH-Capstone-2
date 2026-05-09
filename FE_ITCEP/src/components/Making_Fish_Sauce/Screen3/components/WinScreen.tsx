@@ -14,25 +14,20 @@ export function WinScreen({ quality, userId }: WinScreenProps) {
   const handleContinue = async () => {
     try {
       if (userId) {
-        // Get level 3 from fish sauce village (village_id = 6)
-        const levels = await levelsService.getByVillage(6, userId);
+        // Get level 3 from fish sauce village (village_id = 8)
+        const levels = await levelsService.getByVillage(8, userId);
         const level3 = levels.find((l: any) => l.level_number === 3);
         
         if (level3) {
-          // Save progress for level 3
+          // Save progress for level 3 (backend auto-unlocks level 4)
           await progressService.saveProgress({
+            user_id: userId,
             level_id: level3.level_id,
             status: 'completed',
             score: quality
           });
           
-          // Unlock level 4
-          const level4 = levels.find((l: any) => l.level_number === 4);
-          if (level4) {
-            await progressService.unlockLevel(level4.level_id);
-          }
-          
-          console.log('[Screen3] Level 3 completed, Level 4 unlocked!');
+          console.log('[Screen3] Level 3 completed, Level 4 auto-unlocked by backend!');
         }
       }
     } catch (error) {

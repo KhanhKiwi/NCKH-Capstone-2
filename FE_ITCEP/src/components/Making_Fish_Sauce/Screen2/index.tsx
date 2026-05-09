@@ -397,25 +397,20 @@ export default function Screen2() {
   const handleContinue = async () => {
     try {
       if (userId) {
-        // Get all levels for fish sauce village (village_id = 6)
-        const levels = await levelsService.getByVillage(6, userId);
+        // Get all levels for fish sauce village (village_id = 8)
+        const levels = await levelsService.getByVillage(8, userId);
         const level2 = levels.find((l: any) => l.level_number === 2);
         
         if (level2) {
-          // Save progress for level 2
+          // Save progress for level 2 (backend auto-unlocks level 3)
           await progressService.saveProgress({
+            user_id: userId,
             level_id: level2.level_id,
             status: 'completed',
             score: quality
           });
           
-          // Unlock level 3
-          const level3 = levels.find((l: any) => l.level_number === 3);
-          if (level3) {
-            await progressService.unlockLevel(level3.level_id);
-          }
-          
-          console.log('[Screen2] Level 2 completed, Level 3 unlocked!');
+          console.log('[Screen2] Level 2 completed, Level 3 auto-unlocked by backend!');
         }
       }
     } catch (error) {

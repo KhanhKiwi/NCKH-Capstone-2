@@ -39,6 +39,7 @@ export default function Screen6() {
           // Save progress for level 6 (final level)
           const finalScore = 96; // Heritage score
           await progressService.saveProgress({
+            user_id: userId,
             level_id: level6.level_id,
             status: 'completed',
             score: finalScore

@@ -104,6 +104,7 @@ export default function MamNamOModal({ onClose }: MamNamOModalProps) {
             if (level1) {
               try {
                 await progressService.saveProgress({
+                  user_id: userId,
                   level_id: level1.level_id,
                   status: 'unlocked'
                 });

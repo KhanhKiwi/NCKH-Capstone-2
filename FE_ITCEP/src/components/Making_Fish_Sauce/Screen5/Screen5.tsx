@@ -102,20 +102,15 @@ export default function Screen5() {
           const level5 = levels.find((l: any) => l.level_number === 5);
           
           if (level5) {
-            // Save progress for level 5
+            // Save progress for level 5 (backend auto-unlocks level 6)
             await progressService.saveProgress({
+              user_id: userId,
               level_id: level5.level_id,
               status: 'completed',
               score: avgQuality
             });
             
-            // Unlock level 6 (final level)
-            const level6 = levels.find((l: any) => l.level_number === 6);
-            if (level6) {
-              await progressService.unlockLevel(level6.level_id);
-            }
-            
-            console.log('[Screen5] Level 5 completed, Level 6 unlocked!');
+            console.log('[Screen5] Level 5 completed, Level 6 auto-unlocked by backend!');
           }
         }
       } catch (error) {
