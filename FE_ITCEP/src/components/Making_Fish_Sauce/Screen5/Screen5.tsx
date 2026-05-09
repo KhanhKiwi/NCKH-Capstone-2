@@ -3,8 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Droplets, Layers, FlaskConical, Award, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { levelsService } from '../../../api/levels/levelsService';
-import { progressService } from '../../../api/progress/progressService';
-import { FlavorRadarChart } from './components/FlavorRadarChart';
+import { progressService } from '../../../api/progress/progressService';import { getUserId } from '../../../utils/authUtils';import { FlavorRadarChart } from './components/FlavorRadarChart';
 import { FiltrationStation } from './components/FiltrationStation';
 import { LiquidPreview } from './components/LiquidPreview';
 import { ImageWithFallback } from '../../figma/ImageWithFallback';
@@ -14,7 +13,7 @@ import { toast } from 'sonner';
 
 export default function Screen5() {
   const navigate = useNavigate();
-  const userId = localStorage.getItem('userId') ? Number(localStorage.getItem('userId')) : null;
+  const userId = getUserId();
   const [filteringStage, setFilteringStage] = useState(0);
   const [clarity, setClarity] = useState(45);
   const [harvestComplete, setHarvestComplete] = useState(false);
@@ -98,8 +97,8 @@ export default function Screen5() {
     if (avgQuality >= 80 && filteringStage >= 3) {
       try {
         if (userId) {
-          // Get level 5 from fish sauce village (village_id = 6)
-          const levels = await levelsService.getByVillage(6, userId);
+          // Get level 5 from fish sauce village (village_id = 8)
+          const levels = await levelsService.getByVillage(8, userId);
           const level5 = levels.find((l: any) => l.level_number === 5);
           
           if (level5) {

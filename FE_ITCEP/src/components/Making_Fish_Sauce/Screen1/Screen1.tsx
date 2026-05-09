@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, useMotionValue, AnimatePresence } from 'motion/react';
 import { levelsService } from '../../../api/levels/levelsService';
 import { progressService } from '../../../api/progress/progressService';
+import { getUserId } from '../../../utils/authUtils';
 
 // Fish type definitions
 type FishType = 'correct' | 'wrong' | 'spoiled';
@@ -206,8 +207,8 @@ export default function Screen1() {
     setIsUnlocking(true);
     try {
       if (userId) {
-        // Get all levels for fish sauce village (village_id = 6)
-        const levels = await levelsService.getByVillage(6, userId);
+        // Get all levels for fish sauce village (village_id = 8)
+        const levels = await levelsService.getByVillage(8, userId);
         const level1 = levels.find((l: any) => l.level_number === 1);
         
         if (level1) {

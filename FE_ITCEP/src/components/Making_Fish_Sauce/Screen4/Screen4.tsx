@@ -10,6 +10,7 @@ import { AmbientParticles } from './components/AmbientParticles';
 import { useNavigate } from 'react-router';
 import { levelsService } from '../../../api/levels/levelsService';
 import { progressService } from '../../../api/progress/progressService';
+import { getUserId } from '../../../utils/authUtils';
 import { useEffect } from 'react';
 
 export default function Screen4() {
@@ -21,7 +22,7 @@ export default function Screen4() {
   const [humidity] = useState(78);
   const [month] = useState(1);
   const [notification, setNotification] = useState({ show: false, message: '' });
-  const userId = localStorage.getItem('userId') ? Number(localStorage.getItem('userId')) : null;
+  const userId = getUserId();
 
   const actionMessages: Record<string, string> = {
     seal: 'Đã đóng nắp lu thành công',
@@ -63,8 +64,8 @@ export default function Screen4() {
   const saveProgressAndNavigate = async () => {
     try {
       if (userId && isSealed && quality >= 50) {
-        // Get level 4 from fish sauce village (village_id = 6)
-        const levels = await levelsService.getByVillage(6, userId);
+        // Get level 4 from fish sauce village (village_id = 8)
+        const levels = await levelsService.getByVillage(8, userId);
         const level4 = levels.find((l: any) => l.level_number === 4);
         
         if (level4) {

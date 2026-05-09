@@ -3,12 +3,11 @@ import { ArrowLeft, Droplet, Wine, Sparkles, Award } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { levelsService } from '../../../api/levels/levelsService';
-import { progressService } from '../../../api/progress/progressService';
-import { ImageWithFallback } from '../../figma/ImageWithFallback';
+import { progressService } from '../../../api/progress/progressService';import { getUserId } from '../../../utils/authUtils';import { ImageWithFallback } from '../../figma/ImageWithFallback';
 
 export default function Screen6() {
   const navigate = useNavigate();
-  const userId = localStorage.getItem('userId') ? Number(localStorage.getItem('userId')) : null;
+  const userId = getUserId();
   const [selectedBottle, setSelectedBottle] = useState(2);
   const [isFilling, setIsFilling] = useState(false);
   const [isSealed, setIsSealed] = useState(false);
@@ -32,8 +31,8 @@ export default function Screen6() {
   const handleCompletion = async () => {
     try {
       if (userId && isSealed) {
-        // Get level 6 from fish sauce village (village_id = 6) - FINAL LEVEL
-        const levels = await levelsService.getByVillage(6, userId);
+        // Get level 6 from fish sauce village (village_id = 8) - FINAL LEVEL
+        const levels = await levelsService.getByVillage(8, userId);
         const level6 = levels.find((l: any) => l.level_number === 6);
         
         if (level6) {

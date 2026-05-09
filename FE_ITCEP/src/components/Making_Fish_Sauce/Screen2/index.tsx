@@ -10,6 +10,7 @@ import { ImageWithFallback } from '../../figma/ImageWithFallback';
 import { CheckCircle, AlertCircle } from 'lucide-react';
 import { levelsService } from '../../../api/levels/levelsService';
 import { progressService } from '../../../api/progress/progressService';
+import { getUserId } from '../../../utils/authUtils';
 
 interface Particle {
   id: number;
