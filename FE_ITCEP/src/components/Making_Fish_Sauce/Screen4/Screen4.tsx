@@ -8,6 +8,10 @@ import { ProcessTimeline } from './components/ProcessTimeline';
 import { ActionNotification } from './components/ActionNotification';
 import { AmbientParticles } from './components/AmbientParticles';
 import { useNavigate } from 'react-router';
+import { levelsService } from '../../../api/levels/levelsService';
+import { progressService } from '../../../api/progress/progressService';
+import { getUserId } from '../../../utils/authUtils';
+import { useEffect } from 'react';
 
 export default function Screen4() {
   const navigate = useNavigate();
@@ -18,6 +22,7 @@ export default function Screen4() {
   const [humidity] = useState(78);
   const [month] = useState(1);
   const [notification, setNotification] = useState({ show: false, message: '' });
+  const userId = getUserId();
 
   const actionMessages: Record<string, string> = {
     seal: 'Đã đóng nắp lu thành công',
@@ -47,11 +52,45 @@ export default function Screen4() {
       case 'ferment':
         if (isSealed) {
           setQuality(prev => Math.min(prev + 5, 100));
+          // Save progress and move to next level
+          saveProgressAndNavigate();
         }
         break;
     }
 
     setNotification({ show: true, message: actionMessages[action] || 'Thao tác hoàn tất' });
+  };
+
+  const saveProgressAndNavigate = async () => {
+    try {
+      if (userId && isSealed && quality >= 50) {
+        // Get level 4 from fish sauce village (village_id = 8)
+        const levels = await levelsService.getByVillage(8, userId);
+        const level4 = levels.find((l: any) => l.level_number === 4);
+        
+        if (level4) {
+          // Save progress for level 4 (backend auto-unlocks level 5)
+          await progressService.saveProgress({
+            user_id: userId,
+            level_id: level4.level_id,
+            status: 'completed',
+            score: quality
+          });
+          
+          console.log('[Screen4] Level 4 completed, Level 5 auto-unlocked by backend!');
+          
+          // Navigate to next level after a short delay
+          setTimeout(() => {
+            navigate('/game/filtration-harvest');
+          }, 2000);
+        }
+      } else if (!isSealed) {
+        setNotification({ show: true, message: 'Bạn phải niêm phong lu trước khi lên men!' });
+      }
+    } catch (error) {
+      console.error('[Screen4] Error saving progress:', error);
+      setNotification({ show: true, message: 'Lỗi khi lưu tiến trình!' });
+    }
   };
 
   return (

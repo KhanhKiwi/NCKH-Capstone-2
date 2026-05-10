@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var ProgressService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProgressService = void 0;
 const common_1 = require("@nestjs/common");
@@ -19,16 +20,18 @@ const typeorm_2 = require("typeorm");
 const user_progress_entity_1 = require("./entities/user-progress.entity");
 const level_entity_1 = require("../levels/entities/level.entity");
 const user_entity_1 = require("../users/entities/user.entity");
-let ProgressService = class ProgressService {
+let ProgressService = ProgressService_1 = class ProgressService {
     progressRepo;
     levelRepo;
     userRepo;
+    logger = new common_1.Logger(ProgressService_1.name);
     constructor(progressRepo, levelRepo, userRepo) {
         this.progressRepo = progressRepo;
         this.levelRepo = levelRepo;
         this.userRepo = userRepo;
     }
     async saveProgress(dto) {
+        this.logger.log(`saveProgress called with payload ${JSON.stringify(dto)}`);
         const { user_id, level_id, status, score } = dto;
         const user = await this.userRepo.findOne({ where: { user_id } });
         if (!user)
@@ -59,6 +62,7 @@ let ProgressService = class ProgressService {
                 progress.completed_at = now;
         }
         await this.progressRepo.save(progress);
+        this.logger.log(`Progress saved for user ${user_id} level ${level_id} status=${progress.status}`);
         if (status === 'completed') {
             const currentLevel = level;
             if (typeof currentLevel.level_number === 'number') {
@@ -66,16 +70,19 @@ let ProgressService = class ProgressService {
                     where: { craft: { craft_id: currentLevel.craft.craft_id }, level_number: currentLevel.level_number + 1 },
                 });
                 if (nextLevel) {
+                    this.logger.log(`Found next level ${nextLevel.level_id} (level_number=${nextLevel.level_number}) — ensuring unlocked for user ${user_id}`);
                     const existing = await this.progressRepo.findOne({
                         where: { user: { user_id }, level: { level_id: nextLevel.level_id } },
                     });
                     if (!existing) {
                         const unlocked = this.progressRepo.create({ user, level: nextLevel, status: 'unlocked' });
                         await this.progressRepo.save(unlocked);
+                        this.logger.log(`Created unlocked UserProgress for user ${user_id} level ${nextLevel.level_id}`);
                     }
                     else if (existing.status === 'locked') {
                         existing.status = 'unlocked';
                         await this.progressRepo.save(existing);
+                        this.logger.log(`Updated existing UserProgress to unlocked for user ${user_id} level ${nextLevel.level_id}`);
                     }
                 }
             }
@@ -87,7 +94,7 @@ let ProgressService = class ProgressService {
     }
 };
 exports.ProgressService = ProgressService;
-exports.ProgressService = ProgressService = __decorate([
+exports.ProgressService = ProgressService = ProgressService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(user_progress_entity_1.UserProgress)),
     __param(1, (0, typeorm_1.InjectRepository)(level_entity_1.Level)),

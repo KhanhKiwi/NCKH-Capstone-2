@@ -12,12 +12,14 @@ const typeorm_1 = require("@nestjs/typeorm");
 const levels_controller_1 = require("./levels.controller");
 const levels_service_1 = require("./levels.service");
 const level_entity_1 = require("./entities/level.entity");
+const user_progress_entity_1 = require("../progress/entities/user-progress.entity");
+const user_entity_1 = require("../users/entities/user.entity");
 let LevelsModule = class LevelsModule {
 };
 exports.LevelsModule = LevelsModule;
 exports.LevelsModule = LevelsModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([level_entity_1.Level])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([level_entity_1.Level, user_progress_entity_1.UserProgress, user_entity_1.User])],
         controllers: [levels_controller_1.LevelsController],
         providers: [levels_service_1.LevelsService],
         exports: [levels_service_1.LevelsService],

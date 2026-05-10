@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Craft = void 0;
 const typeorm_1 = require("typeorm");
 const level_entity_1 = require("../../levels/entities/level.entity");
+const player_session_entity_1 = require("../../sessions/entities/player-session.entity");
 const craft_village_entity_1 = require("../../villages/entities/craft-village.entity");
 let Craft = class Craft {
     craft_id;
@@ -19,6 +20,7 @@ let Craft = class Craft {
     description;
     village;
     levels;
+    sessions;
     created_at;
     updated_at;
     deleted_at;
@@ -45,6 +47,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => level_entity_1.Level, (level) => level.craft),
     __metadata("design:type", Array)
 ], Craft.prototype, "levels", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => player_session_entity_1.PlayerSession, (session) => session.craft),
+    __metadata("design:type", Array)
+], Craft.prototype, "sessions", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
