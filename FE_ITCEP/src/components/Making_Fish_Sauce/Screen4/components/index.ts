@@ -6,5 +6,7 @@ export { FermentationMetrics } from './FermentationMetrics';
 export { JarDisplay } from './JarDisplay';
 export { ProcessTimeline } from './ProcessTimeline';
 export { FermentationGame } from './FermentationGame';
+export { AdvancedFermentationGame } from './AdvancedFermentationGame';
+export { AdvancedResultScreen } from './AdvancedResultScreen';
 export { ChoiceCard } from './ChoiceCard';
 export { ResultScreen } from './ResultScreen';
