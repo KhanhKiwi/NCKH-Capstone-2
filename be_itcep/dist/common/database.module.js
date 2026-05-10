@@ -12,6 +12,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const config_1 = require("@nestjs/config");
 const user_entity_1 = require("../modules/users/entities/user.entity");
 const user_progress_entity_1 = require("../modules/progress/entities/user-progress.entity");
+const user_challenge_entity_1 = require("../modules/user-challenges/entities/user-challenge.entity");
 const level_entity_1 = require("../modules/levels/entities/level.entity");
 const step_entity_1 = require("../modules/steps/entities/step.entity");
 const craft_entity_1 = require("../modules/crafts/entities/craft.entity");
@@ -43,6 +44,7 @@ exports.DatabaseModule = DatabaseModule = __decorate([
                     entities: [
                         user_entity_1.User,
                         user_progress_entity_1.UserProgress,
+                        user_challenge_entity_1.UserChallenge,
                         level_entity_1.Level,
                         step_entity_1.Step,
                         craft_entity_1.Craft,
