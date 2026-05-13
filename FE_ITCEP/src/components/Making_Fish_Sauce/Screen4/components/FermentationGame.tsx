@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Plus, Minus, Info } from 'lucide-react';
 import { JarDisplay } from './JarDisplay';
 import { ControlPanel } from './ControlPanel';
 
@@ -223,9 +222,9 @@ export function FermentationGame({ onGameEnd }: FermentationGameProps) {
                 <div className="flex items-center gap-2 mb-2">
                   <button
                     onClick={() => adjustTemperature(-1)}
-                    className="p-2 bg-[#b87333] hover:bg-[#a0522d] text-white rounded-lg transition"
+                    className="p-2 bg-[#b87333] hover:bg-[#a0522d] text-white rounded-lg transition text-lg font-bold"
                   >
-                    <Minus size={18} />
+                    −
                   </button>
                   <div className="flex-1 bg-gray-200 rounded-full h-2 relative">
                     <div className="absolute h-full bg-gradient-to-r from-[#8b4513] via-[#5f7c8a] to-[#8b4513] rounded-full" 
@@ -249,9 +248,9 @@ export function FermentationGame({ onGameEnd }: FermentationGameProps) {
                   </div>
                   <button
                     onClick={() => adjustTemperature(1)}
-                    className="p-2 bg-[#b87333] hover:bg-[#a0522d] text-white rounded-lg transition"
+                    className="p-2 bg-[#b87333] hover:bg-[#a0522d] text-white rounded-lg transition text-lg font-bold"
                   >
-                    <Plus size={18} />
+                    +
                   </button>
                 </div>
                 <p className="text-xs opacity-60 text-center">Tối ưu: {TEMP_MIN}-{TEMP_MAX}°C</p>
@@ -268,9 +267,9 @@ export function FermentationGame({ onGameEnd }: FermentationGameProps) {
                 <div className="flex items-center gap-2 mb-2">
                   <button
                     onClick={() => adjustHumidity(-1)}
-                    className="p-2 bg-[#b87333] hover:bg-[#a0522d] text-white rounded-lg transition"
+                    className="p-2 bg-[#b87333] hover:bg-[#a0522d] text-white rounded-lg transition text-lg font-bold"
                   >
-                    <Minus size={18} />
+                    −
                   </button>
                   <div className="flex-1 bg-gray-200 rounded-full h-2 relative">
                     <div className="absolute h-full bg-gradient-to-r from-[#8b4513] via-[#5f7c8a] to-[#8b4513] rounded-full"
@@ -294,9 +293,9 @@ export function FermentationGame({ onGameEnd }: FermentationGameProps) {
                   </div>
                   <button
                     onClick={() => adjustHumidity(1)}
-                    className="p-2 bg-[#b87333] hover:bg-[#a0522d] text-white rounded-lg transition"
+                    className="p-2 bg-[#b87333] hover:bg-[#a0522d] text-white rounded-lg transition text-lg font-bold"
                   >
-                    <Plus size={18} />
+                    +
                   </button>
                 </div>
                 <p className="text-xs opacity-60 text-center">Tối ưu: {HUMIDITY_MIN}-{HUMIDITY_MAX}%</p>
@@ -314,7 +313,7 @@ export function FermentationGame({ onGameEnd }: FermentationGameProps) {
           {/* Info */}
           <div className="bg-gradient-to-br from-[#3d2b1f]/80 to-[#5c3d2e]/80 backdrop-blur-xl rounded-2xl border border-[#8b7355]/30 shadow-2xl p-8 text-[#f5f0e8]">
             <h3 className="text-lg mb-4 flex items-center gap-3">
-              <Info className="w-6 h-6" />
+              ℹ️
               Hướng Dẫn
             </h3>
             <p className="text-sm leading-relaxed">

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { ChevronLeft } from 'lucide-react';
 import { IntroScreen } from './IntroScreen';
 import Screen4 from './Screen4';
 
@@ -29,7 +28,7 @@ export default function CloseJarFermentGamePage() {
         className="fixed top-6 left-6 z-50 bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white rounded-full p-3 transition-all hover:scale-110 shadow-lg"
         title={gameStarted ? "Quay lại giới thiệu" : "Quay lại"}
       >
-        <ChevronLeft size={24} />
+        <span className="text-xl">‹</span>
       </button>
     </div>
   );

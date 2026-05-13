@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { CheckCircle2, X } from 'lucide-react';
 
 interface ActionNotificationProps {
   message: string;
@@ -20,14 +19,14 @@ export function ActionNotification({ message, show, onClose }: ActionNotificatio
   return (
     <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
       <div className="bg-gradient-to-br from-[#5f7c8a] to-[#4a6572] text-white px-6 py-4 rounded-xl shadow-2xl border border-white/20 backdrop-blur-xl flex items-center gap-3 min-w-[280px] max-w-md">
-        <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+        <span className="text-lg flex-shrink-0">✓</span>
         <p className="text-sm flex-1">{message}</p>
         <button
           onClick={onClose}
           className="p-1 hover:bg-white/20 rounded-lg transition-colors"
           aria-label="Close notification"
         >
-          <X className="w-4 h-4" />
+          ✕
         </button>
       </div>
 

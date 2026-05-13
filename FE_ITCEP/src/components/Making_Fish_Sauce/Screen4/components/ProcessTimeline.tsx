@@ -1,4 +1,3 @@
-import { Check, Circle } from 'lucide-react';
 
 interface TimelineStep {
   id: string;
@@ -70,9 +69,9 @@ export function ProcessTimeline() {
                 `}
               >
                 {step.completed ? (
-                  <Check className="w-6 h-6" />
+                  <span className="text-lg">✓</span>
                 ) : (
-                  <Circle className="w-6 h-6" fill={index === 3 ? 'currentColor' : 'none'} />
+                  <span className="text-lg">●</span>
                 )}
               </div>
 
@@ -109,9 +108,9 @@ export function ProcessTimeline() {
                   `}
                 >
                   {step.completed ? (
-                    <Check className="w-5 h-5" />
+                    <span className="text-base">✓</span>
                   ) : (
-                    <Circle className="w-5 h-5" fill={index === 3 ? 'currentColor' : 'none'} />
+                    <span className="text-base">●</span>
                   )}
                 </div>
                 
