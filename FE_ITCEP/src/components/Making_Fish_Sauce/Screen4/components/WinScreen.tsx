@@ -1,24 +1,20 @@
-import { useNavigate } from 'react-router';
 import type { JarState } from '../types/gameTypes';
 
 interface WinScreenProps {
   jars: JarState[];
-  finalQuality: number;
   baseQuality: number;
-  onContinue: () => void;
-  onRetry: () => void;
-  onBack: () => void;
+  onContinue: () => void | Promise<void>;
+  onRetry: () => void | Promise<void>;
+  onBack: () => void | Promise<void>;
 }
 
 export function WinScreen({
   jars,
-  finalQuality,
   baseQuality,
   onContinue,
   onRetry,
   onBack
 }: WinScreenProps) {
-  const navigate = useNavigate();
   
   // Calculate average quality from all 3 jars
   const averageQuality = Math.round((jars[0].quality + jars[1].quality + jars[2].quality) / 3);

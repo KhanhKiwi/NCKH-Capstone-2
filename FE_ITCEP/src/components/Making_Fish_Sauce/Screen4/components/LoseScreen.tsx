@@ -2,14 +2,12 @@ import type { JarState } from '../types/gameTypes';
 
 interface LoseScreenProps {
   jars: JarState[];
-  baseQuality: number;
-  onRetry: () => void;
-  onBack: () => void;
+  onRetry: () => void | Promise<void>;
+  onBack: () => void | Promise<void>;
 }
 
 export function LoseScreen({
   jars,
-  baseQuality,
   onRetry,
   onBack
 }: LoseScreenProps) {

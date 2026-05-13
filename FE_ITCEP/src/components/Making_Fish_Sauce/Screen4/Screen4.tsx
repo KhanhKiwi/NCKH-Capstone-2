@@ -5,7 +5,6 @@ import { progressService } from '../../../api/progress/progressService';
 import { getUserId } from '../../../utils/authUtils';
 import { RhythmSealingPhase } from './phases/RhythmSealingPhase';
 import { FermentationSurvivalGame } from './games/FermentationSurvivalGame';
-import { ActionNotification } from './components/ActionNotification';
 import { WinScreen } from './components/WinScreen';
 import { LoseScreen } from './components/LoseScreen';
 import type { JarState } from './types/gameTypes';
@@ -16,10 +15,8 @@ export default function Screen4() {
   const navigate = useNavigate();
   const [gamePhase, setGamePhase] = useState<GamePhase>('sealing');
   const [baseQuality, setBaseQuality] = useState(0);
-  const [finalQuality, setFinalQuality] = useState(0);
   const [gamePassed, setGamePassed] = useState(false);
   const [jars, setJars] = useState<JarState[]>([]);
-  const [notification, setNotification] = useState({ show: false, message: '' });
   const userId = getUserId();
 
   const handleSealingComplete = (quality: number) => {
@@ -28,7 +25,6 @@ export default function Screen4() {
   };
 
   const handleSurvivalGameEnd = async (passed: boolean, quality: number, jarsData: JarState[]) => {
-    setFinalQuality(quality);
     setGamePassed(passed);
     setJars(jarsData);
     setGamePhase('finished');
@@ -82,13 +78,11 @@ export default function Screen4() {
       return (
         <WinScreen
           jars={jars}
-          finalQuality={finalQuality}
           baseQuality={baseQuality}
           onContinue={() => navigate('/game/final-extraction')}
           onRetry={() => {
             setGamePhase('sealing');
             setBaseQuality(0);
-            setFinalQuality(0);
             setGamePassed(false);
             setJars([]);
           }}
@@ -99,11 +93,9 @@ export default function Screen4() {
       return (
         <LoseScreen
           jars={jars}
-          baseQuality={baseQuality}
           onRetry={() => {
             setGamePhase('sealing');
             setBaseQuality(0);
-            setFinalQuality(0);
             setGamePassed(false);
             setJars([]);
           }}
