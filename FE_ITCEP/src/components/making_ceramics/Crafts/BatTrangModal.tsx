@@ -53,7 +53,7 @@ export default function BatTrangModal({ open = true, onClose }: { open?: boolean
         } catch {
           userId = undefined
         }
-        const apiLevels: any[] = await levelsService.getByVillage(1, userId)
+        let apiLevels: any[] = await levelsService.getByVillage(1, userId)
         console.debug('[BatTrangModal] apiLevels.length', apiLevels?.length)
         // fallback: if service returned none, try fetching all levels and filter by craft_id = 1
         if ((!apiLevels || apiLevels.length === 0)) {
