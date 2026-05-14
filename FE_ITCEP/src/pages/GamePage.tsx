@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Play, GraduationCap, Trophy } from 'lucide-react';
+import { ArrowLeft, GraduationCap, Trophy } from 'lucide-react';
 import { useNavigate } from 'react-router'
+import { motion } from 'motion/react';
 import { authService } from '../api/services/authService'
 import { levelsService } from '../api/levels/levelsService'
 import CenteredModal from '../components/ui/CenteredModal'
@@ -46,22 +47,16 @@ export default function GamePage() {
 
   const gameCards = [
     {
-      icon: Play,
-      title: "Chơi",
-      description: "Bắt đầu trò chơi mới",
-      delay: 0.3
-    },
-    {
       icon: GraduationCap,
       title: "Học nghề",
       description: "Tìm hiểu quy trình",
-      delay: 0.4
+      delay: 0.3
     },
     {
       icon: Trophy,
       title: "Thử thách",
       description: "Tìm thử thách và thi đấu",
-      delay: 0.5
+      delay: 0.4
     }
   ];
 
@@ -183,7 +178,7 @@ export default function GamePage() {
         </Link>
 
         {/* Game Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl w-full">
           {gameCards.map((card) => (
             <GameCard
               key={card.title}
@@ -191,7 +186,13 @@ export default function GamePage() {
               title={card.title}
               description={card.description}
               delay={card.delay}
-              onClick={card.title === 'Thử thách' ? handleChallengeClick : undefined}
+              onClick={
+                card.title === 'Học nghề'
+                  ? () => navigate('/studyjob/gom')
+                  : card.title === 'Thử thách'
+                    ? handleChallengeClick
+                    : undefined
+              }
             />
           ))}
           {modalMessage && (
@@ -202,6 +203,34 @@ export default function GamePage() {
 
       {/* Bottom Decorative Glow */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#FFB347] via-[#F0D4B0] to-[#E6A75E]"></div>
+
+      <motion.button
+        type="button"
+        onClick={() => navigate('/')}
+        initial={{ opacity: 0, x: -12, y: 8 }}
+        animate={{
+          opacity: 1,
+          x: 0,
+          y: [0, -4, 0],
+          boxShadow: [
+            '0 10px 24px rgba(0,0,0,0.28)',
+            '0 14px 30px rgba(230,167,94,0.42)',
+            '0 10px 24px rgba(0,0,0,0.28)',
+          ],
+        }}
+        transition={{
+          opacity: { duration: 0.45 },
+          x: { duration: 0.45 },
+          y: { duration: 2.3, repeat: Infinity, ease: 'easeInOut' },
+          boxShadow: { duration: 2.3, repeat: Infinity, ease: 'easeInOut' },
+        }}
+        className="absolute left-6 top-40 z-30 inline-flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-linear-to-r from-[#f7d7a6]/95 to-[#e6a75e]/95 text-[#3d2b1f] border border-[#f7d7a6]/80 backdrop-blur-md font-semibold tracking-wide hover:scale-105 active:scale-95 transition-transform"
+      >
+        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#5d4e37] text-[#f7d7a6]">
+          <ArrowLeft className="w-4 h-4" />
+        </span>
+        Quay lại
+      </motion.button>
     </div>
   );
 }
