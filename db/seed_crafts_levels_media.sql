@@ -38,6 +38,16 @@ VALUES
 (5, 1, 4, 'Trang trí & tráng men', '2026-04-09 10:04:00', '2026-04-09 10:04:00', NULL),
 (6, 1, 5, 'Nung & hoàn thiện', '2026-04-09 10:05:00', '2026-04-09 10:05:00', NULL);
 
+INSERT INTO `Level` (level_id, craft_id, level_number, difficulty, created_at, updated_at, deleted_at)
+VALUES
+(1, 2, 1, 'Giới thiệu làng Nam Ô và hướng dẫn', '2026-04-09 11:01:00', '2026-04-09 11:01:00', NULL),
+(2, 2, 2, 'Đánh bắt cá cơm', '2026-04-09 11:02:00', '2026-04-09 11:02:00', NULL),
+(3, 2, 3, 'Làm sạch & chọn cá', '2026-04-09 11:03:00', '2026-04-09 11:03:00', NULL),
+(4, 2, 4, 'Ướp muối truyền thống', '2026-04-09 11:04:00', '2026-04-09 11:04:00', NULL),
+(5, 2, 5, 'Ủ chượp & lên men', '2026-04-09 11:05:00', '2026-04-09 11:05:00', NULL),
+(6, 2, 6, 'Lọc nước mắm & hoàn thiện', '2026-04-09 11:06:00', '2026-04-09 11:06:00', NULL);
+
+
 INSERT INTO `UserProgress` (`status`, `score`, `completed_at`, `created_at`, `updated_at`, `deleted_at`, `user_id`, `level_id`)
 VALUES
   ('completed', 100, NULL, '2026-04-10 10:00:00', '2026-04-10 10:00:00', NULL, 1, 1),

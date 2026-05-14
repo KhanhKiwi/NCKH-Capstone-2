@@ -49,7 +49,7 @@ import { AnalyticsEvent } from '../modules/analytics/entities/analytics-event.en
           AnalyticsEvent,
         ],
 
-        synchronize: false, // Đặt thành false trong production để tránh mất dữ liệu
+        synchronize: false , // Đặt thành false trong production để tránh mất dữ liệu
         logging: ['error', 'warn'],
       }),
     }),
