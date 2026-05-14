@@ -2,32 +2,33 @@ import { Link } from 'react-router-dom'
 
 const processSteps = [
   {
-    title: 'Chuẩn bị đất',
+    title: 'Chuẩn bị nguyên liệu',
     description:
-      'Lựa chọn đất sét phù hợp: phân loại, loại bỏ tạp chất (sạn, sỏi) bằng sàng lọc hoặc ngâm lắng. Tiếp theo nhào và cán đất để đồng đều kết cấu, điều chỉnh độ ẩm bằng cách thêm/giảm nước cho tới khi đất đạt độ dẻo ổn định — không quá ướt hoặc quá khô. Đôi khi cần ủ đất (lão đất) để loại bỏ khí và tăng độ kết dính trước khi tạo hình.',
+      'Bắt đầu bằng việc lựa chọn cá tươi — ưu tiên các loài nhỏ như cá cơm, cá nục hoặc cá trích tùy truyền thống địa phương. Kiểm tra độ tươi: mắt trong, mang đỏ, không có mùi ôi; loại bỏ cá hư hoặc có ký sinh trùng. Chuẩn bị muối biển chất lượng, dụng cụ sạch (hũ, thớt, dao), và nơi ủ thoáng mát, tránh ánh nắng trực tiếp. Tính toán tỷ lệ muối theo khối lượng cá (thông thường 15–30% tùy công thức) và chuẩn bị các vật liệu bổ sung nếu làm theo công thức gia truyền (gạo, men lá, ớt, tỏi tùy biến).',
   },
   {
-    title: 'Tạo hình',
+    title: 'Rửa & xếp hũ',
     description:
-      'Tạo phôi ban đầu bằng cách nặn hoặc dùng khuôn, sau đó lên bàn xoay để định hình. Giữ tư thế tay ổn định, dùng lực đều và từ tốn để tránh méo vênh; thường thực hiện theo các bước: dựng trục, thu gọn thành thân, kéo thành và tạo các chi tiết. Kiểm tra tỷ lệ, làm mịn và loại bỏ phần đất thừa trước khi để khô nhẹ.',
+      'Rửa cá kỹ để loại bỏ đất cát và tạp chất — có thể ngâm nhanh rồi rửa sạch nhiều lần, sau đó để ráo hoàn toàn. Xếp cá vào hũ theo lớp: một lớp cá, một lớp muối; đảm bảo muối phủ đều bề mặt để quá trình thẩm thấu diễn ra đều. Dùng vật nén hoặc đá sạch để nén cá, giảm không gian chứa khí, hạn chế oxy tiếp xúc làm hỏng. Cách xếp, chiều dày từng lớp và lực nén ảnh hưởng lớn đến chất lượng mắm cuối cùng.',
   },
   {
-    title: 'Phơi khô',
+    title: 'Phối trộn & niêm phong',
     description:
-      'Phơi sản phẩm dần dần trong bóng râm hoặc nơi thoáng gió để tránh khô quá nhanh gây nứt. Khi đạt trạng thái bán khô (leather-hard) thực hiện sửa mộc: gọt, mài, làm nhẵn các góc, và cắt bỏ phần nền không mong muốn. Kiểm tra cẩn thận để vá các vết rạn nhỏ bằng bùn đất pha loãng (slip) trước khi để khô hoàn toàn trước khi gia nhiệt.',
+      'Nếu công thức có gia vị (gạo, men, lá cây, tỏi, ớt), phối trộn chúng theo công thức truyền thống trước khi cho vào hũ. Dùng các dụng cụ sạch để đảm bảo vệ sinh; đóng nắp hoặc đậy vải, niêm phong miệng hũ nếu cần để kiểm soát vi sinh. Ghi ngày bắt đầu ủ trên nắp hoặc nhãn để theo dõi thời gian. Đặt hũ ở nơi có nhiệt độ ổn định, tránh nơi ẩm ướt hoặc quá nóng; điều kiện bảo quản ảnh hưởng tới tốc độ lên men và mùi vị.',
   },
   {
-    title: 'Trang trí & tráng men',
+    title: 'Ủ & theo dõi',
     description:
-      'Chuẩn bị bề mặt bằng cách làm sạch bụi và xử lý tiền men nếu cần (nhám nhẹ, rửa nước). Áp dụng kỹ thuật trang trí: vẽ, khắc, in khuôn hoặc kết hợp màu men, sau đó phủ men bằng cọ, nhúng hoặc phun để đạt lớp phủ đều. Luôn thử men trên mẫu nhỏ để kiểm tra độ co ngót, màu sắc và phản ứng với đất trước khi phủ lên sản phẩm chính.',
+      'Quá trình ủ diễn ra theo nhiều giai đoạn: giai đoạn sơ khởi vài tuần đến vài tháng (lên men lỏng), sau đó là giai đoạn ổn định mùi và hương. Kiểm tra định kỳ: quan sát màu sắc, mùi, hiện tượng nổi bọt, nấm mốc; loại bỏ lớp bề mặt nếu thấy tạp chất. Tuỳ vùng miền, người thợ có thể thêm muối bổ sung hoặc rút bớt phần nước để điều chỉnh nồng độ. Ghi chép thay đổi theo thời gian giúp xác định thời điểm mắm đạt chất lượng mong muốn (thường vài tháng đến 1 năm).',
   },
   {
-    title: 'Nung & hoàn thiện',
+    title: 'Lọc & đóng chai',
     description:
-      'Tiến hành nung theo lịch trình nhiệt phù hợp với loại đất và men (gồm gia nhiệt dần, giữ mức nhiệt tối đa và làm nguội từ từ). Kiểm soát nhiệt độ để tránh nứt do sốc nhiệt; tùy mục đích có thể nung hai lần (biscuit rồi glaze). Sau khi nguội, làm sạch, kiểm tra bề mặt, và loại bỏ khuyết tật nhỏ; nếu cần thực hiện đánh bóng hoặc gắn phụ kiện hoàn thiện.',
+      'Khi mắm đạt hương vị mong muốn, thực hiện lọc để tách tinh chất khỏi bã: dùng vải lọc, lắng tự nhiên hoặc bộ lọc thô. Xử lý tiếp (nếu cần) bằng lắng, lọc mịn, hoặc đun nhẹ để tiệt trùng tuỳ quy trình bảo quản. Đóng chai trong điều kiện sạch, dán nhãn ngày sản xuất và hướng dẫn bảo quản. Bảo quản nơi mát mẻ, tránh ánh nắng; quy trình đóng gói đúng giúp kéo dài thời hạn sử dụng và giữ ổn định hương vị.',
   },
 ]
-export default function PotteryStudyPage() {
+
+export default function NamOMamStudyPage() {
   return (
     <div className="min-h-screen bg-[#f7f2e8] text-[#3f3224]">
       <style>{`
@@ -37,29 +38,24 @@ export default function PotteryStudyPage() {
         .btn-pulse { transition: transform .18s ease, box-shadow .18s ease; }
         .btn-pulse:hover { transform: translateY(-4px) scale(1.02); }
       `}</style>
+
       <section
         className="relative overflow-hidden border-b border-[#e6d7be] px-4 py-16"
-        style={{ backgroundImage: "url('/anhHuongDan/LangGom.png')", backgroundSize: 'cover', backgroundPosition: 'center' }}
+        style={{ backgroundImage: "url('/anhHuongDan/LangMam.png')", backgroundSize: 'cover', backgroundPosition: 'center' }}
       >
-        {/* subtle overlay to preserve readability */}
         <div className="absolute inset-0 bg-black/12" />
-        <div className="absolute -top-24 -right-16 h-64 w-64 rounded-full bg-[#d9a75e]/20 blur-3xl" />
-        <div className="absolute -bottom-20 -left-10 h-52 w-52 rounded-full bg-[#a86f2c]/14 blur-3xl" />
-
         <div className="relative mx-auto max-w-6xl">
           <div className="inline-flex items-center rounded-full border border-[#c38a3f]/40 bg-white/70 px-4 py-2 text-sm font-semibold text-[#6b4a27] shadow-sm">
-            Làng nghề gốm
+            Làng nghề mắm
           </div>
 
           <h1
             className="mt-5 w-full text-4xl font-extrabold leading-tight md:text-6xl hero-appear whitespace-nowrap overflow-x-auto"
             style={{ fontFamily: 'serif' }}
           >
-            <span className="inline-block mr-3 transform-gpu" style={{ animation: 'fadeUp 900ms cubic-bezier(.2,.8,.2,1) forwards' }}>🏺</span>
-            Làng Nghề Gốm Thanh Hà
+            <span className="inline-block mr-3 transform-gpu" style={{ animation: 'fadeUp 900ms cubic-bezier(.2,.8,.2,1) forwards' }}>🫗</span>
+            Làng Mắm Nam Ô
           </h1>
-
-
 
           <div className="mt-8 flex flex-wrap gap-4">
             <Link
@@ -70,7 +66,7 @@ export default function PotteryStudyPage() {
               Quay lại làng nghề
             </Link>
             <Link
-              to="/craft-selection?openName=l%C3%A0ng%20g%C3%B3m%20Thanh%20H%C3%A0"
+              to="/craft-selection?openName=l%C3%A0ng%20m%E1%BA%A5m%20Nam%20%C3%94"
               className="group inline-flex items-center gap-2 rounded-full bg-[#6b4a27] px-6 py-3 font-semibold text-white shadow-lg transition-transform duration-300 hover:-translate-y-0.5 hover:bg-[#5a3d1f] btn-pulse"
               style={{ animation: 'fadeUp 700ms cubic-bezier(.2,.8,.2,1) forwards', animationDelay: '320ms' }}
             >
@@ -85,17 +81,17 @@ export default function PotteryStudyPage() {
         <div className="flex flex-col gap-4 md:flex-row md:justify-center md:items-stretch md:gap-6">
           <div className="w-full max-w-[420px] rounded-2xl border border-[#e6d7be] bg-white p-5 shadow-sm">
             <div className="flex h-full min-h-[96px] flex-col items-center justify-center text-center">
-              <p className="text-2xl font-bold text-[#4f3a27]">Tạo hình • Men • Nung</p>
+              <p className="text-2xl font-bold text-[#4f3a27]">Lấy cá • Muối • Ủ</p>
             </div>
           </div>
           <div className="w-full max-w-[420px] rounded-2xl border border-[#e6d7be] bg-white p-5 shadow-sm">
             <div className="flex h-full min-h-[96px] flex-col items-center justify-center text-center">
-              <p className="text-2xl font-bold text-[#4f3a27]">Cơ bản đến nâng cao</p>
+              <p className="text-2xl font-bold text-[#4f3a27]">Truyền thống • An toàn</p>
             </div>
           </div>
           <div className="w-full max-w-[420px] rounded-2xl border border-[#e6d7be] bg-white p-5 shadow-sm">
             <div className="flex h-full min-h-[96px] flex-col items-center justify-center text-center">
-              <p className="text-2xl font-bold text-[#4f3a27]">Hiểu nghề để giữ nghề</p>
+              <p className="text-2xl font-bold text-[#4f3a27]">Giữ hương vị làng</p>
             </div>
           </div>
         </div>
@@ -104,7 +100,7 @@ export default function PotteryStudyPage() {
       <section className="mx-auto max-w-6xl px-4 pb-4">
         <div className="mb-4 flex items-end justify-between gap-3">
           <h2 className="text-3xl font-bold" style={{ fontFamily: 'serif' }}>
-            Quy trình 5 bước làm gốm
+            Quy trình 5 bước làm mắm Nam Ô
           </h2>
           <span className="rounded-full bg-[#f0dfc2] px-3 py-1 text-sm font-semibold text-[#6b4a27]">Bài học cốt lõi</span>
         </div>
@@ -122,7 +118,7 @@ export default function PotteryStudyPage() {
               }}
             >
               <div className="flex items-start gap-3">
-                <div className="text-3xl">🏺</div>
+                <div className="text-3xl">🫗</div>
                 <div>
                   <h3 className="text-xl font-bold text-[#4f3a27]">{step.title}</h3>
                   <p className="mt-3 leading-7 text-[#5e4c3a]">{step.description}</p>
@@ -132,8 +128,6 @@ export default function PotteryStudyPage() {
           ))}
         </div>
       </section>
-
-      {/* artisan tips section removed */}
     </div>
   )
 }

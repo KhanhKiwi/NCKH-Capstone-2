@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, GraduationCap, Trophy } from 'lucide-react';
+import { ArrowLeft, GraduationCap, Trophy, Home } from 'lucide-react';
 import { useNavigate } from 'react-router'
 import { motion } from 'motion/react';
 import { authService } from '../api/services/authService'
@@ -46,6 +46,13 @@ export default function GamePage() {
   }, []);
 
   const gameCards = [
+    {
+      icon: Home,
+      title: "Trang chủ",
+      description: "Quay về trang chủ",
+      delay: 0.2,
+      onClick: () => navigate('/'),
+    },
     {
       icon: GraduationCap,
       title: "Học nghề",
@@ -163,9 +170,8 @@ export default function GamePage() {
         </div>
       ))}
 
-      {/* Player Info & Achievements */}
+      {/* Player Info (Achievements moved under player box) */}
       <PlayerInfo />
-      <Achievements />
 
       {/* Center Content */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-8">
@@ -177,8 +183,8 @@ export default function GamePage() {
           <PlayButton />
         </Link>
 
-        {/* Game Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl w-full">
+        {/* Game Cards: three equal boxes side-by-side */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl w-full">
           {gameCards.map((card) => (
             <GameCard
               key={card.title}
@@ -187,11 +193,13 @@ export default function GamePage() {
               description={card.description}
               delay={card.delay}
               onClick={
-                card.title === 'Học nghề'
-                  ? () => navigate('/studyjob/gom')
-                  : card.title === 'Thử thách'
-                    ? handleChallengeClick
-                    : undefined
+                card.onClick ?? (
+                  card.title === 'Học nghề'
+                    ? () => navigate('/villages')
+                    : card.title === 'Thử thách'
+                      ? handleChallengeClick
+                      : undefined
+                )
               }
             />
           ))}
@@ -204,33 +212,7 @@ export default function GamePage() {
       {/* Bottom Decorative Glow */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#FFB347] via-[#F0D4B0] to-[#E6A75E]"></div>
 
-      <motion.button
-        type="button"
-        onClick={() => navigate('/')}
-        initial={{ opacity: 0, x: -12, y: 8 }}
-        animate={{
-          opacity: 1,
-          x: 0,
-          y: [0, -4, 0],
-          boxShadow: [
-            '0 10px 24px rgba(0,0,0,0.28)',
-            '0 14px 30px rgba(230,167,94,0.42)',
-            '0 10px 24px rgba(0,0,0,0.28)',
-          ],
-        }}
-        transition={{
-          opacity: { duration: 0.45 },
-          x: { duration: 0.45 },
-          y: { duration: 2.3, repeat: Infinity, ease: 'easeInOut' },
-          boxShadow: { duration: 2.3, repeat: Infinity, ease: 'easeInOut' },
-        }}
-        className="absolute left-6 top-40 z-30 inline-flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-linear-to-r from-[#f7d7a6]/95 to-[#e6a75e]/95 text-[#3d2b1f] border border-[#f7d7a6]/80 backdrop-blur-md font-semibold tracking-wide hover:scale-105 active:scale-95 transition-transform"
-      >
-        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#5d4e37] text-[#f7d7a6]">
-          <ArrowLeft className="w-4 h-4" />
-        </span>
-        Quay lại
-      </motion.button>
+      {/* Back button removed per request */}
     </div>
   );
 }

@@ -12,6 +12,7 @@ import AboutPage from '../pages/AboutPage'
 import PotteryStudyPage from '../pages/studyjob/PotteryStudyPage'
 import NamOMamStudyPage from '../pages/studyjob/NamOMamStudyPage'
 import ChieuStudyPage from '../pages/studyjob/ChieuStudyPage'
+
 import BatTrangLevel0 from '../pages/making_ceramics/Screen0/screen0'
 import BatTrangLevel1Phase0 from '../pages/making_ceramics/Screen1/Phase0'
 import BatTrangLevel1Screen1 from '../pages/making_ceramics/Screen1/Phase1'
@@ -27,8 +28,8 @@ import BatTrangLevel5Phase1 from '../pages/making_ceramics/Screen5/Phase1'
 import BatTrangLevel5Phase0 from '../pages/making_ceramics/Screen5/Phase0'
 import BatTrangLevel5Phase2 from '../pages/making_ceramics/Screen5/Phase2'
 import VillageDetailPage from '../pages/VillageDetailPage'
-import ChallengePage from '../pages/ChallengePage'
 import VillagesPage from '../pages/VillagesPage'
+import ChallengePage from '../pages/ChallengePage'
 import ChallengeMakingCere from '../pages/challenge_making_cere'
 import LeaderboardPage from '../pages/Leaderboard'
 import AdminPage from '../pages/admin/AdminPage'
@@ -70,8 +71,8 @@ export const router = createBrowserRouter([
       { path: 'studyjob/mam-nam-o', Component: NamOMamStudyPage },
       { path: 'studyjob/chieu', Component: ChieuStudyPage },
       { path: 'game', Component: GamePage },
-      { path: 'challenge', Component: ChallengePage },
       { path: 'villages', Component: VillagesPage },
+      { path: 'challenge', Component: ChallengePage },
       { path: 'leaderboard', Component: LeaderboardPage },
       { path: 'challenge-making-cere', Component: ChallengeMakingCere },
       { path: 'game/catch-fish', Component: CatchFishGamePage },

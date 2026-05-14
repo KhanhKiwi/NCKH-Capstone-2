@@ -41,7 +41,37 @@ function isFishSauceCraftName(name?: string) {
   return n.includes('mam nam o')
 }
 
+function composeText(value?: string) {
+  try {
+    if (!value) return '';
+    // remove zero-width and control chars
+    let s = value.replace(/\p{C}/gu, '');
+    // remove spaces between a base letter and a combining mark (fix broken sequences like "e ́" or "e <space> ́")
+    s = s.replace(/(\p{L})\s+(\p{M})/gu, '$1$2');
+    // remove spaces between a combining mark and a following letter (e.g. "é u" -> "éu")
+    s = s.replace(/(\p{M})\s+(\p{L})/gu, '$1$2');
+    // remove spaces immediately around combining marks
+    s = s.replace(/\s*(\p{M})\s*/gu, '$1');
+    // also collapse multiple spaces
+    s = s.replace(/\s{2,}/g, ' ');
+    return s.normalize('NFC');
+  } catch (e) {
+    return value || '';
+  }
+}
+
 export default function CraftSelectionPage() {
+  // load web fonts once
+  useEffect(() => {
+    const id = 'fe-itcep-google-fonts';
+    if (!document.getElementById(id)) {
+      const link = document.createElement('link');
+      link.id = id;
+      link.rel = 'stylesheet';
+      link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@400;700;900&display=swap';
+      document.head.appendChild(link);
+    }
+  }, []);
   const [selectedCraft, setSelectedCraft] = useState<Craft | null>(null);
   const [showLevelModal, setShowLevelModal] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -53,7 +83,7 @@ export default function CraftSelectionPage() {
         const data = await villagesService.getAll()
         const mapped = (data || []).map((v: any) => ({
           id: Number(v.village_id ?? v.id),
-          name: v.name ?? '',
+          name: composeText(v.name ?? ''),
           location: v.city ?? v.location ?? '',
           image: v.image ?? '',
           unlocked: !!v.is_open,
@@ -94,11 +124,15 @@ export default function CraftSelectionPage() {
 
   const handleCraftClick = (craft: Craft) => {
     if (craft.comingSoon) return;
-    if (!craft.unlocked) return; // do not open locked crafts
-    // If this is the Làng Dệt Đinh Yên craft, unlock all levels locally
+    // Special-case: keep "chiếu" craft always accessible/unlocked (e.g. Làng chiếu Bàn Thạch)
     const craftName = craft.name ?? '';
     const normalizedName = normalizeText(craftName)
-    if (normalizedName.includes('dinh yen') || normalizedName.includes('chieu')) {
+    if (!craft.unlocked && (normalizedName.includes('chieu') || normalizedName.includes('ban thach') || normalizedName.includes('chiem') )) {
+      // allow opening and treat as unlocked locally
+      // continue to set levels below
+    } else if (!craft.unlocked) return; // do not open other locked crafts
+    // If this is the Làng Dệt Đinh Yên craft, unlock all levels locally
+    if (normalizedName.includes('dinh yen') || normalizedName.includes('chieu') || normalizedName.includes('ban thach')) {
       setLevels(defaultLevels.map(l => ({ ...l, unlocked: true })));
     } else if (isPotteryCraftName(craftName)) {
       setLevels(potteryLevels)
@@ -107,7 +141,9 @@ export default function CraftSelectionPage() {
       setLevels(defaultLevels);
     }
 
-    setSelectedCraft(craft);
+    // mark selected craft as unlocked locally so UI shows playable state
+    console.log('[Craft] select:', { rawName: craft.name, display: composeText(craft.name) });
+    setSelectedCraft({ ...craft, name: composeText(craft.name), unlocked: true });
     setShowLevelModal(true);
   };
 
@@ -133,7 +169,20 @@ export default function CraftSelectionPage() {
       }
 
       if (found) {
-        setSelectedCraft(found);
+        const foundName = found.name ?? '';
+        const foundNormalized = normalizeText(foundName);
+
+        // Mirror handleCraftClick behavior for deep links: set levels and mark unlocked locally
+        if (foundNormalized.includes('dinh yen') || foundNormalized.includes('chieu') || foundNormalized.includes('ban thach')) {
+          setLevels(defaultLevels.map(l => ({ ...l, unlocked: true })));
+        } else if (isPotteryCraftName(foundName)) {
+          setLevels(potteryLevels);
+        } else {
+          setLevels(defaultLevels);
+        }
+
+        console.log('[Craft] deep-link open:', { rawName: found.name, display: composeText(found.name) });
+        setSelectedCraft({ ...found, name: composeText(found.name), unlocked: true });
         setShowLevelModal(true);
       }
     } catch (e) {
@@ -143,7 +192,7 @@ export default function CraftSelectionPage() {
   }, [crafts, location.search]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#fff7ed] via-[#fff1e6] to-[#fff3f0] relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-[#fff7ed] via-[#fff1e6] to-[#fff3f0] relative overflow-hidden" style={{ fontFamily: "'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>
       <svg className="absolute -top-16 -left-16 w-80 opacity-20" viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle cx="300" cy="300" r="300" fill="#fef3c7" />
       </svg>
@@ -166,7 +215,7 @@ export default function CraftSelectionPage() {
           <div className="inline-block mb-4">
             <div className="h-1 w-36 mx-auto mb-6 rounded-full bg-gradient-to-r from-[#b7843b] to-[#e6d7b3]"></div>
           </div>
-          <h1 className="text-5xl md:text-6xl text-[#2b2b2b] mb-3 tracking-wide font-semibold" style={{ fontFamily: 'Georgia, serif' }}>
+          <h1 className="text-5xl md:text-6xl text-[#2b2b2b] mb-3 tracking-wide font-semibold" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
             Chọn làng nghề
           </h1>
           <p className="text-lg md:text-xl text-[#4b4336] max-w-3xl mx-auto">
@@ -188,7 +237,7 @@ export default function CraftSelectionPage() {
                 {craft.image ? (
                   <ImageWithFallback
                     src={craft.image}
-                    alt={craft.name}
+                    alt={composeText(craft.name)}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
@@ -200,7 +249,7 @@ export default function CraftSelectionPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
 
                 <div className="absolute left-5 bottom-5 right-5 p-4 rounded-xl bg-white/60 backdrop-blur-sm border border-white/30">
-                  <h3 className="text-lg md:text-xl font-semibold text-[#27221b] truncate">{craft.name}</h3>
+                  <h3 className="text-lg md:text-xl font-semibold text-[#27221b] truncate">{composeText(craft.name)}</h3>
                   <p className="text-sm text-[#4b4336] mt-1 flex items-center gap-2">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
@@ -248,26 +297,30 @@ export default function CraftSelectionPage() {
       )}
 
       {showLevelModal && selectedCraft && !isPotteryCraftName(selectedCraft.name) && !isFishSauceCraftName(selectedCraft.name) && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-6">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden border border-gray-100">
-            <div className="p-6 bg-gradient-to-r from-amber-600 to-emerald-600 text-white relative">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-6 transition-opacity duration-300">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden border border-gray-100 transform transition-transform duration-300">
+            <div className="p-6 bg-gradient-to-r from-amber-600 to-emerald-600 text-white relative rounded-t-2xl">
               <button
                 onClick={() => setShowLevelModal(false)}
                 className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 rounded-full p-2 transition-colors"
+                aria-label="Đóng"
               >
                 <X className="w-5 h-5 text-white" />
               </button>
-              <h2 className="text-2xl font-bold mb-1" style={{ fontFamily: 'Georgia, serif' }}>
-                {selectedCraft.name}
+              <h2 className="text-3xl font-extrabold mb-1 leading-tight" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                {composeText(selectedCraft.name)}
               </h2>
-              <p className="text-sm text-white/90">Chọn cấp độ để bắt đầu</p>
+              <p className="text-sm text-white/95">Chọn cấp độ để bắt đầu</p>
             </div>
 
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-160px)]">
               <div className="space-y-4">
                 {levels.map((level) => (
-                  <div key={level.id} className={`flex items-center gap-4 p-4 rounded-xl border ${level.unlocked ? 'bg-gradient-to-r from-yellow-50 to-white border-amber-200' : 'bg-gray-50 border-gray-200 opacity-80'}`}>
-                    <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-md ${level.unlocked ? 'bg-emerald-600 text-white' : 'bg-gray-300 text-white'}`}>
+                  <div
+                    key={level.id}
+                    className={`group flex items-center gap-4 p-4 rounded-xl border ${level.unlocked ? 'bg-gradient-to-r from-yellow-50 to-white border-amber-200' : 'bg-white/60 border-gray-200'} shadow-sm hover:shadow-lg transition-all transform hover:-translate-y-1`}
+                  >
+                    <div className={`w-14 h-14 rounded-full flex items-center justify-center ${level.unlocked ? 'bg-emerald-600 text-white shadow-md' : 'bg-gray-100 text-gray-500'} text-lg font-semibold`}> 
                       {level.unlocked ? <span className="text-lg font-bold">{level.id}</span> : <Lock className="w-5 h-5" />}
                     </div>
                     <div className="flex-1">
@@ -277,10 +330,10 @@ export default function CraftSelectionPage() {
                     <div>
                       {level.unlocked ? (
                         <Link to={`/level-${level.id}`}>
-                          <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-full text-sm font-semibold transition-colors">Chơi ngay</button>
+                          <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-full text-sm font-semibold transition-colors shadow">Chơi ngay</button>
                         </Link>
                       ) : (
-                        <div className="text-sm text-gray-500 px-4 py-2 rounded-full">Đã khóa</div>
+                        <div className="text-sm text-gray-500 px-4 py-2 rounded-full border border-gray-200 bg-white/50">Đã khóa</div>
                       )}
                     </div>
                   </div>

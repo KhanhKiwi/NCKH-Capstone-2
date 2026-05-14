@@ -1,41 +1,95 @@
 import { motion } from "motion/react";
-import { Trophy, Star, Award } from "lucide-react";
+import { Trophy } from "lucide-react";
+import { useEffect, useState } from "react";
+import { authService } from "../../api/services/authService";
+import { progressService } from "../../api/services/progressService";
 
-export function Achievements() {
-  const achievements = [
-    { icon: Trophy, label: "Chiến thắng", count: 45 },
-    { icon: Star, label: "Điểm cao", count: 8750 },
-    { icon: Award, label: "Huy chương", count: 23 },
-  ];
+interface AchievementsProps {
+  inline?: boolean;
+}
+
+export function Achievements({ inline = false }: AchievementsProps) {
+  const [wins, setWins] = useState<number | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadWins() {
+      try {
+        let userId: number | undefined;
+        try {
+          const profile = await authService.getProfile();
+          userId = Number(profile?.user_id ?? profile?.id ?? profile?.userId);
+        } catch (e) {
+          userId = undefined;
+        }
+
+        if (!userId) {
+          try {
+            const token = localStorage.getItem('access_token');
+            if (token) {
+              const parts = token.split('.');
+              if (parts.length >= 2) {
+                const payload = JSON.parse(atob(parts[1]));
+                userId = Number(payload?.user_id ?? payload?.sub ?? payload?.id);
+              }
+            }
+          } catch (e) {
+            userId = undefined;
+          }
+        }
+
+        if (!userId) {
+          if (mounted) setWins(0);
+          return;
+        }
+
+        const progress = await progressService.getUserProgress(userId);
+        const completedCount = Array.isArray(progress) ? progress.filter(p => p.status === 'completed').length : 0;
+        if (mounted) setWins(completedCount);
+      } catch (e) {
+        if (mounted) setWins(0);
+      }
+    }
+
+    loadWins();
+    return () => { mounted = false; };
+  }, []);
+
+  const outerClass = inline ? 'mt-3 w-full' : 'absolute top-6 right-6 z-20';
 
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5 }}
-      className="absolute top-6 right-6 z-20"
+      transition={{ duration: 0.45 }}
+      className={outerClass}
     >
-      <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-4 shadow-2xl">
-        <h3 className="text-white font-bold text-sm mb-3">Thành tích</h3>
-        <div className="space-y-2">
-          {achievements.map((item, index) => (
-            <motion.div
-              key={item.label}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.1 * index }}
-              className="flex items-center gap-2 bg-black/20 rounded-lg px-3 py-2"
-            >
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#F0D4B0] to-[#E6A75E] flex items-center justify-center">
-                <item.icon className="w-4 h-4 text-[#5D4E37]" />
+      <div className="backdrop-blur-lg bg-white/6 border border-white/8 rounded-2xl p-3 shadow-lg w-full">
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.06 }}
+          className="flex items-center gap-3 bg-black/25 rounded-xl px-3 py-2"
+        >
+            <div className="w-10 h-10 rounded-full bg-linear-to-br from-[#F0D4B0] to-[#E6A75E] flex items-center justify-center shadow-sm">
+              <div className="w-7 h-7 rounded-full bg-white/95 flex items-center justify-center">
+                <Trophy className="w-4 h-4 text-[#3d2b1f]" />
               </div>
-              <div className="flex-1">
-                <p className="text-[#F0D4B0] text-xs">{item.label}</p>
-                <p className="text-white font-bold text-sm">{item.count}</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+            </div>
+
+            <div className="flex-1 flex items-center gap-2">
+              <div className="text-[#F0D4B0] font-semibold text-lg">Qua ải:</div>
+              <motion.div
+                initial={{ scale: 0.98 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 280 }}
+                className="text-white font-extrabold text-lg leading-none"
+              >
+                {wins ?? '—'}
+              </motion.div>
+            </div>
+        </motion.div>
       </div>
     </motion.div>
   );
