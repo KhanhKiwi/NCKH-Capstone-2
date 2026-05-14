@@ -30,7 +30,6 @@ export default function Screen5() {
   const [quality, setQuality] = useState(30); // Start with 30% (need to reach 80%)
   const [clarity, setClarity] = useState(20);
   const [comboCount, setComboCount] = useState(0);
-  const [masterTouches, setMasterTouches] = useState(0);
   const [failureReason, setFailureReason] = useState<string>('');
 
   // Flavor profile
@@ -348,7 +347,7 @@ export default function Screen5() {
                   <ComboCounter
                     comboCount={comboCount}
                     maxCombo={5}
-                    masterTouch={masterTouches > 0}
+                    masterTouch={false}
                   />
                 )}
 

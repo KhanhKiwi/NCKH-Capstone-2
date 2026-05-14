@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 
 interface PhaseTimelineProps {
-  currentPhase: 'prep' | 'filtration' | 'blend' | 'evaluation' | 'complete';
+  currentPhase: 'prep' | 'filtration' | 'blend' | 'evaluation' | 'complete' | 'failed';
   timeRemaining: number;
   totalTime: number;
 }

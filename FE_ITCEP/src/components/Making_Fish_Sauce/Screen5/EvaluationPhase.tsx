@@ -173,7 +173,7 @@ export function EvaluationPhase({ onComplete, timeLimit }: EvaluationPhaseProps)
               { key: 'umami', emoji: '👃', label: 'UMAMI', desc: 'Vị gốc đặc trưng', key_hint: '1' },
               { key: 'salty', emoji: '🧂', label: 'MẶN', desc: 'Vị mặn', key_hint: '2' },
               { key: 'fishy', emoji: '🐟', label: 'CÁ', desc: 'Vị cá', key_hint: '3' }
-            ].map((aroma, idx) => (
+            ].map((aroma) => (
               <motion.button
                 key={aroma.key}
                 onClick={() => handleAromaSelect(aroma.key)}
