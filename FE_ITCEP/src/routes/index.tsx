@@ -8,6 +8,8 @@ import Screen3MakingMats from '../pages/making mats/Screen3'
 import Screen5 from '../pages/making mats/Screen5'
 import Screen6 from '../pages/making mats/Screen6'
 import HomePage from '../pages/web-home/HomePage'
+import AboutPage from '../pages/AboutPage'
+import PotteryStudyPage from '../pages/studyjob/PotteryStudyPage'
 import BatTrangLevel0 from '../pages/making_ceramics/Screen0/screen0'
 import BatTrangLevel1Phase0 from '../pages/making_ceramics/Screen1/Phase0'
 import BatTrangLevel1Screen1 from '../pages/making_ceramics/Screen1/Phase1'
@@ -60,6 +62,8 @@ export const router = createBrowserRouter([
       { path: 'phase4', element: <Navigate to="/level-3/phase4" replace /> },
 
       { index: true, Component: HomePage },
+      { path: 'about', Component: AboutPage },
+      { path: 'studyjob/gom', Component: PotteryStudyPage },
       { path: 'game', Component: GamePage },
       { path: 'challenge', Component: ChallengePage },
       { path: 'leaderboard', Component: LeaderboardPage },

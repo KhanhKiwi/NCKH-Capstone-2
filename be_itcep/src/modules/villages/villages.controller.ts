@@ -12,7 +12,7 @@ export class VillagesController {
 	@ApiBody({
 		schema: {
 			example: {
-				name: 'Làng gốm Bát Tràng',
+				name: 'làng gốm Thanh Hà',
 				description: 'Làng nghề truyền thống về gốm sứ',
 				image: 'https://example.com/village.jpg',
 				city: 'Hà Nội',
@@ -37,7 +37,7 @@ export class VillagesController {
 	@ApiBody({
 		schema: {
 			example: {
-				name: 'Làng gốm Bát Tràng',
+				name: 'làng gốm Thanh Hà',
 				description: 'Cập nhật mô tả mới',
 				image: 'https://example.com/village-new.jpg',
 				city: 'Hà Nội',

@@ -109,6 +109,20 @@ export default function HomePage() {
   }, []);
   const [previewVisible, setPreviewVisible] = useState<boolean>(true);
 
+  function truncateSentences(text: string, maxSentences = 1) {
+    if (!text) return '';
+    // Split on sentence boundaries: look for .!? followed by space and uppercase/quote/or end of string
+    // This avoids breaking on periods inside numbers like "1.000"
+    const sentencePattern = /[^.!?]*[.!?]+(?=\s+[A-ZẠ-ỰƠ"']|$)/g;
+    const matches = text.match(sentencePattern);
+    if (!matches || matches.length === 0) {
+      const parts = text.split('\n').map(s => s.trim()).filter(Boolean);
+      return parts.length <= maxSentences ? text : parts.slice(0, maxSentences).join(' ') + '...';
+    }
+    if (matches.length <= maxSentences) return text;
+    return matches.slice(0, maxSentences).map(s => s.trim()).join(' ').trim() + '...';
+  }
+
   // Trigger a fade/scale animation on preview whenever activeIndex changes
   useEffect(() => {
     setPreviewVisible(false);
@@ -449,7 +463,10 @@ export default function HomePage() {
                         </div>
                       </div>
                     )}
-              <button className="flex items-center gap-3 bg-gradient-to-r from-[#ffe9b0] to-[#d4c4a8] hover:from-[#fffbe8] hover:to-[#b48a3c] text-[#4a3f2e] px-12 py-5 rounded-full text-2xl font-bold shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-[#fffbe8]">
+              <button
+                onClick={() => navigate('/about')}
+                className="flex items-center gap-3 bg-gradient-to-r from-[#ffe9b0] to-[#d4c4a8] hover:from-[#fffbe8] hover:to-[#b48a3c] text-[#4a3f2e] px-12 py-5 rounded-full text-2xl font-bold shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-[#fffbe8]"
+              >
                 <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#b48a3c"/><path d="M12 8v4l3 3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 Tìm hiểu thêm
               </button>
@@ -552,18 +569,20 @@ export default function HomePage() {
                       <img src={crafts[activeIndex] && crafts[activeIndex].thumbnail} alt={crafts[activeIndex] && crafts[activeIndex].name} className={`absolute inset-0 w-full h-full object-cover preview-parallax transition-all duration-700 ${previewVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/32 to-transparent pointer-events-none"></div>
                       <div className="absolute left-6 bottom-6 text-white max-w-2xl">
-                        <div className="inline-flex items-center gap-3 bg-[#fffbe8]/90 text-[#5a4328] px-4 py-2 rounded-full font-bold shadow caption-animate">
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z" fill="#b48a3c"/></svg>
-                          {crafts[activeIndex] && crafts[activeIndex].name}
-                        </div>
-                        <p className="mt-4 text-[#fffdf6] text-lg leading-relaxed drop-shadow-lg caption-animate">{crafts[activeIndex] && crafts[activeIndex].description}</p>
-                        <div className="mt-6">
-                          <button onClick={() => navigate(`/village/${crafts[activeIndex] && crafts[activeIndex].id}`)} className="btn-cta" style={{ background: 'linear-gradient(90deg,#b48a3c,#ffe9b0)' }}>
-                            <span className="btn-label text-[#4a3f2e] font-bold">Xem chi tiết</span>
-                            <span className="btn-icon">
-                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="#4a3f2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                            </span>
-                          </button>
+                        <div className="backdrop-blur-sm bg-black/45 rounded-2xl p-5 shadow-xl max-w-[66ch] caption-animate">
+                          <div className="inline-flex items-center gap-3 bg-white/10 text-[#fffbe8] px-3 py-1 rounded-full font-semibold shadow-sm">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z" fill="#ffe9b0"/></svg>
+                            <span className="uppercase text-xs tracking-wider">{crafts[activeIndex] && crafts[activeIndex].name}</span>
+                          </div>
+                          <p className="mt-3 text-lg md:text-xl leading-7 text-white/95" style={{ textShadow: '0 6px 20px rgba(0,0,0,0.55)' }}>
+                            {truncateSentences(crafts[activeIndex]?.description ?? 'Chưa có giới thiệu.', 1)}
+                          </p>
+                          <div className="mt-4">
+                            <button onClick={() => navigate(`/village/${crafts[activeIndex] && crafts[activeIndex].id}`)} className="inline-flex items-center gap-3 bg-gradient-to-r from-[#b48a3c] to-[#ffe9b0] text-[#4a3f2e] px-6 py-3 rounded-full font-semibold shadow-lg hover:scale-105 transition-transform">
+                              <span>Xem chi tiết</span>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="#4a3f2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            </button>
+                          </div>
                         </div>
                       </div>
 
@@ -591,7 +610,7 @@ export default function HomePage() {
                     <img src={c.thumbnail} alt={c.name} className={`w-20 h-20 object-cover rounded-md flex-shrink-0 ${i === activeIndex ? 'scale-105' : ''}`} />
                     <div className="text-left">
                       <div className="text-sm font-bold text-[#5a4328]">{c.name}</div>
-                      <div className="text-xs text-[#6b5a46] line-clamp-2">{c.description}</div>
+                      <div className="text-sm text-[#6b5a46] leading-5 line-clamp-1">{truncateSentences(c.description ?? '', 1)}</div>
                     </div>
                   </button>
                 ))}

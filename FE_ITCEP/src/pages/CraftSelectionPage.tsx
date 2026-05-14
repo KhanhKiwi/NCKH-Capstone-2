@@ -23,6 +23,24 @@ interface Level {
   completed: boolean;
 }
 
+function normalizeText(value: string) {
+  return (value || '')
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .trim()
+}
+
+function isPotteryCraftName(name?: string) {
+  const n = normalizeText(name || '')
+  return n.includes('thanh ha') || n.includes('bat trang') || n.includes('gom')
+}
+
+function isFishSauceCraftName(name?: string) {
+  const n = normalizeText(name || '')
+  return n.includes('mam nam o')
+}
+
 export default function CraftSelectionPage() {
   const [selectedCraft, setSelectedCraft] = useState<Craft | null>(null);
   const [showLevelModal, setShowLevelModal] = useState(false);
@@ -57,6 +75,15 @@ export default function CraftSelectionPage() {
     { id: 6, name: 'Hoàn thiện chiếu', unlocked: false, completed: false },
   ];
 
+  const potteryLevels: Level[] = [
+    { id: 1, name: 'Giới thiệu làng và hướng dẫn', unlocked: true, completed: false },
+    { id: 2, name: 'Chuẩn bị đất', unlocked: false, completed: false },
+    { id: 3, name: 'Tạo hình', unlocked: false, completed: false },
+    { id: 4, name: 'Phơi khô', unlocked: false, completed: false },
+    { id: 5, name: 'Trang trí & tráng men', unlocked: false, completed: false },
+    { id: 6, name: 'Nung & hoàn thiện', unlocked: false, completed: false },
+  ]
+
   // levels UI is driven by backend per-craft progress; default fallback for offline
   const [levels, setLevels] = useState<Level[]>(defaultLevels)
 
@@ -70,8 +97,11 @@ export default function CraftSelectionPage() {
     if (!craft.unlocked) return; // do not open locked crafts
     // If this is the Làng Dệt Đinh Yên craft, unlock all levels locally
     const craftName = craft.name ?? '';
-    if (craftName.toLowerCase().includes('đinh yên') || craftName.toLowerCase().includes('dệt')) {
+    const normalizedName = normalizeText(craftName)
+    if (normalizedName.includes('dinh yen') || normalizedName.includes('chieu')) {
       setLevels(defaultLevels.map(l => ({ ...l, unlocked: true })));
+    } else if (isPotteryCraftName(craftName)) {
+      setLevels(potteryLevels)
     } else {
       // reset to default per-craft fallback
       setLevels(defaultLevels);
@@ -94,7 +124,14 @@ export default function CraftSelectionPage() {
       const nameParam = params.get('openName')?.trim();
       if (!nameParam) return;
       if (!crafts || crafts.length === 0) return;
-      const found = crafts.find(c => c.name && c.name.toLowerCase().includes(nameParam.toLowerCase()));
+      const normalizedParam = normalizeText(nameParam)
+      let found = crafts.find(c => c.name && normalizeText(c.name).includes(normalizedParam));
+
+      // Backward compatibility: old links still use "Bát Tràng" while DB now stores "Thanh Hà".
+      if (!found && (normalizedParam.includes('bat trang') || normalizedParam.includes('gom') || normalizedParam.includes('thanh ha'))) {
+        found = crafts.find(c => isPotteryCraftName(c.name));
+      }
+
       if (found) {
         setSelectedCraft(found);
         setShowLevelModal(true);
@@ -202,15 +239,15 @@ export default function CraftSelectionPage() {
         </div>
       </div>
 
-      {showLevelModal && selectedCraft && selectedCraft.name?.includes('Bát Tràng') && (
+      {showLevelModal && selectedCraft && isPotteryCraftName(selectedCraft.name) && (
         <BatTrangModal onClose={() => setShowLevelModal(false)} />
       )}
 
-      {showLevelModal && selectedCraft && selectedCraft.name?.includes('Mắm Nam Ô') && (
+      {showLevelModal && selectedCraft && isFishSauceCraftName(selectedCraft.name) && (
         <MamNamOModal onClose={() => setShowLevelModal(false)} isOpen={showLevelModal} />
       )}
 
-      {showLevelModal && selectedCraft && !selectedCraft.name?.includes('Bát Tràng') && !selectedCraft.name?.includes('Mắm Nam Ô') && (
+      {showLevelModal && selectedCraft && !isPotteryCraftName(selectedCraft.name) && !isFishSauceCraftName(selectedCraft.name) && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-6">
           <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden border border-gray-100">
             <div className="p-6 bg-gradient-to-r from-amber-600 to-emerald-600 text-white relative">
