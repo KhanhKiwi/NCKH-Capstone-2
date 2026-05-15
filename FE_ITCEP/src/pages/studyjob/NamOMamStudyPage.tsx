@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import useRevealOnScroll from '../../hooks/useRevealOnScroll'
 
 const processSteps = [
   {
@@ -29,6 +30,7 @@ const processSteps = [
 ]
 
 export default function NamOMamStudyPage() {
+  useRevealOnScroll()
   return (
     <div className="min-h-screen bg-[#f7f2e8] text-[#3f3224]">
       <style>{`
@@ -37,10 +39,12 @@ export default function NamOMamStudyPage() {
         .hero-appear { opacity: 0; animation: fadeUp 700ms cubic-bezier(.2,.8,.2,1) forwards; }
         .btn-pulse { transition: transform .18s ease, box-shadow .18s ease; }
         .btn-pulse:hover { transform: translateY(-4px) scale(1.02); }
+        .reveal-on-scroll{ opacity:0; transform: translateY(12px); transition: all 700ms cubic-bezier(.2,.9,.2,1); }
+        .reveal-on-scroll.is-revealed{ opacity:1; transform:none; animation: fadeUp 650ms cubic-bezier(.2,.8,.2,1) both; }
       `}</style>
 
       <section
-        className="relative overflow-hidden border-b border-[#e6d7be] px-4 py-16"
+        className="relative overflow-hidden border-b border-[#e6d7be] px-4 py-16 reveal-on-scroll"
         style={{ backgroundImage: "url('/anhHuongDan/LangMam.png')", backgroundSize: 'cover', backgroundPosition: 'center' }}
       >
         <div className="absolute inset-0 bg-black/12" />
@@ -50,14 +54,14 @@ export default function NamOMamStudyPage() {
           </div>
 
           <h1
-            className="mt-5 w-full text-4xl font-extrabold leading-tight md:text-6xl hero-appear whitespace-nowrap overflow-x-auto"
+            className="mt-5 w-full text-4xl font-extrabold leading-tight md:text-6xl hero-appear whitespace-nowrap overflow-x-auto reveal-on-scroll"
             style={{ fontFamily: 'serif' }}
           >
             <span className="inline-block mr-3 transform-gpu" style={{ animation: 'fadeUp 900ms cubic-bezier(.2,.8,.2,1) forwards' }}>🫗</span>
             Làng Mắm Nam Ô
           </h1>
 
-          <div className="mt-8 flex flex-wrap gap-4">
+          <div className="mt-8 flex flex-wrap gap-4 reveal-on-scroll">
             <Link
               to="/villages"
               className="inline-flex items-center gap-2 rounded-full border border-[#6b4a27]/20 bg-white/90 px-5 py-3 font-semibold text-[#6b4a27] shadow-sm transition-colors hover:bg-white btn-pulse"
@@ -109,13 +113,8 @@ export default function NamOMamStudyPage() {
           {processSteps.map((step, idx) => (
             <article
               key={step.title}
-              className="rounded-2xl border border-[#e6d7be] bg-white p-6 shadow-sm hover:shadow-lg"
-              style={{
-                opacity: 0,
-                transform: 'translateY(12px)',
-                animation: 'fadeUp 650ms cubic-bezier(.2,.8,.2,1) forwards',
-                animationDelay: `${idx * 120}ms`,
-              }}
+              className="rounded-2xl border border-[#e6d7be] bg-white p-6 shadow-sm hover:shadow-lg reveal-on-scroll"
+              style={{ animationDelay: `${idx * 120}ms` }}
             >
               <div className="flex items-start gap-3">
                 <div className="text-3xl">🫗</div>

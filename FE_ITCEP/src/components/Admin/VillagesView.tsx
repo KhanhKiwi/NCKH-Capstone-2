@@ -207,7 +207,7 @@ export default function VillagesView() {
       {mediaModal.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40" onClick={() => { setMediaModal({ open: false }); setMediaList([]); }} />
-          <div className="relative w-full max-w-4xl bg-white rounded-2xl p-6 shadow-2xl">
+          <div className="relative w-full max-w-4xl bg-white rounded-2xl p-6 shadow-2xl max-h-[80vh] overflow-y-auto hide-scrollbar">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Ảnh của {mediaModal.villageName}</h3>
               <button onClick={() => { setMediaModal({ open: false }); setMediaList([]); }} className="px-3 py-1 rounded-md bg-slate-100">Đóng</button>
@@ -223,12 +223,12 @@ export default function VillagesView() {
             ) : mediaList.length === 0 ? (
               <div className="text-sm text-slate-500">Chưa có ảnh nào.</div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                 {mediaList.map((m) => (
-                  <div key={m.media_id ?? m.url} className="relative rounded-lg overflow-hidden border">
-                    <img src={m.url} alt="media" className="w-full h-48 object-cover" />
-                    <div className="absolute right-2 top-2 flex flex-col gap-2">
-                      <button onClick={() => removeMedia(m.media_id)} className="px-2 py-1 bg-red-500 text-white rounded">Xóa</button>
+                  <div key={m.media_id ?? m.url} className="relative rounded-lg overflow-hidden border bg-slate-50">
+                    <img loading="lazy" src={m.url} alt={mediaModal.villageName ? `Ảnh ${mediaModal.villageName}` : 'media'} className="w-full h-48 object-cover cursor-pointer" onClick={() => window.open(m.url, '_blank', 'noopener,noreferrer')} />
+                    <div className="absolute right-3 top-3">
+                      <button type="button" onClick={() => removeMedia(m.media_id)} aria-label="Xóa ảnh" className="text-sm px-3 py-1 bg-rose-500 text-white rounded-full shadow-md">Xóa</button>
                     </div>
                   </div>
                 ))}

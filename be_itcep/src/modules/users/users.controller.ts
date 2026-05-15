@@ -95,7 +95,7 @@ export class UsersController {
   @UseInterceptors(
     FileInterceptor('avatar', {
       storage: diskStorage({
-        destination: join(__dirname, '..', '..', '..', 'uploads', 'avatars'),
+        destination: join(process.cwd(), 'uploads', 'avatars'),
         filename: (req, file, cb) => {
           const randomName = Array(32)
             .fill(null)

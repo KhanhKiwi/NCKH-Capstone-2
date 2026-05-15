@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import useRevealOnScroll from '../../hooks/useRevealOnScroll'
 
 const processSteps = [
   {
@@ -28,6 +29,8 @@ const processSteps = [
   },
 ]
 export default function PotteryStudyPage() {
+  // init reveal-on-scroll
+  useRevealOnScroll()
   return (
     <div className="min-h-screen bg-[#f7f2e8] text-[#3f3224]">
       <style>{`
@@ -36,9 +39,11 @@ export default function PotteryStudyPage() {
         .hero-appear { opacity: 0; animation: fadeUp 700ms cubic-bezier(.2,.8,.2,1) forwards; }
         .btn-pulse { transition: transform .18s ease, box-shadow .18s ease; }
         .btn-pulse:hover { transform: translateY(-4px) scale(1.02); }
+        .reveal-on-scroll{ opacity:0; transform: translateY(12px); transition: all 700ms cubic-bezier(.2,.9,.2,1); }
+        .reveal-on-scroll.is-revealed{ opacity:1; transform:none; animation: fadeUp 650ms cubic-bezier(.2,.8,.2,1) both; }
       `}</style>
       <section
-        className="relative overflow-hidden border-b border-[#e6d7be] px-4 py-16"
+        className="relative overflow-hidden border-b border-[#e6d7be] px-4 py-16 reveal-on-scroll"
         style={{ backgroundImage: "url('/anhHuongDan/LangGom.png')", backgroundSize: 'cover', backgroundPosition: 'center' }}
       >
         {/* subtle overlay to preserve readability */}
@@ -46,13 +51,13 @@ export default function PotteryStudyPage() {
         <div className="absolute -top-24 -right-16 h-64 w-64 rounded-full bg-[#d9a75e]/20 blur-3xl" />
         <div className="absolute -bottom-20 -left-10 h-52 w-52 rounded-full bg-[#a86f2c]/14 blur-3xl" />
 
-        <div className="relative mx-auto max-w-6xl">
+          <div className="relative mx-auto max-w-6xl">
           <div className="inline-flex items-center rounded-full border border-[#c38a3f]/40 bg-white/70 px-4 py-2 text-sm font-semibold text-[#6b4a27] shadow-sm">
             Làng nghề gốm
           </div>
 
           <h1
-            className="mt-5 w-full text-4xl font-extrabold leading-tight md:text-6xl hero-appear whitespace-nowrap overflow-x-auto"
+            className="mt-5 w-full text-4xl font-extrabold leading-tight md:text-6xl hero-appear whitespace-nowrap overflow-x-auto reveal-on-scroll"
             style={{ fontFamily: 'serif' }}
           >
             <span className="inline-block mr-3 transform-gpu" style={{ animation: 'fadeUp 900ms cubic-bezier(.2,.8,.2,1) forwards' }}>🏺</span>
@@ -61,7 +66,7 @@ export default function PotteryStudyPage() {
 
 
 
-          <div className="mt-8 flex flex-wrap gap-4">
+          <div className="mt-8 flex flex-wrap gap-4 reveal-on-scroll">
             <Link
               to="/villages"
               className="inline-flex items-center gap-2 rounded-full border border-[#6b4a27]/20 bg-white/90 px-5 py-3 font-semibold text-[#6b4a27] shadow-sm transition-colors hover:bg-white btn-pulse"
@@ -113,13 +118,8 @@ export default function PotteryStudyPage() {
           {processSteps.map((step, idx) => (
             <article
               key={step.title}
-              className="rounded-2xl border border-[#e6d7be] bg-white p-6 shadow-sm hover:shadow-lg"
-              style={{
-                opacity: 0,
-                transform: 'translateY(12px)',
-                animation: 'fadeUp 650ms cubic-bezier(.2,.8,.2,1) forwards',
-                animationDelay: `${idx * 120}ms`,
-              }}
+              className="rounded-2xl border border-[#e6d7be] bg-white p-6 shadow-sm hover:shadow-lg reveal-on-scroll"
+              style={{ animationDelay: `${idx * 120}ms` }}
             >
               <div className="flex items-start gap-3">
                 <div className="text-3xl">🏺</div>

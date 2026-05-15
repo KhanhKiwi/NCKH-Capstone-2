@@ -7,6 +7,7 @@ import { villagesData } from '../../data/villagesData';
 import { villagesService } from '../../api/villages/villagesService';
 import Footer from '../../components/Footer/Footer';
 import RecentReviewList from '../../components/Reviews/RecentReviewList';
+import useRevealOnScroll from '../../hooks/useRevealOnScroll';
 
 type ChatRole = 'user' | 'assistant';
 
@@ -129,6 +130,9 @@ export default function HomePage() {
     const t = setTimeout(() => setPreviewVisible(true), 60);
     return () => clearTimeout(t);
   }, [activeIndex]);
+
+  // init reveal-on-scroll behavior
+  useRevealOnScroll()
 
   // Autoplay progress and tilt state
   const AUTOPLAY_MS = 7000;
@@ -345,7 +349,7 @@ export default function HomePage() {
           ))}
           {/* Hiệu ứng sóng trang trí */}
           <svg className="absolute top-0 left-0 w-full h-32" viewBox="0 0 1440 320"><path fill="#f5f0e8" fillOpacity="0.18" d="M0,160L60,170.7C120,181,240,203,360,197.3C480,192,600,160,720,133.3C840,107,960,85,1080,101.3C1200,117,1320,171,1380,197.3L1440,224L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z"></path></svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none">
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none reveal-on-scroll">
             <h1
               className="text-7xl md:text-8xl font-extrabold mb-4 text-white animate-pulse-slow"
               style={{
@@ -484,7 +488,7 @@ export default function HomePage() {
         <div className="absolute right-8 bottom-8 opacity-20 -rotate-12 select-none pointer-events-none">
           <svg width="100" height="100" viewBox="0 0 100 100" fill="none"><rect x="10" y="10" width="80" height="80" rx="20" stroke="#b48a3c" strokeWidth="7" fill="#fffbe8" /></svg>
         </div>
-        <div className="max-w-3xl mx-auto text-center relative z-10 animate-fade-in">
+          <div className="max-w-3xl mx-auto text-center relative z-10 animate-fade-in reveal-on-scroll">
           <h2 className="text-5xl md:text-6xl font-extrabold text-[#b48a3c] mb-4 drop-shadow-lg tracking-wide" style={{ fontFamily: 'serif' }}>
             <span className="inline-block align-middle mr-3">
               <svg width="38" height="38" fill="none" viewBox="0 0 24 24"><path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z" fill="#ffe9b0"/></svg>
@@ -509,7 +513,7 @@ export default function HomePage() {
       </section>
 
       {/* Traditional Crafts Section - Redesigned */}
-      <section id="crafts" className="py-20 px-4 bg-gradient-to-b from-[#f5f0e8] to-[#f9f6ef]">
+      <section id="crafts" className="py-20 px-4 bg-gradient-to-b from-[#f5f0e8] to-[#f9f6ef] reveal-on-scroll">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-center gap-4 mb-6">
             <div className="flex-1 h-px bg-[#b48a3c] opacity-60"></div>
@@ -520,7 +524,7 @@ export default function HomePage() {
             </h3>
             <div className="flex-1 h-px bg-[#b48a3c] opacity-60"></div>
           </div>
-          <div className="text-center mb-6">
+          <div className="text-center mb-6 reveal-on-scroll">
             <p className="text-[#4a3f2e]">Chọn một làng nghề để xem thông tin chi tiết. Ảnh sẽ phóng to khi bạn chọn.</p>
           </div>
 
@@ -551,9 +555,12 @@ export default function HomePage() {
             .btn-cta .btn-icon{ display:inline-flex; align-items:center; justify-content:center; transition: transform 260ms cubic-bezier(.2,.9,.2,1); }
             .btn-cta:hover .btn-icon{ transform: translateX(6px); }
             .btn-cta:active{ transform: translateY(-1px) scale(0.995); }
+            /* reveal-on-scroll helper */
+            .reveal-on-scroll{ opacity:0; transform: translateY(12px); transition: all 700ms cubic-bezier(.2,.9,.2,1); will-change: transform, opacity; }
+            .reveal-on-scroll.is-revealed{ opacity:1; transform: translateY(0); }
           `}</style>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start reveal-on-scroll">
             <div className="md:col-span-2">
               <div className="rounded-2xl overflow-visible">
                 <div className="p-1 rounded-2xl" style={{ background: 'conic-gradient(from 0deg, #f9e9c4, #e6c787, #b48a3c, #f9e9c4)', borderRadius: 18 }}>
@@ -628,11 +635,14 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="py-12">
+          <div className="py-12 reveal-on-scroll">
             <RecentReviewList />
           </div>
         </div>
       </section>
+
+      {/* initialize reveal hook for elements on this page */}
+      {useRevealOnScroll && useRevealOnScroll()}
 
       {/* Footer follows immediately after reviews */}
       </div>

@@ -27,10 +27,10 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Serve static uploads
-  const uploadsPath = join(__dirname, '..', 'uploads');
+  // Serve static uploads from project root `uploads` so files persist across restarts
+  const uploadsPath = join(process.cwd(), 'uploads');
   const avatarsPath = join(uploadsPath, 'avatars');
-  if (!existsSync(uploadsPath)) mkdirSync(uploadsPath);
+  if (!existsSync(uploadsPath)) mkdirSync(uploadsPath, { recursive: true });
   if (!existsSync(avatarsPath)) mkdirSync(avatarsPath, { recursive: true });
   app.useStaticAssets(uploadsPath, {
     prefix: '/uploads/',

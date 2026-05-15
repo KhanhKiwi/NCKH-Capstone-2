@@ -13,6 +13,7 @@ export default function VillagesPage() {
   const navigate = useNavigate()
   const [villages, setVillages] = useState<VillageItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [entered, setEntered] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -41,9 +42,18 @@ export default function VillagesPage() {
     }
   }, [])
 
+  useEffect(() => {
+    const t = setTimeout(() => setEntered(true), 30)
+    return () => clearTimeout(t)
+  }, [])
+
   return (
     <div className="min-h-screen pb-16 bg-gradient-to-b from-[#fffaf6] to-[#f5efe6]">
-      <div className="max-w-7xl mx-auto px-6 py-12 relative z-10">
+      <div className={`max-w-7xl mx-auto px-6 py-12 relative z-10 page-enter ${entered ? 'page-enter--visible' : ''}`}>
+        <style>{`
+          .page-enter { opacity: 0; transform: translateY(12px); }
+          .page-enter--visible { opacity: 1; transform: translateY(0); transition: opacity 420ms cubic-bezier(.2,.9,.2,1), transform 420ms cubic-bezier(.2,.9,.2,1); }
+        `}</style>
         <div className="absolute left-6 top-6">
           <button
             onClick={() => navigate('/game', { replace: true })}
@@ -68,8 +78,13 @@ export default function VillagesPage() {
         {loading ? (
           <div className="text-center py-20 text-gray-600">Đang tải...</div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-            {villages.map((v) => {
+          <div>
+            <style>{`
+              .enter-card { opacity: 0; transform: translateY(18px) scale(.995); }
+              .enter-card--visible { opacity: 1; transform: translateY(0) scale(1); transition: opacity 420ms cubic-bezier(.2,.9,.2,1), transform 420ms cubic-bezier(.2,.9,.2,1); }
+            `}</style>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+            {villages.map((v, idx) => {
               const nameLower = String(v.name ?? '').toLowerCase()
               const idLower = String(v.id ?? '').toLowerCase()
               const isPottery = nameLower.includes('gốm') || nameLower.includes('gom') || idLower.includes('bat-trang')
@@ -93,7 +108,8 @@ export default function VillagesPage() {
                   tabIndex={isClickable ? 0 : -1}
                   onClick={isClickable ? handleClick : undefined}
                   onKeyDown={(e) => { if (isClickable && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); handleClick() } }}
-                  className={`group relative rounded-3xl overflow-hidden shadow-2xl transform transition duration-500 ${cardStateClass}`}
+                  className={`group relative rounded-3xl overflow-hidden shadow-2xl transform transition duration-500 ${cardStateClass} enter-card ${entered ? 'enter-card--visible' : ''}`}
+                  style={{ transitionDelay: `${idx * 80}ms` }}
                 >
                   <div className="relative h-72 sm:h-80 lg:h-72 w-full bg-gray-100">
                     <img
@@ -125,6 +141,7 @@ export default function VillagesPage() {
                 </div>
               )
             })}
+            </div>
           </div>
         )}
       </div>

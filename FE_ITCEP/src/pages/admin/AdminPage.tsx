@@ -29,6 +29,7 @@ export default function AdminPage() {
   const [users, setUsers] = useState<User[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([])
+  const [feedbackSearch, setFeedbackSearch] = useState('')
   const [feedbackFilter, setFeedbackFilter] = useState<'all' | 'approved' | 'rejected' | 'pending'>('all')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editValues, setEditValues] = useState<{ name: string; email: string }>({ name: '', email: '' })
@@ -38,35 +39,18 @@ export default function AdminPage() {
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
   useEffect(() => {
-    // mock data for stats/feedback
-    setTimeout(() => {
-      setStats({ visits: 12432, views: 54321 })
-      // feedbacks are loaded from API; remove hardcoded mock entries
-
-      // mock visits series for last 7 days (demo) with concrete date labels
-      const series = [1200, 1800, 2500, 3000, 4000, 2200, 12432]
-      const today = new Date()
-      const labels = Array.from({ length: series.length }).map((_, i) => {
-        const d = new Date(today)
-        d.setDate(today.getDate() - (series.length - 1 - i))
-        const dd = String(d.getDate()).padStart(2, '0')
-        const mm = String(d.getMonth() + 1).padStart(2, '0')
-        return `${dd}/${mm}`
-      })
-      setVisitsSeries(series)
-      setVisitsLabels(labels)
-
-      // mock monthly series (last 6 months)
-      const monthSeries = [3200, 4800, 7600, 9800, 11500, 12432]
-      const monthLabels = Array.from({ length: monthSeries.length }).map((_, i) => {
-        const d = new Date(today.getFullYear(), today.getMonth() - (monthSeries.length - 1 - i), 1)
-        const mm = String(d.getMonth() + 1).padStart(2, '0')
-        const yyyy = d.getFullYear()
-        return `${mm}/${yyyy}`
-      })
-      setVisitsMonthSeries(monthSeries)
-      setVisitsMonthLabels(monthLabels)
-    }, 80)
+    // load visits count from analytics events (count event_type==='visit')
+    ;(async () => {
+      try {
+        const { analyticsService } = await import('../../api/analytics/analyticsService')
+        const data = await analyticsService.getAll()
+        const list: any[] = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : []
+        const visits = list.filter((e) => (e.event_type ?? '').toLowerCase() === 'visit').length
+        setStats((s) => ({ ...s, visits }))
+      } catch (err) {
+        console.debug('Could not load analytics visits count', err)
+      }
+    })()
 
     // load users from API (defensive parsing + logging)
     ;(async () => {
@@ -283,32 +267,13 @@ export default function AdminPage() {
                       <h2 className="text-2xl font-semibold">Bảng điều khiển</h2>
                       <p className="text-sm text-slate-200 mt-1">Tổng quan hệ thống và trạng thái nhanh</p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <input
-                        placeholder="Tìm kiếm..."
-                        className="hidden md:inline-block px-3 py-2 rounded-md border bg-white/60 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-                      />
-                      <button
-                        onClick={() => setGameEnabled((s) => !s)}
-                        className={`px-4 py-2 rounded-md font-medium transition ${
-                          gameEnabled ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'
-                        }`}
-                      >
-                        {gameEnabled ? 'Game: On' : 'Game: Off'}
-                      </button>
-                      <button className="px-3 py-2 rounded-md bg-white/90 text-indigo-700 font-medium">Xuất</button>
-                      <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-indigo-700 font-semibold">A</div>
-                    </div>
+                    {/* Top-right controls removed as requested */}
                   </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="p-6 rounded-lg bg-slate-50 border">
                     <div className="text-sm text-slate-500">Lượt truy cập</div>
                     <div className="text-3xl font-bold">{stats.visits}</div>
-                  </div>
-                  <div className="p-6 rounded-lg bg-slate-50 border">
-                    <div className="text-sm text-slate-500">Lượt xem</div>
-                    <div className="text-3xl font-bold">{stats.views}</div>
                   </div>
                   <div className="p-6 rounded-lg bg-slate-50 border">
                     <div className="text-sm text-slate-500">Người dùng</div>
@@ -425,14 +390,25 @@ export default function AdminPage() {
                     <button onClick={() => setFeedbackFilter('approved')} className={`px-3 py-1 rounded-md text-sm ${feedbackFilter === 'approved' ? 'bg-emerald-600 text-white' : 'bg-slate-100'}`}>Đã duyệt</button>
                     <button onClick={() => setFeedbackFilter('rejected')} className={`px-3 py-1 rounded-md text-sm ${feedbackFilter === 'rejected' ? 'bg-rose-600 text-white' : 'bg-slate-100'}`}>Không duyệt</button>
                   </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      placeholder="Tìm kiếm phản hồi theo tên hoặc nội dung"
+                      className="px-3 py-2 rounded-md border w-72"
+                      value={feedbackSearch}
+                      onChange={(e) => setFeedbackSearch(e.target.value)}
+                    />
+                    <button onClick={() => setFeedbackSearch('')} className="px-3 py-2 rounded-md bg-slate-100">Xóa</button>
+                  </div>
                 </div>
 
                 <ul className="space-y-4">
                   {feedbacks
                     .filter((f) => {
                       const state = (f.resolved ?? 'pending') as string
-                      if (feedbackFilter === 'all') return true
-                      return state === feedbackFilter
+                      if (feedbackFilter !== 'all' && state !== feedbackFilter) return false
+                      const q = feedbackSearch.trim().toLowerCase()
+                      if (!q) return true
+                      return (f.user || '').toLowerCase().includes(q) || (f.message || '').toLowerCase().includes(q)
                     })
                     .map((f) => (
                     <li key={f.id} className="p-4 rounded-lg border bg-white shadow-sm flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">

@@ -4,13 +4,25 @@ import Footer from '../components/Footer/Footer';
 import Callout from '../components/UI/Callout';
 import VillageCard from '../components/AboutPage/VillageCard';
 import { useEffect, useState } from 'react';
+import useRevealOnScroll from '../hooks/useRevealOnScroll';
 import { villagesService } from '../api/villages/villagesService';
 import Accordion from '../components/AboutPage/Accordion';
 
 export default function AboutPage() {
   const [villages, setVillages] = useState<any[]>([])
   const [loadingVillages, setLoadingVillages] = useState(true)
+  const [mounted, setMounted] = useState(false)
 
+  useEffect(() => {
+    // trigger entrance animation on first mount
+    const t = setTimeout(() => setMounted(true), 30)
+    return () => {
+      clearTimeout(t)
+      setMounted(false)
+    }
+  }, [])
+
+  
   useEffect(() => {
     let mounted = true
     ;(async () => {
@@ -38,10 +50,17 @@ export default function AboutPage() {
       mounted = false
     }
   }, [])
+
+  // initialize scroll reveal animations
+  useRevealOnScroll()
   return (
     <div className="min-h-screen bg-[#f6f1e8] text-[#3f3224]">
-      <main className="max-w-5xl mx-auto px-6 py-16">
-        <header className="mb-12 text-center">
+      <main className={`max-w-5xl mx-auto px-6 py-16 transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+        <style>{`
+          .reveal-on-scroll{ opacity:0; transform: translateY(12px); transition: all 700ms cubic-bezier(.2,.9,.2,1); will-change: transform, opacity; }
+          .reveal-on-scroll.is-revealed{ opacity:1; transform: translateY(0); }
+        `}</style>
+        <header className="mb-12 text-center reveal-on-scroll">
           <h1 className="text-4xl md:text-5xl font-serif font-extrabold mb-4">Tìm hiểu thêm về CraftSteps</h1>
           <p className="text-lg text-[#6b5a46] max-w-3xl mx-auto">Trang này mô tả sứ mệnh, cách hoạt động, nguồn dữ liệu, các tính năng chính và hướng dẫn tận dụng CraftSteps để khám phá các làng nghề truyền thống Việt Nam. Dành cho người đọc muốn hiểu sâu hơn và sử dụng trang hiệu quả.</p>
           <div className="mt-6 flex items-center justify-center gap-4">
@@ -50,7 +69,7 @@ export default function AboutPage() {
           </div>
         </header>
 
-        <section className="bg-white rounded-2xl p-8 shadow-lg mb-8">
+        <section className="bg-white rounded-2xl p-8 shadow-lg mb-8 reveal-on-scroll">
           <h2 className="text-2xl font-semibold mb-3">Sứ mệnh của chúng tôi</h2>
           <p className="leading-relaxed mb-4">CraftSteps tồn tại để đưa tiếng nói, kỹ nghệ và câu chuyện của các làng nghề truyền thống Việt Nam đến với công chúng rộng rãi — để nhiều người biết, trân trọng và góp phần giúp những làng nghề ấy trường tồn.</p>
 
@@ -64,12 +83,12 @@ export default function AboutPage() {
 
         
 
-        <section className="bg-white rounded-2xl p-8 shadow-lg mb-8">
+        <section className="bg-white rounded-2xl p-8 shadow-lg mb-8 reveal-on-scroll">
           <Callout icon={<span>✨</span>} title="CraftSteps là gì">
             CraftSteps là nền tảng giáo dục và khám phá tương tác tập trung vào các làng nghề truyền thống Việt Nam. Chúng tôi kết hợp tư liệu, hướng dẫn theo bước, nội dung đa phương tiện và các bài tập thực hành để giúp người dùng hiểu quy trình, kỹ năng và câu chuyện đằng sau mỗi nghề.
           </Callout>
 
-          <h3 className="text-xl font-medium mb-2 mt-2">Danh sách làng nghề</h3>
+          <h3 className="text-xl font-medium mb-2 mt-2 reveal-on-scroll">Danh sách làng nghề</h3>
           <p className="leading-relaxed mb-4">Danh sách các làng nghề có thể được duyệt theo tỉnh hoặc theo thể loại nghề (ví dụ: gốm, dệt, mộc, đan, sơn mài). Dưới đây là một ví dụ nhanh:</p>
             <div className="flex flex-wrap justify-center gap-8 mb-6">
               {loadingVillages && (
@@ -87,7 +106,7 @@ export default function AboutPage() {
 
           {/* Tiến trình học đã được loại bỏ per user request */}
 
-          <h3 className="text-xl font-medium mb-2 mt-4">Giá trị văn hoá</h3>
+          <h3 className="text-xl font-medium mb-2 mt-4 reveal-on-scroll">Giá trị văn hoá</h3>
           <Callout icon={<span>🛖</span>} title="Giá trị văn hoá">
             Các làng nghề lưu giữ tri thức, kỹ thuật và câu chuyện cộng đồng. CraftSteps tôn trọng giá trị này bằng cách ghi nhận nguồn gốc, kể chuyện của nghệ nhân và khuyến khích tương tác có trách nhiệm, góp phần bảo tồn và truyền tiếp các giá trị văn hoá cho thế hệ sau.
           </Callout>
@@ -109,7 +128,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section className="bg-white rounded-2xl p-8 shadow-lg mb-8">
+        <section className="bg-white rounded-2xl p-8 shadow-lg mb-8 reveal-on-scroll">
           <h2 className="text-2xl font-semibold mb-3">Cách dùng CraftSteps</h2>
           <ol className="list-decimal pl-6 space-y-3 text-[#5a4a35]">
             <li><strong>Duyệt làng nghề:</strong> Sử dụng trang chủ hoặc thanh tìm kiếm để chọn làng, đọc mô tả và xem hình ảnh/clip.</li>
@@ -118,7 +137,7 @@ export default function AboutPage() {
           </ol>
         </section>
 
-        <section className="bg-white rounded-2xl p-8 shadow-lg mb-8">
+        <section className="bg-white rounded-2xl p-8 shadow-lg mb-8 reveal-on-scroll">
           <h2 className="text-2xl font-semibold mb-3">FAQ - Những câu hỏi thường gặp</h2>
           <Accordion
             items={[
@@ -138,7 +157,7 @@ export default function AboutPage() {
           />
         </section>
 
-        <section className="bg-white rounded-2xl p-8 shadow-lg mb-12">
+        <section className="bg-white rounded-2xl p-8 shadow-lg mb-12 reveal-on-scroll">
           <h2 className="text-2xl font-semibold mb-3">Đội ngũ và liên hệ</h2>
           <p className="leading-relaxed mb-4">CraftSteps được phát triển bởi một nhóm nhỏ gồm nhà phát triển, nhà thiết kế và cộng tác viên nội dung/nhà nghiên cứu văn hoá. Chúng tôi trân trọng mọi góp ý và cộng tác từ cộng đồng.</p>
           <p className="text-sm text-[#6b5a46]">Email: <a href="mailto:info@craftsteps.example" className="text-[#4a7c2f] underline">info@craftsteps.example</a></p>

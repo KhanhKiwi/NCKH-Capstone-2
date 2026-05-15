@@ -106,3 +106,6 @@ INSERT INTO `Media` (`media_id`, `url`, `created_at`, `updated_at`, `deleted_at`
 (40, 'https://dulichkhatvongviet.com/wp-content/uploads/2022/04/lang-lua-van-phuc.jpg', '2026-05-14 16:21:00', '2026-05-14 16:21:00', NULL, 5),
 (41, 'https://statics.vinpearl.com/lang-lua-van-phuc-1_1673513372.jpeg', '2026-05-14 16:22:00', '2026-05-14 16:22:00', NULL, 5),
 (42, 'http://media.dulich24.com.vn/diemden/lang-lua-van-phuc-4151/lang-lua-van-phuc-1.jpg', '2026-05-14 16:23:00', '2026-05-14 16:23:00', NULL, 5);
+
+
+
