@@ -10,7 +10,11 @@ export class FeedbackService {
   constructor(@InjectRepository(Feedback) private repo: Repository<Feedback>, @InjectRepository(User) private userRepo: Repository<User>) {}
 
   async create(dto: CreateFeedbackDto) {
-    const fb: Partial<Feedback> = { feedback_text: dto.feedbackText };
+    const fb: Partial<Feedback> = {
+      feedback_text: dto.content ?? (dto as any).feedbackText,
+      name: dto.name,
+      rating: dto.rating,
+    };
     if (dto.userId) {
       const user = await this.userRepo.findOne({ where: { user_id: dto.userId } as any });
       if (user) fb.user = user as any;

@@ -10,6 +10,12 @@ export class Feedback {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  name: string;
+
+  @Column({ type: 'int', nullable: true })
+  rating: number;
+
   @Column({ type: 'text' })
   feedback_text: string;
 
