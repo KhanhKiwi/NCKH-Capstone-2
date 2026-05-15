@@ -232,7 +232,7 @@ export default function AuthPanel({
 
               {/* Social Login */}
               <div className="space-y-3">
-                <a href="http://localhost:3000/auth/google" className="w-full py-3 border-2 border-gray-200 rounded-xl hover:border-amber-300 hover:bg-amber-50 transition-all duration-300 flex items-center justify-center gap-2">
+                <a href={`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/google`} className="w-full py-3 border-2 border-gray-200 rounded-xl hover:border-amber-300 hover:bg-amber-50 transition-all duration-300 flex items-center justify-center gap-2">
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path
                       fill="#4285F4"

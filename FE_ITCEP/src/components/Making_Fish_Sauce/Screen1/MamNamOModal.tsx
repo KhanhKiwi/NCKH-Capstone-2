@@ -1,8 +1,8 @@
 import { X, Play, Lock } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { progressService } from '../../../api/services/progressService';
-import { initializeFirstLevel } from '../../../utils/progressUtils';
+import { levelsService } from '../../../api/levels/levelsService';
+import { progressService } from '../../../api/progress/progressService';
 import { getUserId } from '../../../utils/authUtils';
 import '../../../utils/progressDebug'; // Load debug helper
 
@@ -81,15 +81,44 @@ export default function MamNamOModal({ onClose }: MamNamOModalProps) {
     const fetchProgress = async () => {
       setIsLoading(true);
       try {
+        // Get userId from JWT token (via authUtils which decodes JWT)
         const userId = getUserId();
+        
         console.log('[Modal] Modal opened, userId:', userId);
         
         if (userId) {
           console.log('[Modal] Initializing progress for level 1...');
-          // Initialize first level if needed, then fetch progress
-          const progress = await initializeFirstLevel(userId, 1); // Level 1 = Bắt Cá
+          
+          // Get all levels for fish sauce village (village_id = 8)
+          const levels = await levelsService.getByVillage(8, userId);
+          console.log('[Modal] Available levels:', levels);
+          
+          // Get current user progress
+          const currentProgress = await progressService.getMyProgress(userId);
+          console.log('[Modal] Current progress:', currentProgress);
+          
+          // If no progress exists, auto-initialize level 1 as unlocked
+          if (!currentProgress || currentProgress.length === 0) {
+            console.log('[Modal] No progress found. Initializing level 1...');
+            const level1 = levels.find((l: any) => l.level_number === 1);
+            if (level1) {
+              try {
+                await progressService.saveProgress({
+                  user_id: userId,
+                  level_id: level1.level_id,
+                  status: 'unlocked'
+                });
+                console.log('[Modal] Level 1 initialized as unlocked');
+              } catch (e) {
+                console.warn('[Modal] Failed to initialize level 1:', e);
+              }
+            }
+          }
+          
+          // Fetch progress again
+          const progress = await progressService.getMyProgress(userId);
           console.log('[Modal] Progress loaded:', progress);
-          setUserProgress(progress);
+          setUserProgress(progress || []);
         } else {
           console.error('[Modal] No user ID found!');
           setUserProgress([]);
@@ -107,7 +136,11 @@ export default function MamNamOModal({ onClose }: MamNamOModalProps) {
 
   // Check if a level is unlocked
   const getLevelStatus = (levelId: number): 'locked' | 'unlocked' | 'in_progress' | 'completed' => {
-    const progress = userProgress.find(p => p.level?.level_id === levelId);
+    // progressService.getMyProgress() returns array with nested level object
+    const progress = userProgress.find((p: any) => {
+      // Try both flat and nested structures
+      return p.level_id === levelId || p.level?.level_id === levelId;
+    });
     return progress?.status || 'locked';
   };
 

@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
-import { Coins } from "lucide-react";
 import { useEffect, useState } from "react";
 import { authService } from "../../api/services/authService";
+import { Achievements } from "./Achievements";
 
 export function PlayerInfo() {
   const [user, setUser] = useState<any | null>(null);
@@ -43,14 +43,10 @@ export function PlayerInfo() {
             )}
           </div>
           <div>
-            <p className="text-white font-bold text-sm">{displayName}</p>
-            <p className="text-[#F0D4B0] text-xs">Cấp độ 15</p>
+            <p className="text-white font-bold text-lg">{displayName}</p>
           </div>
         </div>
-        <div className="mt-3 flex items-center gap-2 bg-black/20 rounded-lg px-3 py-2">
-          <Coins className="w-5 h-5 text-[#FFD700]" />
-          <span className="text-white font-bold">12,500</span>
-        </div>
+        <Achievements inline />
       </div>
     </motion.div>
   );

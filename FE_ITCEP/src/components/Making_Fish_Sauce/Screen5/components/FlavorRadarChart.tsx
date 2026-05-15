@@ -20,8 +20,8 @@ export function FlavorRadarChart({ umami, saltiness, aroma, aftertaste, colorQua
   return (
     <div className="w-full h-full bg-gradient-to-br from-amber-950/30 to-slate-900/40 backdrop-blur-sm rounded-2xl border border-amber-700/30 p-6 flex flex-col">
       <h3 className="text-amber-100/90 text-center mb-4 tracking-wide">Biểu đồ Cảm quan</h3>
-      <div className="flex-1 min-h-0">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="flex-1 min-h-0" style={{ minHeight: '280px' }}>
+        <ResponsiveContainer width="100%" height="100%" minHeight={280}>
           <RadarChart data={data}>
             <PolarGrid stroke="#d97706" strokeOpacity={0.2} />
             <PolarAngleAxis

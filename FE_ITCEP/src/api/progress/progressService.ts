@@ -75,7 +75,9 @@ export const progressService = {
     try {
       // explicit id requested
       if (typeof userId === 'number') {
+        console.log('[progressService.getMyProgress] Fetching progress for explicit userId=', userId);
         const res = await api.get(`/progress/user/${userId}`)
+        console.log('[progressService.getMyProgress] Response:', res.data);
         return res.data
       }
 
@@ -86,7 +88,9 @@ export const progressService = {
           const parts = token.split('.')
           if (parts.length >= 2) {
             const payload = JSON.parse(atob(parts[1]))
+            console.log('[progressService.getMyProgress] JWT payload:', payload);
             const inferred = payload?.user_id ?? payload?.sub ?? payload?.id
+            console.log('[progressService.getMyProgress] Inferred userId=', inferred);
             if (inferred) {
               const res = await api.get(`/progress/user/${Number(inferred)}`)
               return res.data

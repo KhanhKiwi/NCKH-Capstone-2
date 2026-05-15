@@ -13,11 +13,11 @@ export interface Village {
 export const villagesData: Village[] = [
   {
     id: 'bat-trang',
-    name: 'Làng gốm Bát Tràng',
+    name: 'làng gốm Thanh Hà',
     location: 'Gia Lâm, Hà Nội',
     thumbnail: 'https://images.unsplash.com/photo-1734600891288-e762b5128851?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aWV0bmFtZXNlJTIwYmF0JTIwdHJhbmclMjBwb3R0ZXJ5JTIwY2VyYW1pY3N8ZW58MXx8fHwxNzczMzA4ODc0fDA&ixlib=rb-4.1.0&q=80&w=1080',
     description: 'Bát Tràng là làng nghề sản xuất gốm sứ truyền thống nổi tiếng nhất Việt Nam. Những sản phẩm gốm Bát Tràng được làm hoàn toàn thủ công với kỹ thuật chuốt tay, đắp nổi và vẽ hoa văn tinh tế, đậm đà bản sắc văn hóa dân tộc.',
-    history: 'Làng gốm Bát Tràng hình thành từ thế kỷ XIV-XV thời nhà Lý, khi thủ đô dời về Thăng Long. Trải qua hơn 500 năm thăng trầm, làng nghề vẫn giữ được ngọn lửa cháy rực rỡ và những bí quyết gia truyền từ đôi bàn tay tài hoa của các nghệ nhân.',
+    history: 'làng gốm Thanh Hà hình thành từ thế kỷ XIV-XV thời nhà Lý, khi thủ đô dời về Thăng Long. Trải qua hơn 500 năm thăng trầm, làng nghề vẫn giữ được ngọn lửa cháy rực rỡ và những bí quyết gia truyền từ đôi bàn tay tài hoa của các nghệ nhân.',
     videoUrl: 'https://www.youtube.com/embed/Z5VHUW5oUe4',
     galleryImages: [
       'https://images.unsplash.com/photo-1578509376106-96b6c86ded1b?auto=format&fit=crop&q=80&w=1080',

@@ -14,7 +14,6 @@ import { PressureGauge } from './components/PressureGauge';
 import { SealingDragGame } from './components/SealingDragGame';
 import { WinScreen } from './components/WinScreen';
 import { LossScreen } from './components/LossScreen';
-import { progressService } from '../../../api/services/progressService';
 import { getUserId } from '../../../utils/authUtils';
 
 export default function Screen3() {
