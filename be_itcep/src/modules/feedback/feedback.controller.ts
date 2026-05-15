@@ -25,13 +25,13 @@ export class FeedbackController {
     status: 201,
     description: 'Feedback created',
     schema: {
-      example: {
+        example: {
         feedback_id: 1,
         feedback_text: "Ứng dụng rất hữu ích, cảm ơn team!",
         content: 'Ứng dụng rất hữu ích, cảm ơn team!',
         name: 'Nguyễn Văn A',
         rating: 5,
-        resolved: false,
+        resolved: 'pending',
         created_at: '2026-05-15T10:00:00.000Z',
         updated_at: '2026-05-15T10:00:00.000Z',
         user: { user_id: 1, name: 'Nguyễn Văn A', email: 'a@example.com' }
@@ -55,7 +55,7 @@ export class FeedbackController {
           content: 'Ứng dụng rất hữu ích, cảm ơn team!',
           name: 'Nguyễn Văn A',
           rating: 5,
-          resolved: false,
+          resolved: 'pending',
           created_at: '2026-05-15T10:00:00.000Z',
           user: { user_id: 1, name: 'Nguyễn Văn A' }
         },
@@ -65,7 +65,7 @@ export class FeedbackController {
             content: 'Gặp lỗi khi mở trang làng, ảnh không hiển thị.',
             name: 'Trần Thị B',
             rating: 3,
-            resolved: false,
+            resolved: 'pending',
             created_at: '2026-05-15T10:05:00.000Z',
             user: { user_id: 2, name: 'Trần Thị B' }
         }
@@ -84,15 +84,15 @@ export class FeedbackController {
     description: 'Feedback found',
     schema: {
       example: {
-        feedback_id: 1,
-        feedback_text: 'Ứng dụng rất hữu ích, cảm ơn team!',
-        content: 'Ứng dụng rất hữu ích, cảm ơn team!',
-        name: 'Nguyễn Văn A',
-        rating: 5,
-        resolved: false,
-        created_at: '2026-05-15T10:00:00.000Z',
-        user: { user_id: 1, name: 'Nguyễn Văn A' }
-      }
+      feedback_id: 1,
+      feedback_text: 'Ứng dụng rất hữu ích, cảm ơn team!',
+      content: 'Ứng dụng rất hữu ích, cảm ơn team!',
+      name: 'Nguyễn Văn A',
+      rating: 5,
+      resolved: 'pending',
+      created_at: '2026-05-15T10:00:00.000Z',
+      user: { user_id: 1, name: 'Nguyễn Văn A' }
+    }
     }
   })
   findOne(@Param('id') id: string) {
@@ -105,7 +105,7 @@ export class FeedbackController {
   @ApiResponse({
     status: 200,
     description: 'Feedback updated',
-    schema: { example: { feedback_id: 1, resolved: true } }
+    schema: { example: { feedback_id: 1, resolved: 'approved' } }
   })
   update(@Param('id') id: string, @Body() dto: Partial<any>) {
     return this.feedbackService.update(Number(id), dto);

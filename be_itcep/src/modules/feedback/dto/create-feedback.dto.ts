@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsInt, Min, Max } from 'class-validator';
+import { IsOptional, IsString, IsInt, Min, Max, IsIn } from 'class-validator';
 
 export class CreateFeedbackDto {
   @ApiProperty({ description: 'Feedback content from user', example: 'Nội dung đánh giá...' })
@@ -17,6 +17,12 @@ export class CreateFeedbackDto {
   @Min(1)
   @Max(5)
   rating?: number;
+
+  @ApiProperty({ description: "Moderation status: 'pending' | 'approved' | 'rejected'", required: false, example: 'pending' })
+  @IsOptional()
+  @IsString()
+  @IsIn(['pending', 'approved', 'rejected'])
+  resolved?: string;
 
   @ApiProperty({ description: 'Optional user id (if logged in)', required: false, example: 1 })
   @IsOptional()

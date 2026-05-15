@@ -19,8 +19,9 @@ export class Feedback {
   @Column({ type: 'text' })
   feedback_text: string;
 
-  @Column({ default: false })
-  resolved: boolean;
+  // support tri-state moderation status: 'pending' | 'approved' | 'rejected'
+  @Column({ type: 'varchar', length: 32, default: 'pending' })
+  resolved: string;
 
   @CreateDateColumn()
   created_at: Date;

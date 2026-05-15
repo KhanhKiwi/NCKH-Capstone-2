@@ -11,7 +11,7 @@ import { Step } from '../modules/steps/entities/step.entity';
 import { Craft } from '../modules/crafts/entities/craft.entity';
 import { CraftVillage } from '../modules/villages/entities/craft-village.entity';
 import { Media } from '../modules/media/entities/media.entity';
-// import { PlayerSession } from '../modules/sessions/entities/player-session.entity';
+import { PlayerSession } from '../modules/sessions/entities/player-session.entity';
 import { UserActionLog } from '../modules/logs/entities/user-action-log.entity';
 import { AnalyticsEvent } from '../modules/analytics/entities/analytics-event.entity';
 import { Feedback } from '../modules/feedback/entities/feedback.entity';
@@ -46,12 +46,12 @@ import { Feedback } from '../modules/feedback/entities/feedback.entity';
           CraftVillage,
           Media,
           Feedback,
-          // PlayerSession,
+          PlayerSession,
           UserActionLog,
           AnalyticsEvent,
         ],
 
-        synchronize: true, // Đặt thành false trong production để tránh mất dữ liệu
+        synchronize: false, // Đặt thành false trong production để tránh mất dữ liệu
         logging: ['error', 'warn'],
       }),
     }),

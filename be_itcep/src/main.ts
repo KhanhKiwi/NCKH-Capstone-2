@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { log } from 'console';
 import { join } from 'path';
+import { existsSync, mkdirSync } from 'fs';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { VillagesModule } from './modules/villages/villages.module';
@@ -27,7 +28,11 @@ async function bootstrap() {
   });
 
   // Serve static uploads
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+  const uploadsPath = join(__dirname, '..', 'uploads');
+  const avatarsPath = join(uploadsPath, 'avatars');
+  if (!existsSync(uploadsPath)) mkdirSync(uploadsPath);
+  if (!existsSync(avatarsPath)) mkdirSync(avatarsPath, { recursive: true });
+  app.useStaticAssets(uploadsPath, {
     prefix: '/uploads/',
   });
 

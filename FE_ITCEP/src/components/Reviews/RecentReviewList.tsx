@@ -1,4 +1,5 @@
-import { useRef } from 'react';
+import { useRef, useEffect, useState } from 'react';
+import { feedbackService } from '../../api/feedback/feedbackService';
 
 interface Review {
   id: number;
@@ -9,59 +10,37 @@ interface Review {
   date: string;
 }
 
-const demoReviews: Review[] = [
-  {
-    id: 1,
-    name: 'Nguyễn Văn A',
-    avatar: 'https://i.pravatar.cc/80?img=11',
-    content: 'Làng nghề truyền thống thật tuyệt vời! Quy trình làm gốm rất thú vị và ý nghĩa.',
-    stars: 5,
-    date: '2026-04-01',
-  },
-  {
-    id: 2,
-    name: 'Trần Thị B',
-    avatar: 'https://i.pravatar.cc/80?img=12',
-    content: 'Mình rất thích trải nghiệm làm tranh Đông Hồ, cảm ơn CraftSteps đã mang đến hành trình này!',
-    stars: 5,
-    date: '2026-03-29',
-  },
-  {
-    id: 3,
-    name: 'Lê Văn C',
-    avatar: 'https://i.pravatar.cc/80?img=13',
-    content: 'Các làng nghề đều có nét đẹp riêng, giao diện rất bắt mắt và dễ sử dụng.',
-    stars: 4,
-    date: '2026-03-27',
-  },
-  {
-    id: 4,
-    name: 'Phạm Thị D',
-    avatar: 'https://i.pravatar.cc/80?img=14',
-    content: 'Nội dung rất bổ ích, mình học được nhiều điều từ các bước thủ công.',
-    stars: 5,
-    date: '2026-03-22',
-  },
-  {
-    id: 5,
-    name: 'Hoàng Văn E',
-    avatar: 'https://i.pravatar.cc/80?img=15',
-    content: 'Giao diện thân thiện, các bài hướng dẫn rõ ràng, dễ theo dõi.',
-    stars: 4,
-    date: '2026-03-18',
-  },
-  {
-    id: 6,
-    name: 'Đỗ Thị F',
-    avatar: 'https://i.pravatar.cc/80?img=16',
-    content: 'Rất thích ý tưởng kết hợp giáo dục và trải nghiệm văn hóa truyền thống.',
-    stars: 5,
-    date: '2026-03-10',
-  },
-];
+const demoReviews: Review[] = []
 
 export default function RecentReviewList() {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const data: any = await feedbackService.getAll({ resolved: 'approved' })
+        const list: any[] = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : []
+        const normalized = list.map((f: any) => ({
+          id: Number(f.feedback_id ?? f.id ?? f._id ?? 0),
+          name: f.name ?? f.user?.name ?? 'Ẩn danh',
+          avatar: f.user?.avatar ?? undefined,
+          content: f.feedback_text ?? f.content ?? f.message ?? '',
+          stars: Number(f.rating ?? f.stars ?? 5),
+          date: f.created_at ?? f.createdAt ?? f.date ?? new Date().toISOString(),
+          resolved: String(f.resolved ?? ''),
+        }))
+        if (mounted) setReviews(normalized)
+      } catch (err) {
+        console.error('Failed to load reviews', err)
+      } finally {
+        if (mounted) setLoading(false)
+      }
+    })()
+    return () => { mounted = false }
+  }, [])
 
   return (
     <div className="w-full max-w-6xl mx-auto mt-12 mb-6 relative" style={{ marginTop: '150px' }}>
@@ -102,7 +81,7 @@ export default function RecentReviewList() {
           className="grid gap-6 overflow-x-auto scroll-smooth pb-6 px-8 no-scrollbar"
           style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', gridAutoFlow: 'column', gridAutoColumns: 'minmax(260px,360px)', gridTemplateRows: 'repeat(2, auto)', scrollSnapType: 'x mandatory' }}
         >
-          {demoReviews.map((review) => (
+          {(loading ? demoReviews : reviews).filter(r => (r.resolved ?? '') === 'approved').map((review) => (
             <div
               id={`review-${review.id}`}
               key={review.id}
@@ -110,7 +89,11 @@ export default function RecentReviewList() {
               style={{ boxShadow: '0 4px 18px 0 rgba(180,138,60,0.10)', scrollSnapAlign: 'start' }}
             >
               <div className="flex items-center gap-3 mb-2">
-                <img src={review.avatar} alt={review.name} className="w-10 h-10 rounded-full object-cover avatar-ring" />
+                {review.avatar ? (
+                  <img src={review.avatar} alt={review.name} className="w-10 h-10 rounded-full object-cover avatar-ring" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-[#fffbe8] avatar-ring" />
+                )}
                 <div className="flex-1">
                   <div className="text-[#b48a3c] font-bold text-sm">{review.name}</div>
                   <div className="text-[#8b6f47] text-xs">{new Date(review.date).toLocaleDateString('vi-VN')}</div>
@@ -130,7 +113,7 @@ export default function RecentReviewList() {
                   </svg>
                 ))}
               </div>
-              <div className="text-[#4a3f2e] text-sm font-medium italic">“{review.content}”</div>
+              <div className="text-[#4a3f2e] text-sm font-medium italic break-words whitespace-pre-wrap max-w-full">“{review.content}”</div>
               {/* share buttons removed */}
             </div>
           ))}

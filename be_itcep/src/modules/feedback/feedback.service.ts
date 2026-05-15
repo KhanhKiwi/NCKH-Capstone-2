@@ -14,6 +14,8 @@ export class FeedbackService {
       feedback_text: dto.content ?? (dto as any).feedbackText,
       name: dto.name,
       rating: dto.rating,
+      // default to 'pending' unless provided
+      resolved: dto.resolved ?? 'pending',
     };
     if (dto.userId) {
       const user = await this.userRepo.findOne({ where: { user_id: dto.userId } as any });

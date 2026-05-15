@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import VillagesView from '../../components/Admin/VillagesView'
 import VisitsChart from '../../components/Admin/VisitsChart'
 import { usersService } from '../../api/users/usersService'
+import { feedbackService } from '../../api/feedback/feedbackService'
 
 type User = { id: string; name: string; email: string }
-type Feedback = { id: string; user: string; message: string; resolved?: boolean }
+type Feedback = { id: string; user: string; message: string; resolved?: string }
 
 export default function AdminPage() {
   const [active, setActive] = useState<'dashboard' | 'users' | 'feedback' | 'villages' | 'settings'>(() => {
@@ -28,6 +29,7 @@ export default function AdminPage() {
   const [users, setUsers] = useState<User[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([])
+  const [feedbackFilter, setFeedbackFilter] = useState<'all' | 'approved' | 'rejected' | 'pending'>('all')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editValues, setEditValues] = useState<{ name: string; email: string }>({ name: '', email: '' })
   const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null)
@@ -39,10 +41,7 @@ export default function AdminPage() {
     // mock data for stats/feedback
     setTimeout(() => {
       setStats({ visits: 12432, views: 54321 })
-      setFeedbacks([
-        { id: 'f1', user: 'Nguyen Van A', message: 'Game rất hay, nhưng bị lag.' },
-        { id: 'f2', user: 'Tran Thi B', message: 'Mong có thêm hướng dẫn.' },
-      ])
+      // feedbacks are loaded from API; remove hardcoded mock entries
 
       // mock visits series for last 7 days (demo) with concrete date labels
       const series = [1200, 1800, 2500, 3000, 4000, 2200, 12432]
@@ -97,6 +96,26 @@ export default function AdminPage() {
         console.error('Failed to load users', err)
         // keep users empty when API unavailable
         setUsers([])
+      }
+    })()
+
+    // load feedbacks from API
+    ;(async () => {
+      try {
+        const data = await feedbackService.getAll()
+        // backend may return array or { data: [...] } etc
+        const list: any[] = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : Array.isArray(data?.feedbacks) ? data.feedbacks : []
+        const normalized = list.map((f: any) => ({
+          id: String(f.feedback_id ?? f.id ?? f._id ?? ''),
+          // prefer the `name` field from the feedback itself. If missing, fall back to user profile name. If neither, show 'Ẩn danh'.
+          user: (f.name ?? f.user?.name ?? 'Ẩn danh'),
+          message: f.feedback_text ?? f.content ?? f.message ?? '',
+          resolved: f.resolved ?? (f.resolved === false ? 'pending' : String(f.resolved)),
+        }))
+        setFeedbacks(normalized)
+      } catch (err) {
+        console.error('Failed to load feedbacks', err)
+        setFeedbacks([])
       }
     })()
 
@@ -160,8 +179,40 @@ export default function AdminPage() {
       console.error('Failed to save user', err)
     }
   }
-  function resolveFeedback(id: string) {
-    setFeedbacks((s) => s.map((f) => (f.id === id ? { ...f, resolved: true } : f)))
+  async function updateFeedbackStatus(id: string, status: 'pending' | 'approved' | 'rejected') {
+    // optimistic update
+    setFeedbacks((s) => s.map((f) => (f.id === id ? { ...f, resolved: status } : f)))
+    try {
+    await feedbackService.update(id, { resolved: status } as any)
+    } catch (err) {
+      console.error('Failed to update feedback status', err)
+      // revert on error by reloading list
+      try {
+        const data = await feedbackService.getAll()
+        const list: any[] = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : []
+        const normalized = list.map((f: any) => ({
+          id: String(f.feedback_id ?? f.id ?? f._id ?? ''),
+          user: (f.name ?? f.user?.name ?? 'Ẩn danh'),
+          message: f.feedback_text ?? f.content ?? f.message ?? '',
+          resolved: f.resolved ?? (f.resolved === false ? 'pending' : String(f.resolved)),
+        }))
+        setFeedbacks(normalized)
+      } catch (e) {
+        console.error('Failed to reload feedbacks after update error', e)
+      }
+    }
+  }
+  function renderStatusBadge(status?: string) {
+    const s = (status ?? 'pending') as string
+    // Do not render a badge for pending state
+    if (s === 'pending') return null
+    const map: Record<string, { label: string; cls: string }> = {
+      approved: { label: 'Đã duyệt', cls: 'bg-emerald-100 text-emerald-800' },
+      rejected: { label: 'Không duyệt', cls: 'bg-rose-100 text-rose-800' },
+    }
+    const info = map[s] ?? null
+    if (!info) return null
+    return <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${info.cls}`}>{info.label}</span>
   }
   // villages are handled in VillagesView component
 
@@ -180,12 +231,12 @@ export default function AdminPage() {
 
               <nav className="space-y-3">
                 {[
-                  ['dashboard', '🏠', 'Dashboard'],
-                  ['users', '👥', 'Users'],
-                  ['feedback', '💬', 'Feedback'],
-                  ['villages', '🏘️', 'Villages'],
-                  ['settings', '⚙️', 'Settings'],
-                ].map(([key, icon, label]) => {
+                    ['dashboard', '🏠', 'Bảng điều khiển'],
+                    ['users', '👥', 'Người dùng'],
+                    ['feedback', '💬', 'Phản hồi'],
+                    ['villages', '🏘️', 'Làng'],
+                    ['settings', '⚙️', 'Cài đặt'],
+                  ].map(([key, icon, label]) => {
                   const k = key as typeof active
                   const isActive = active === k
                   return (
@@ -229,12 +280,12 @@ export default function AdminPage() {
               <section className="bg-white rounded-2xl p-8 shadow-xl mb-6">
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                      <h2 className="text-2xl font-semibold">Dashboard</h2>
+                      <h2 className="text-2xl font-semibold">Bảng điều khiển</h2>
                       <p className="text-sm text-slate-200 mt-1">Tổng quan hệ thống và trạng thái nhanh</p>
                     </div>
                     <div className="flex items-center gap-3">
                       <input
-                        placeholder="Search..."
+                        placeholder="Tìm kiếm..."
                         className="hidden md:inline-block px-3 py-2 rounded-md border bg-white/60 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-300"
                       />
                       <button
@@ -245,22 +296,22 @@ export default function AdminPage() {
                       >
                         {gameEnabled ? 'Game: On' : 'Game: Off'}
                       </button>
-                      <button className="px-3 py-2 rounded-md bg-white/90 text-indigo-700 font-medium">Export</button>
+                      <button className="px-3 py-2 rounded-md bg-white/90 text-indigo-700 font-medium">Xuất</button>
                       <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-indigo-700 font-semibold">A</div>
                     </div>
                   </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                   <div className="p-6 rounded-lg bg-slate-50 border">
-                    <div className="text-sm text-slate-500">Truy cập</div>
+                    <div className="text-sm text-slate-500">Lượt truy cập</div>
                     <div className="text-3xl font-bold">{stats.visits}</div>
                   </div>
                   <div className="p-6 rounded-lg bg-slate-50 border">
-                    <div className="text-sm text-slate-500">Lượt view</div>
+                    <div className="text-sm text-slate-500">Lượt xem</div>
                     <div className="text-3xl font-bold">{stats.views}</div>
                   </div>
                   <div className="p-6 rounded-lg bg-slate-50 border">
-                    <div className="text-sm text-slate-500">Users</div>
+                    <div className="text-sm text-slate-500">Người dùng</div>
                     <div className="text-3xl font-bold">{users.length}</div>
                   </div>
                 </div>
@@ -298,15 +349,15 @@ export default function AdminPage() {
 
             {active === 'users' && (
               <section className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-                <h2 className="text-xl font-semibold mb-4">Quản lý Users</h2>
+                <h2 className="text-xl font-semibold mb-4">Quản lý người dùng</h2>
                     <div className="flex items-center justify-between mb-3">
                       <input
-                        placeholder="Search users by name or email"
+                        placeholder="Tìm người dùng theo tên hoặc email"
                         className="px-3 py-2 rounded-md border w-80"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                       />
-                      <div className="text-sm text-slate-500">{users.length} users</div>
+                      <div className="text-sm text-slate-500">{users.length} người</div>
                     </div>
                     <table className="w-full text-sm">
                   <thead>
@@ -364,24 +415,44 @@ export default function AdminPage() {
               </section>
             )}
 
-            {active === 'feedback' && (
+              {active === 'feedback' && (
               <section className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-                <h2 className="text-xl font-semibold mb-4">Feedback</h2>
-                <ul className="space-y-3">
-                  {feedbacks.map((f) => (
-                    <li key={f.id} className="p-3 rounded-md border">
-                      <div className="font-medium">{f.user}</div>
-                      <div className="text-sm text-slate-600 mb-2">{f.message}</div>
-                      <div>
-                        <button
-                          onClick={() => resolveFeedback(f.id)}
-                          disabled={!!f.resolved}
-                          className={`px-3 py-1 rounded-md text-sm font-medium ${
-                            f.resolved ? 'bg-emerald-200 text-emerald-800' : 'bg-indigo-600 text-white'
-                          }`}
-                        >
-                          {f.resolved ? 'Đã xử lý' : 'Đánh dấu đã xử lý'}
-                        </button>
+                <h2 className="text-xl font-semibold mb-4">Phản hồi</h2>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setFeedbackFilter('all')} className={`px-3 py-1 rounded-md text-sm ${feedbackFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-slate-100'}`}>Tất cả</button>
+                    <button onClick={() => setFeedbackFilter('pending')} className={`px-3 py-1 rounded-md text-sm ${feedbackFilter === 'pending' ? 'bg-yellow-500 text-white' : 'bg-slate-100'}`}>Chờ duyệt</button>
+                    <button onClick={() => setFeedbackFilter('approved')} className={`px-3 py-1 rounded-md text-sm ${feedbackFilter === 'approved' ? 'bg-emerald-600 text-white' : 'bg-slate-100'}`}>Đã duyệt</button>
+                    <button onClick={() => setFeedbackFilter('rejected')} className={`px-3 py-1 rounded-md text-sm ${feedbackFilter === 'rejected' ? 'bg-rose-600 text-white' : 'bg-slate-100'}`}>Không duyệt</button>
+                  </div>
+                </div>
+
+                <ul className="space-y-4">
+                  {feedbacks
+                    .filter((f) => {
+                      const state = (f.resolved ?? 'pending') as string
+                      if (feedbackFilter === 'all') return true
+                      return state === feedbackFilter
+                    })
+                    .map((f) => (
+                    <li key={f.id} className="p-4 rounded-lg border bg-white shadow-sm flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="text-base font-semibold text-slate-800">{f.user}</div>
+                          {((f.resolved ?? 'pending') !== 'pending') && (
+                            <div className="hidden sm:block">{renderStatusBadge(f.resolved)}</div>
+                          )}
+                        </div>
+                        <div className="mt-2 text-sm text-slate-600 whitespace-pre-wrap break-words break-all max-w-full">{f.message}</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {((f.resolved ?? 'pending') !== 'pending') && <div className="sm:hidden">{renderStatusBadge(f.resolved)}</div>}
+                        {((f.resolved ?? 'pending') === 'pending') && (
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => updateFeedbackStatus(f.id, 'approved')} className="px-3 py-1 rounded-md text-sm font-medium bg-emerald-600 text-white">Duyệt</button>
+                            <button onClick={() => updateFeedbackStatus(f.id, 'rejected')} className="px-3 py-1 rounded-md text-sm font-medium bg-rose-600 text-white">Không duyệt</button>
+                          </div>
+                        )}
                       </div>
                     </li>
                   ))}
@@ -395,7 +466,7 @@ export default function AdminPage() {
 
             {active === 'settings' && (
               <section className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-                <h2 className="text-xl font-semibold mb-4">Settings</h2>
+                <h2 className="text-xl font-semibold mb-4">Cài đặt</h2>
                 <div className="text-sm text-slate-600">Chứa các tùy chọn khác (demo).</div>
               </section>
             )}

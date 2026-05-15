@@ -49,4 +49,14 @@ export const devProxy = {
     changeOrigin: true,
     secure: false,
   },
+  '/feedback': {
+    target: 'http://localhost:3000',
+    changeOrigin: true,
+    secure: false,
+  },
+  '/feedbacks': {
+    target: 'http://localhost:3000',
+    changeOrigin: true,
+    secure: false,
+  },
 }
