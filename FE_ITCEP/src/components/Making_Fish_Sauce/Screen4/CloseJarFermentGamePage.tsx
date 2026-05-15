@@ -7,7 +7,7 @@ import { progressService } from '../../../api/progress/progressService';
 import { levelsService } from '../../../api/levels/levelsService';
 import { getUserId } from '../../../utils/authUtils';
 
-export default function CloseJarFermentGamePage() {
+export default function CloseJarFermentGamePage({ challengeMode = false, onComplete }: { challengeMode?: boolean; onComplete?: () => void }) {
   const navigate = useNavigate();
   const [gameStarted, setGameStarted] = useState(false);
   const [isFinishing, setIsFinishing] = useState(false);
@@ -51,7 +51,11 @@ export default function CloseJarFermentGamePage() {
       if (passed && quality >= 75) {
         console.log('[Screen4] Navigating to Level 5...');
         setTimeout(() => {
-          navigate('/game/final-extraction');
+          if (challengeMode && onComplete) {
+            onComplete();
+          } else {
+            navigate('/game/final-extraction');
+          }
         }, 1500);
       } else {
         console.log('[Screen4] Level not passed - staying on result screen');
@@ -69,7 +73,7 @@ export default function CloseJarFermentGamePage() {
       {!gameStarted ? (
         <IntroScreen onStart={() => setGameStarted(true)} />
       ) : (
-        <AdvancedFermentationGame onGameEnd={handleGameEnd} />
+        <AdvancedFermentationGame onGameEnd={handleGameEnd} challengeMode={challengeMode} />
       )}
 
       {/* Back Button - Floating */}

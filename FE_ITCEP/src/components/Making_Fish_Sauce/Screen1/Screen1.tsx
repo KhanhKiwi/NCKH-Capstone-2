@@ -19,7 +19,7 @@ interface Fish {
   scale: number;
 }
 
-export default function Screen1() {
+export default function Screen1({ challengeMode = false, onChallengeComplete }: { challengeMode?: boolean; onChallengeComplete?: () => void }) {
   const navigate = useNavigate();
   
   const [quality, setQuality] = useState(0); // 0-100% quality rating
@@ -230,12 +230,20 @@ export default function Screen1() {
         }
       }
       
-      // Navigate to next level
-      navigate('/game/wash-fish');
+      // Navigate to next level or call challenge complete callback
+      if (challengeMode && onChallengeComplete) {
+        onChallengeComplete();
+      } else {
+        navigate('/game/wash-fish');
+      }
     } catch (error) {
       console.error('[Screen1] Error saving progress:', error);
-      // Still navigate even if unlock fails (graceful degradation)
-      navigate('/game/wash-fish');
+      // Still navigate/complete even if unlock fails (graceful degradation)
+      if (challengeMode && onChallengeComplete) {
+        onChallengeComplete();
+      } else {
+        navigate('/game/wash-fish');
+      }
     } finally {
       setIsUnlocking(false);
     }

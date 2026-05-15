@@ -29,7 +29,7 @@ interface BrushStroke {
   timestamp: number;
 }
 
-export default function Screen2() {
+export default function Screen2({ challengeMode = false, onChallengeComplete }: { challengeMode?: boolean; onChallengeComplete?: () => void }) {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<number | null>(null);
   
@@ -417,8 +417,12 @@ export default function Screen2() {
       console.error('[Screen2] Error saving progress:', error);
     }
     
-    // Navigate to next level
-    navigate('/game/wash-salt');
+    // Navigate to next level or call challenge complete callback
+    if (challengeMode && onChallengeComplete) {
+      onChallengeComplete();
+    } else {
+      navigate('/game/wash-salt');
+    }
   };
 
   const handleRetry = () => {

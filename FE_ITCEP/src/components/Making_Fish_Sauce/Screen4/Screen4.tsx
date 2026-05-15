@@ -11,7 +11,11 @@ import type { JarState } from './types/gameTypes';
 
 type GamePhase = 'sealing' | 'survival' | 'finished';
 
-export default function Screen4() {
+interface Screen4Props {
+  challengeMode?: boolean;
+}
+
+export default function Screen4({ challengeMode = false }: Screen4Props) {
   const navigate = useNavigate();
   const [gamePhase, setGamePhase] = useState<GamePhase>('sealing');
   const [baseQuality, setBaseQuality] = useState(0);
@@ -87,6 +91,7 @@ export default function Screen4() {
             setJars([]);
           }}
           onBack={() => navigate(-1)}
+          challengeMode={challengeMode}
         />
       );
     } else {
@@ -100,6 +105,7 @@ export default function Screen4() {
             setJars([]);
           }}
           onBack={() => navigate(-1)}
+          challengeMode={challengeMode}
         />
       );
     }

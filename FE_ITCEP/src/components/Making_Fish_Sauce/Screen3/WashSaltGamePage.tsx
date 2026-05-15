@@ -2,7 +2,12 @@ import { useState } from 'react';
 import Screen3 from './index';
 import { IntroScreen } from './IntroScreen';
 
-export default function WashSaltGamePage() {
+interface WashSaltGamePageProps {
+  challengeMode?: boolean;
+  onComplete?: () => void;
+}
+
+export default function WashSaltGamePage({ challengeMode = false, onComplete }: WashSaltGamePageProps) {
   const [gameStarted, setGameStarted] = useState(false);
 
   return (
@@ -11,7 +16,7 @@ export default function WashSaltGamePage() {
       {!gameStarted ? (
         <IntroScreen onStart={() => setGameStarted(true)} />
       ) : (
-        <Screen3 />
+        <Screen3 challengeMode={challengeMode} onChallengeComplete={onComplete} />
       )}
     </div>
   );

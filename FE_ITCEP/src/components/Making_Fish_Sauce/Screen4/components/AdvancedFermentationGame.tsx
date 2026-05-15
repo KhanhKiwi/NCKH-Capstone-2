@@ -139,9 +139,10 @@ const SITUATIONS = [
 
 interface AdvancedFermentationGameProps {
   onGameEnd: (passed: boolean, quality: number) => void;
+  challengeMode?: boolean;
 }
 
-export function AdvancedFermentationGame({ onGameEnd }: AdvancedFermentationGameProps) {
+export function AdvancedFermentationGame({ onGameEnd, challengeMode = false }: AdvancedFermentationGameProps) {
   const [month, setMonth] = useState(1);
   const [temperature, setTemperature] = useState(30);
   const [humidity, setHumidity] = useState(75);
@@ -266,6 +267,7 @@ export function AdvancedFermentationGame({ onGameEnd }: AdvancedFermentationGame
         history={history}
         temperature={temperature}
         humidity={humidity}
+        challengeMode={challengeMode}
       />
     );
   }
@@ -275,11 +277,13 @@ export function AdvancedFermentationGame({ onGameEnd }: AdvancedFermentationGame
   return (
     <div className="min-h-screen w-full relative overflow-auto bg-gradient-to-b from-[#f5f0e8] to-[#e8dcc8]">
       <AmbientParticles />
-      <ActionNotification
-        message={notification.message}
-        show={notification.show}
-        onClose={() => setNotification({ show: false, message: '' })}
-      />
+      {!challengeMode && (
+        <ActionNotification
+          message={notification.message}
+          show={notification.show}
+          onClose={() => setNotification({ show: false, message: '' })}
+        />
+      )}
 
       <div className="relative min-h-screen max-w-[1600px] mx-auto px-4 py-6">
         <header className="mb-8">

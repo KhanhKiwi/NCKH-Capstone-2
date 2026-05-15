@@ -9,9 +9,10 @@ import { getUserId } from '../../../../utils/authUtils';
 interface ResultScreenProps {
   score: number;
   onPlayAgain: () => void;
+  challengeMode?: boolean;
 }
 
-export function ResultScreen({ score, onPlayAgain }: ResultScreenProps) {
+export function ResultScreen({ score, onPlayAgain, challengeMode = false }: ResultScreenProps) {
   const navigate = useNavigate();
   const userId = getUserId();
 
@@ -182,23 +183,25 @@ export function ResultScreen({ score, onPlayAgain }: ResultScreenProps) {
 
         {/* Buttons */}
         <motion.div
-          className="flex gap-4 mt-8"
+          className={`flex gap-4 mt-8 ${challengeMode ? 'justify-center' : ''}`}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
         >
-          <motion.button
-            onClick={onPlayAgain}
-            className="flex-1 px-6 py-4 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white rounded-lg font-bold text-lg transition-all shadow-lg"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            🔄 Chơi Lại
-          </motion.button>
+          {!challengeMode && (
+            <motion.button
+              onClick={onPlayAgain}
+              className="flex-1 px-6 py-4 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white rounded-lg font-bold text-lg transition-all shadow-lg"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              🔄 Chơi Lại
+            </motion.button>
+          )}
 
           <motion.button
             onClick={handleGoBack}
-            className="flex-1 px-6 py-4 bg-amber-900/40 border border-amber-700/50 text-amber-200 rounded-lg font-semibold hover:bg-amber-900/60 transition-all"
+            className={`${!challengeMode ? 'flex-1' : 'px-8'} px-6 py-4 bg-amber-900/40 border border-amber-700/50 text-amber-200 rounded-lg font-semibold hover:bg-amber-900/60 transition-all`}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.95 }}
           >

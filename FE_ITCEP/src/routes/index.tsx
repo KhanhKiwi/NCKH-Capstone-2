@@ -31,6 +31,7 @@ import VillageDetailPage from '../pages/VillageDetailPage'
 import VillagesPage from '../pages/VillagesPage'
 import ChallengePage from '../pages/ChallengePage'
 import ChallengeMakingCere from '../pages/challenge_making_cere'
+import ChallengeMakingFishSauce from '../pages/challenge_making_fish_sauce'
 import LeaderboardPage from '../pages/Leaderboard'
 import AdminPage from '../pages/admin/AdminPage'
 import Screen1 from '../components/making_mats/Screen1'
@@ -75,6 +76,7 @@ export const router = createBrowserRouter([
       { path: 'challenge', Component: ChallengePage },
       { path: 'leaderboard', Component: LeaderboardPage },
       { path: 'challenge-making-cere', Component: ChallengeMakingCere },
+      { path: 'challenge-making-fish-sauce', Component: ChallengeMakingFishSauce },
       { path: 'game/catch-fish', Component: CatchFishGamePage },
       { path: 'game/wash-fish', Component: WashFishGamePage },
       { path: 'game/wash-salt', Component: WashSaltGamePage },

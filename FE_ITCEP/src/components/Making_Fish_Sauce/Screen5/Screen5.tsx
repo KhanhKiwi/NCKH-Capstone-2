@@ -19,7 +19,7 @@ import { EvaluationPhase } from './EvaluationPhase';
 
 type GamePhase = 'prep' | 'filtration' | 'blend' | 'evaluation' | 'complete' | 'failed';
 
-export default function Screen5() {
+export default function Screen5({ challengeMode = false, onChallengeComplete }: { challengeMode?: boolean; onChallengeComplete?: () => void }) {
   const navigate = useNavigate();
   const userId = getUserId();
 
@@ -283,11 +283,19 @@ export default function Screen5() {
                       <p className="text-amber-200/60 mb-8">Chất lượng cuối cùng: {Math.round(quality)}%</p>
                       <motion.button
                         onClick={() => {
-                          toast.success('🎉 Level 5 hoàn thành! Mở khóa Level 6!', {
-                            description: 'Tiếp tục hành trình di sản mắm Nam Ô',
-                            duration: 5000
-                          });
-                          setTimeout(() => navigate('/game/eternal-fragrance'), 2000);
+                          if (!challengeMode) {
+                            toast.success('🎉 Level 5 hoàn thành! Mở khóa Level 6!', {
+                              description: 'Tiếp tục hành trình di sản mắm Nam Ô',
+                              duration: 5000
+                            });
+                          }
+                          setTimeout(() => {
+                            if (challengeMode && onChallengeComplete) {
+                              onChallengeComplete();
+                            } else {
+                              navigate('/game/eternal-fragrance');
+                            }
+                          }, 2000);
                         }}
                         className="px-8 py-4 bg-gradient-to-r from-yellow-600 to-amber-600 text-amber-50 rounded-lg font-bold text-lg hover:from-yellow-500 hover:to-amber-500 transition-all"
                         whileHover={{ scale: 1.05 }}

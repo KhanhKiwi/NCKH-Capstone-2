@@ -6,9 +6,11 @@ import { progressService } from '../../../../api/progress/progressService';
 interface WinScreenProps {
   quality: number;
   userId: number | null;
+  challengeMode?: boolean;
+  onChallengeComplete?: () => void;
 }
 
-export function WinScreen({ quality, userId }: WinScreenProps) {
+export function WinScreen({ quality, userId, challengeMode = false, onChallengeComplete }: WinScreenProps) {
   const navigate = useNavigate();
 
   const handleContinue = async () => {
@@ -34,8 +36,12 @@ export function WinScreen({ quality, userId }: WinScreenProps) {
       console.error('[Screen3] Error saving progress:', error);
     }
     
-    // Navigate to next level
-    navigate('/game/close-jar-ferment');
+    // Navigate to next level or call challenge complete callback
+    if (challengeMode && onChallengeComplete) {
+      onChallengeComplete();
+    } else {
+      navigate('/game/close-jar-ferment');
+    }
   };
 
   const getEncouragingMessage = (q: number) => {

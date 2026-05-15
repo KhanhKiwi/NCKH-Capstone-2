@@ -8,7 +8,11 @@ import { ResultScreen } from './components/ResultScreen';
 
 type GamePhase = 'intro' | 'instructions' | 'breathing' | 'sequence' | 'result';
 
-export default function Screen6() {
+interface Screen6Props {
+  challengeMode?: boolean;
+}
+
+export default function Screen6({ challengeMode = false }: Screen6Props) {
   const [gamePhase, setGamePhase] = useState<GamePhase>('intro');
   const [finalScore, setFinalScore] = useState(0);
 
@@ -91,7 +95,7 @@ export default function Screen6() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <ResultScreen score={finalScore} onPlayAgain={handlePlayAgain} />
+          <ResultScreen score={finalScore} onPlayAgain={handlePlayAgain} challengeMode={challengeMode} />
         </motion.div>
       )}
     </AnimatePresence>
