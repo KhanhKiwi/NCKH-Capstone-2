@@ -24,8 +24,14 @@ export class FeedbackService {
     return this.repo.save(fb as any);
   }
 
-  findAll() {
-    return this.repo.find({ relations: ['user'] });
+  findAll(resolved?: string) {
+    const query = this.repo.createQueryBuilder('feedback').leftJoinAndSelect('feedback.user', 'user');
+    
+    if (resolved) {
+      query.where('feedback.resolved = :resolved', { resolved });
+    }
+    
+    return query.getMany();
   }
 
   findOne(id: number) {
