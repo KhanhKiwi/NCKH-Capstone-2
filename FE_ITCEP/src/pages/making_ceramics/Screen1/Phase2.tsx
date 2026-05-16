@@ -39,7 +39,9 @@ export default function Phase2({ onComplete, challengeMode }: Phase2Props & { ch
 			if (Array.isArray(all)) {
 				const current = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === 1)
 				if (current) {
-					await progressService.saveProgress({ user_id: 1, level_id: Number(current.level_id ?? current.id), status: 'completed', score: 100 })
+					const payload: any = { level_id: Number(current.level_id ?? current.id), status: 'completed', score: 100 }
+					if (typeof userId !== 'undefined') payload.user_id = userId
+					await progressService.saveProgress(payload)
 				}
 			}
 		} catch (e) { console.warn('complete level failed', e) }

@@ -138,8 +138,8 @@ export default function BatTrangLevel3Screen3({ onComplete, challengeMode }: { o
     }
 
     try {
-      await progressService.saveProgress({ user_id: 1, level_id: 2, status: 'unlocked', score: 0 })
-      await progressService.saveProgress({ user_id: 1, level_id: 2, status: 'completed', score: 100 })
+      await progressService.saveProgress({ level_id: 2, status: 'unlocked', score: 0 })
+      await progressService.saveProgress({ level_id: 2, status: 'completed', score: 100 })
     } catch (e) { console.warn('progress save failed', e) }
 
     if (onComplete) return onComplete()
