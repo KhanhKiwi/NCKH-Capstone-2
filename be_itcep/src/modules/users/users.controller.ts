@@ -25,7 +25,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { GetUser } from '../../auth/get-user.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { extname, join } from 'path';
 
 @ApiTags('users')
 @Controller('users')
@@ -95,7 +95,7 @@ export class UsersController {
   @UseInterceptors(
     FileInterceptor('avatar', {
       storage: diskStorage({
-        destination: './uploads/avatars',
+        destination: join(process.cwd(), 'uploads', 'avatars'),
         filename: (req, file, cb) => {
           const randomName = Array(32)
             .fill(null)
@@ -107,7 +107,7 @@ export class UsersController {
     }),
   )
   async uploadAvatar(@GetUser() user: any, @UploadedFile() file: any) {
-    const avatarUrl = `http://localhost:3000/uploads/avatars/${file.filename}`;
+    const avatarUrl = `/uploads/avatars/${file.filename}`;
     return this.usersService.update(user.userId, { avatar: avatarUrl });
   }
 

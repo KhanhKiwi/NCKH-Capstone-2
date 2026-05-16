@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { log } from 'console';
 import { join } from 'path';
+import { existsSync, mkdirSync } from 'fs';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { VillagesModule } from './modules/villages/villages.module';
@@ -13,6 +14,7 @@ import { SessionsModule } from './modules/sessions/sessions.module';
 import { MediaModule } from './modules/media/media.module';
 import { LevelsModule } from './modules/levels/levels.module';
 import { UserChallengesModule } from './modules/user-challenges/user-challenges.module';
+import { FeedbackModule } from './modules/feedback/feedback.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -25,8 +27,12 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Serve static uploads
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+  // Serve static uploads from project root `uploads` so files persist across restarts
+  const uploadsPath = join(process.cwd(), 'uploads');
+  const avatarsPath = join(uploadsPath, 'avatars');
+  if (!existsSync(uploadsPath)) mkdirSync(uploadsPath, { recursive: true });
+  if (!existsSync(avatarsPath)) mkdirSync(avatarsPath, { recursive: true });
+  app.useStaticAssets(uploadsPath, {
     prefix: '/uploads/',
   });
 
@@ -37,7 +43,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config, {
-    include: [AuthModule, UsersModule, VillagesModule, CraftsModule, ProgressModule, SessionsModule, MediaModule, LevelsModule, UserChallengesModule],
+    include: [AuthModule, UsersModule, VillagesModule, CraftsModule, ProgressModule, SessionsModule, MediaModule, LevelsModule, UserChallengesModule, FeedbackModule],
   });
   SwaggerModule.setup('api/docs', app, document);
   await app.listen(process.env.PORT ?? 3000);

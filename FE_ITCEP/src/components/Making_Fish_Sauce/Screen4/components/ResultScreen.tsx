@@ -1,6 +1,4 @@
 
-import { CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
-
 interface ResultScreenProps {
   passed: boolean;
   finalQuality: number;
@@ -23,9 +21,9 @@ export function ResultScreen({
         <div className="text-center space-y-4">
           <div className="flex justify-center">
             {passed ? (
-              <CheckCircle2 size={120} className="text-[#5f7c8a] animate-pulse" />
+              <span className="text-9xl text-[#5f7c8a] animate-pulse">✓</span>
             ) : (
-              <XCircle size={120} className="text-[#b87333] animate-pulse" />
+              <span className="text-9xl text-[#b87333] animate-pulse">✕</span>
             )}
           </div>
 
@@ -126,7 +124,7 @@ export function ResultScreen({
             onClick={() => window.location.reload()}
             className="flex items-center gap-2 bg-gradient-to-r from-[#a0522d] to-[#b87333] hover:from-[#b87333] hover:to-[#d4a574] text-white font-bold py-3 px-6 rounded-xl transition-all hover:scale-105 active:scale-95"
           >
-            <RotateCcw size={20} />
+            <span className="text-lg">↻</span>
             Thử Lại
           </button>
 

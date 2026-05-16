@@ -164,7 +164,7 @@ export default function Screen2() {
       setTimeRemaining(prev => {
         if (prev <= 1) {
           setFeedback({
-            message: '⏱️ Hết giờ! Game over!',
+            message: '⏱ Hết giờ! Game over!',
             type: 'error',
             visible: true
           });

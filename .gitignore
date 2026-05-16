@@ -1,0 +1,30 @@
+# Environment variables (contains secrets)
+.env
+.env.local
+.env.*.local
+be_itcep/.env
+FE_ITCEP/.env
+
+# Dependencies
+node_modules/
+/dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Build outputs
+/dist/
+/build/

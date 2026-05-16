@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { feedbackService } from '../../api/feedback/feedbackService';
+import { authService } from '../../api/services/authService';
 
 export default function FooterReviewForm() {
   const [form, setForm] = useState({ name: '', content: '' });
@@ -7,28 +9,89 @@ export default function FooterReviewForm() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [charCount, setCharCount] = useState(0);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+    const val = e.target.value
+    if (e.target.name === 'content') {
+      // enforce 100-character limit
+      if (val.length > 100) {
+        const truncated = val.slice(0, 100)
+        setForm((f) => ({ ...f, content: truncated }))
+        setCharCount(100)
+      } else {
+        setForm((f) => ({ ...f, content: val }))
+        setCharCount(val.length)
+      }
+    } else {
+      setForm((f) => ({ ...f, [e.target.name]: val }));
+    }
     setError('');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (rating <= 0) {
       setError('Vui lòng chọn số sao.');
       return;
     }
+    // validate content character count
+    const contentLen = (form.content || '').length
+    if (contentLen === 0) {
+      setError('Vui lòng nhập nội dung đánh giá.');
+      setSubmitting(false)
+      return
+    }
+    if (contentLen > 100) {
+      setError('Nội dung chỉ cho phép tối đa 100 ký tự.');
+      setSubmitting(false)
+      return
+    }
     setError('');
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
+
+    const isAnonymous = form.name === 'Ẩn danh';
+    const payload: any = {
+      content: form.content || '',
+      rating,
+    };
+
+    // try to get profile to use name from DB and include userId
+    const token = authService.getToken();
+    if (token) {
+      try {
+        const profile = await authService.getProfile();
+        const id = Number(profile?.user_id ?? profile?.id ?? profile?.userId);
+        if (id) payload.userId = id;
+        // prefer profile name when available
+        const profileName = profile?.name || profile?.fullName || profile?.username || profile?.email;
+        if (!isAnonymous && profileName) {
+          payload.name = profileName;
+        }
+      } catch (e) {
+        // ignore profile errors
+      }
+    }
+
+    // if anonymous explicitly chosen, override name to 'Ẩn danh'
+    if (isAnonymous) payload.name = 'Ẩn danh';
+
+    console.log('Sending feedback payload', payload);
+    try {
+      await feedbackService.create(payload as any);
       setSuccess(true);
       setForm({ name: '', content: '' });
+      setCharCount(0);
       setRating(0);
       setHoverRating(0);
       setTimeout(() => setSuccess(false), 2000);
-    }, 900);
+    } catch (err: any) {
+      console.error('Failed to send feedback', err?.response ?? err);
+      const serverMsg = err?.response?.data?.message || err?.message;
+      setError(serverMsg ? `Gửi phản hồi thất bại: ${serverMsg}` : 'Gửi phản hồi thất bại. Vui lòng thử lại sau.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -89,9 +152,10 @@ export default function FooterReviewForm() {
         value={form.content}
         onChange={handleChange}
         disabled={submitting}
-        maxLength={300}
+        maxLength={100}
         style={{ overflow: 'hidden' }}
       />
+      <div className="text-xs text-[#ffe9b0] text-right">{charCount}/100 ký tự</div>
       {error && <div className="text-red-400 text-sm font-semibold text-center">{error}</div>}
       {success && <div className="text-green-400 text-sm font-semibold text-center">Cảm ơn bạn đã gửi đánh giá!</div>}
       <button

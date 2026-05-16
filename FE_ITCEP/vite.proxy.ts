@@ -4,6 +4,15 @@ export const devProxy = {
     target: 'http://localhost:3000',
     changeOrigin: true,
     secure: false,
+    // Serve SPA `index.html` for navigation requests (Accept: text/html)
+    bypass: (req) => {
+      try {
+        if (req.headers && req.headers.accept && req.headers.accept.indexOf('text/html') !== -1) {
+          return '/index.html'
+        }
+      } catch (e) { }
+      return undefined
+    },
   },
   '/users': {
     target: 'http://localhost:3000',
@@ -36,6 +45,16 @@ export const devProxy = {
     secure: false,
   },
   '/uploads': {
+    target: 'http://localhost:3000',
+    changeOrigin: true,
+    secure: false,
+  },
+  '/feedback': {
+    target: 'http://localhost:3000',
+    changeOrigin: true,
+    secure: false,
+  },
+  '/feedbacks': {
     target: 'http://localhost:3000',
     changeOrigin: true,
     secure: false,

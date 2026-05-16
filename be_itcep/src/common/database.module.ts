@@ -14,6 +14,7 @@ import { Media } from '../modules/media/entities/media.entity';
 import { PlayerSession } from '../modules/sessions/entities/player-session.entity';
 import { UserActionLog } from '../modules/logs/entities/user-action-log.entity';
 import { AnalyticsEvent } from '../modules/analytics/entities/analytics-event.entity';
+import { Feedback } from '../modules/feedback/entities/feedback.entity';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { AnalyticsEvent } from '../modules/analytics/entities/analytics-event.en
           Craft,
           CraftVillage,
           Media,
+          Feedback,
           PlayerSession,
           UserActionLog,
           AnalyticsEvent,

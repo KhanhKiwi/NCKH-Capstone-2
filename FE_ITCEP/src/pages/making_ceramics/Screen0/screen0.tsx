@@ -36,7 +36,7 @@ export default function BatTrangLevel0() {
           <div className="absolute -top-6 -left-6 w-24 h-24 rounded-full bg-amber-200 opacity-30 animate-float -z-0" />
           <div className="absolute -bottom-8 -right-8 w-36 h-36 rounded-full bg-emerald-100 opacity-25 animate-float-slow -z-0" />
           <div className="p-10">
-            <h1 className="text-4xl font-extrabold mb-3">Làng gốm Bát Tràng</h1>
+            <h1 className="text-4xl font-extrabold mb-3">làng gốm Thanh Hà</h1>
             <p className="text-lg text-gray-700 mb-6">Khám phá lịch sử, kỹ thuật và những truyền kỳ gắn với nghề gốm — nơi đất, nước và lửa hòa quyện để tạo nên những sản phẩm nghệ thuật sống động.</p>
 
             <div className="flex gap-3">
@@ -49,7 +49,7 @@ export default function BatTrangLevel0() {
         <main className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
           <article className="lg:col-span-2 bg-white p-6 rounded-xl shadow border revealable">
             <h2 className="text-2xl font-bold mb-3">Hành trình của đất và lửa</h2>
-            <p className="mb-4 text-gray-700">Làng gốm Bát Tràng có lịch sử trải dài nhiều thế kỷ, bắt nguồn từ những nghệ nhân biết tận dụng nguồn đất sét màu mỡ ven sông. Qua thời gian, kỹ thuật tạo hình, trang trí và nung men ngày càng tinh tế, tạo nên phong cách riêng dễ nhận biết của Bát Tràng: đơn giản nhưng thanh lịch, vừa thực dụng vừa nghệ thuật.</p>
+            <p className="mb-4 text-gray-700">làng gốm Thanh Hà có lịch sử trải dài nhiều thế kỷ, bắt nguồn từ những nghệ nhân biết tận dụng nguồn đất sét màu mỡ ven sông. Qua thời gian, kỹ thuật tạo hình, trang trí và nung men ngày càng tinh tế, tạo nên phong cách riêng dễ nhận biết của Bát Tràng: đơn giản nhưng thanh lịch, vừa thực dụng vừa nghệ thuật.</p>
 
             <p className="mb-4 text-gray-700">Trong phần này bạn sẽ đọc về nguồn gốc, quy trình làm gốm truyền thống, các kiểu men tiêu biểu và các câu chuyện dân gian truyền lại trong làng — tất cả được trình bày sinh động, có hình minh họa và các mẹo nhanh để bạn dễ nắm bắt trước khi vào phần thực hành.</p>
 

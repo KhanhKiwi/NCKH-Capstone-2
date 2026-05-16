@@ -1,5 +1,4 @@
 import React from 'react';
-import { ChevronRight } from 'lucide-react';
 
 interface Choice {
   id: string;
@@ -45,7 +44,7 @@ export function ChoiceCard({ choices, title = 'Chọn hành động' }: ChoiceCa
                   </p>
                 )}
               </div>
-              <ChevronRight className="flex-shrink-0 text-amber-700 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <span className="flex-shrink-0 text-amber-700 opacity-0 group-hover:opacity-100 transition-opacity">›</span>
             </div>
           </button>
         ))}

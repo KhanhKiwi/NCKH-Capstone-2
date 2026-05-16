@@ -1,4 +1,3 @@
-import { Lock, PackageCheck, Layers, Circle, Play } from 'lucide-react';
 import { useState } from 'react';
 
 interface ControlPanelProps {
@@ -9,11 +8,11 @@ export function ControlPanel({ onAction }: ControlPanelProps) {
   const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set());
 
   const actions = [
-    { id: 'seal', label: 'Đóng lu', icon: Lock, description: 'Đậy nắp lu chượp cẩn thận' },
-    { id: 'compress', label: 'Nén chặt', icon: PackageCheck, description: 'Ép chặt hỗn hợp cá muối' },
-    { id: 'protect', label: 'Phủ lớp muối bảo vệ', icon: Layers, description: 'Tạo lớp muối phủ ngăn oxy' },
-    { id: 'hermetic', label: 'Niêm phong', icon: Circle, description: 'Niêm phong kín khí lu' },
-    { id: 'ferment', label: 'Bắt đầu quá trình ủ', icon: Play, description: 'Khởi động lên men truyền thống', primary: true }
+    { id: 'seal', label: 'Đóng lu', emoji: '🔐', description: 'Đậy nắp lu chượp cẩn thận' },
+    { id: 'compress', label: 'Nén chặt', emoji: '📦', description: 'Ép chặt hỗn hợp cá muối' },
+    { id: 'protect', label: 'Phủ lớp muối bảo vệ', emoji: '🛡️', description: 'Tạo lớp muối phủ ngăn oxy' },
+    { id: 'hermetic', label: 'Niêm phong', emoji: '⭕', description: 'Niêm phong kín khí lu' },
+    { id: 'ferment', label: 'Bắt đầu quá trình ủ', emoji: '▶️', description: 'Khởi động lên men truyền thống', primary: true }
   ];
 
   const handleAction = (actionId: string) => {
@@ -29,7 +28,6 @@ export function ControlPanel({ onAction }: ControlPanelProps) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
         {actions.map((action) => {
-          const Icon = action.icon;
           const isCompleted = completedSteps.has(action.id);
 
           return (
@@ -48,7 +46,7 @@ export function ControlPanel({ onAction }: ControlPanelProps) {
             >
               <div className="relative z-10">
                 <div className={`flex items-center gap-2 mb-2 ${action.primary ? '' : 'text-[#3d2b1f]'}`}>
-                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  <span className="text-lg flex-shrink-0">{action.emoji}</span>
                   <span className="font-medium text-sm">{action.label}</span>
                 </div>
                 <p className={`text-xs ${action.primary ? 'opacity-80' : 'opacity-60'} line-clamp-2`}>

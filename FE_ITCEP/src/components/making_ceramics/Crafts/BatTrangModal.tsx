@@ -53,7 +53,7 @@ export default function BatTrangModal({ open = true, onClose }: { open?: boolean
         } catch {
           userId = undefined
         }
-        const apiLevels: any[] = await levelsService.getByVillage(1, userId)
+        let apiLevels: any[] = await levelsService.getByVillage(1, userId)
         console.debug('[BatTrangModal] apiLevels.length', apiLevels?.length)
         // fallback: if service returned none, try fetching all levels and filter by craft_id = 1
         if ((!apiLevels || apiLevels.length === 0)) {
@@ -197,7 +197,7 @@ export default function BatTrangModal({ open = true, onClose }: { open?: boolean
           <button onClick={onClose} className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 rounded-full p-2 transition-colors">
             <X className="w-5 h-5 text-white" />
           </button>
-          <h2 className="text-3xl font-bold mb-1" >Làng gốm Bát Tràng</h2>
+          <h2 className="text-3xl font-bold mb-1" >làng gốm Thanh Hà</h2>
           <p className="text-1xl font-bold text-white/90">Làng gốm – nơi đất và lửa tạo nên hồn quê</p>
           {/* debug buttons removed */}
         </div>

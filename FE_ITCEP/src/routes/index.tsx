@@ -8,6 +8,11 @@ import Screen3MakingMats from '../pages/making mats/Screen3'
 import Screen5 from '../pages/making mats/Screen5'
 import Screen6 from '../pages/making mats/Screen6'
 import HomePage from '../pages/web-home/HomePage'
+import AboutPage from '../pages/AboutPage'
+import PotteryStudyPage from '../pages/studyjob/PotteryStudyPage'
+import NamOMamStudyPage from '../pages/studyjob/NamOMamStudyPage'
+import ChieuStudyPage from '../pages/studyjob/ChieuStudyPage'
+
 import BatTrangLevel0 from '../pages/making_ceramics/Screen0/screen0'
 import BatTrangLevel1Phase0 from '../pages/making_ceramics/Screen1/Phase0'
 import BatTrangLevel1Screen1 from '../pages/making_ceramics/Screen1/Phase1'
@@ -23,6 +28,7 @@ import BatTrangLevel5Phase1 from '../pages/making_ceramics/Screen5/Phase1'
 import BatTrangLevel5Phase0 from '../pages/making_ceramics/Screen5/Phase0'
 import BatTrangLevel5Phase2 from '../pages/making_ceramics/Screen5/Phase2'
 import VillageDetailPage from '../pages/VillageDetailPage'
+import VillagesPage from '../pages/VillagesPage'
 import ChallengePage from '../pages/ChallengePage'
 import ChallengeMakingCere from '../pages/challenge_making_cere'
 import LeaderboardPage from '../pages/Leaderboard'
@@ -36,6 +42,7 @@ import CatchFishGamePage from '../components/Making_Fish_Sauce/Screen1/CatchFish
 import WashFishGamePage from '../components/Making_Fish_Sauce/Screen2/WashFishGamePage'
 import WashSaltGamePage from '../components/Making_Fish_Sauce/Screen3/WashSaltGamePage'
 import CloseJarFermentGamePage from '../components/Making_Fish_Sauce/Screen4/CloseJarFermentGamePage'
+import Screen5FinalExtractionPhase0 from '../components/Making_Fish_Sauce/Screen5/Phase0'
 import Screen5FinalExtraction from '../components/Making_Fish_Sauce/Screen5/Screen5'
 import Screen6EternalFragrance from '../components/Making_Fish_Sauce/Screen6/Screen6'
 
@@ -59,7 +66,12 @@ export const router = createBrowserRouter([
       { path: 'phase4', element: <Navigate to="/level-3/phase4" replace /> },
 
       { index: true, Component: HomePage },
+      { path: 'about', Component: AboutPage },
+      { path: 'studyjob/gom', Component: PotteryStudyPage },
+      { path: 'studyjob/mam-nam-o', Component: NamOMamStudyPage },
+      { path: 'studyjob/chieu', Component: ChieuStudyPage },
       { path: 'game', Component: GamePage },
+      { path: 'villages', Component: VillagesPage },
       { path: 'challenge', Component: ChallengePage },
       { path: 'leaderboard', Component: LeaderboardPage },
       { path: 'challenge-making-cere', Component: ChallengeMakingCere },
@@ -67,7 +79,8 @@ export const router = createBrowserRouter([
       { path: 'game/wash-fish', Component: WashFishGamePage },
       { path: 'game/wash-salt', Component: WashSaltGamePage },
       { path: 'game/close-jar-ferment', Component: CloseJarFermentGamePage },
-      { path: 'game/final-extraction', Component: Screen5FinalExtraction },
+      { path: 'game/final-extraction', Component: Screen5FinalExtractionPhase0 },
+      { path: 'game/final-extraction/play', Component: Screen5FinalExtraction },
       { path: 'game/eternal-fragrance', Component: Screen6EternalFragrance },
       { path: 'craft-selection', Component: CraftSelectionPage },
       { path: 'level-1', Component: Screen1 },

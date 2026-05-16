@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Play, GraduationCap, Trophy } from 'lucide-react';
+import { ArrowLeft, GraduationCap, Trophy, Home } from 'lucide-react';
 import { useNavigate } from 'react-router'
+import { motion } from 'motion/react';
 import { authService } from '../api/services/authService'
 import { levelsService } from '../api/levels/levelsService'
 import CenteredModal from '../components/ui/CenteredModal'
@@ -46,22 +47,23 @@ export default function GamePage() {
 
   const gameCards = [
     {
-      icon: Play,
-      title: "Chơi",
-      description: "Bắt đầu trò chơi mới",
-      delay: 0.3
+      icon: Home,
+      title: "Trang chủ",
+      description: "Quay về trang chủ",
+      delay: 0.2,
+      onClick: () => navigate('/'),
     },
     {
       icon: GraduationCap,
       title: "Học nghề",
       description: "Tìm hiểu quy trình",
-      delay: 0.4
+      delay: 0.3
     },
     {
       icon: Trophy,
       title: "Thử thách",
       description: "Tìm thử thách và thi đấu",
-      delay: 0.5
+      delay: 0.4
     }
   ];
 
@@ -168,9 +170,8 @@ export default function GamePage() {
         </div>
       ))}
 
-      {/* Player Info & Achievements */}
+      {/* Player Info (Achievements moved under player box) */}
       <PlayerInfo />
-      <Achievements />
 
       {/* Center Content */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-8">
@@ -182,8 +183,8 @@ export default function GamePage() {
           <PlayButton />
         </Link>
 
-        {/* Game Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl w-full">
+        {/* Game Cards: three equal boxes side-by-side */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl w-full">
           {gameCards.map((card) => (
             <GameCard
               key={card.title}
@@ -191,7 +192,15 @@ export default function GamePage() {
               title={card.title}
               description={card.description}
               delay={card.delay}
-              onClick={card.title === 'Thử thách' ? handleChallengeClick : undefined}
+              onClick={
+                card.onClick ?? (
+                  card.title === 'Học nghề'
+                    ? () => navigate('/villages')
+                    : card.title === 'Thử thách'
+                      ? handleChallengeClick
+                      : undefined
+                )
+              }
             />
           ))}
           {modalMessage && (
@@ -202,6 +211,8 @@ export default function GamePage() {
 
       {/* Bottom Decorative Glow */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#FFB347] via-[#F0D4B0] to-[#E6A75E]"></div>
+
+      {/* Back button removed per request */}
     </div>
   );
 }
