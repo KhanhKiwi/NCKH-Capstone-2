@@ -434,9 +434,11 @@ export default function BatTrangLevel2({ onComplete, challengeMode }: { onComple
       const all = await levelsService.getByVillage(1, userId)
       if (Array.isArray(all)) {
         const current = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === 2)
-        if (current) {
+          if (current) {
           const score = starCount === 3 ? 100 : starCount === 2 ? 70 : 40
-          await progressService.saveProgress({ user_id: 1, level_id: Number(current.level_id ?? current.id), status: 'completed', score })
+          const payload: any = { level_id: Number(current.level_id ?? current.id), status: 'completed', score }
+          if (typeof userId !== 'undefined') payload.user_id = userId
+          await progressService.saveProgress(payload)
           try {
             const curNum = Number(current.level_number ?? current.level_id ?? current.id)
             const next = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === curNum + 1)
@@ -601,7 +603,9 @@ export default function BatTrangLevel2({ onComplete, challengeMode }: { onComple
                         const current = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === 2)
                         if (current) {
                           const score = starCount === 3 ? 100 : starCount === 2 ? 70 : 40
-                          await progressService.saveProgress({ user_id: 1, level_id: Number(current.level_id ?? current.id), status: 'completed', score })
+                          const payload: any = { level_id: Number(current.level_id ?? current.id), status: 'completed', score }
+                          if (typeof userId !== 'undefined') payload.user_id = userId
+                          await progressService.saveProgress(payload)
                           try {
                             // attempt to unlock the next level (level_number + 1)
                             const curNum = Number(current.level_number ?? current.level_id ?? current.id)

@@ -192,7 +192,7 @@ export default function BatTrangLevel5Phase2({ onComplete, challengeMode }: { on
         if (cancelled) return
         const t = temperatureRef.current
         setQuality((q) => {
-          if (t >= IDEAL_MIN && t <= IDEAL_MAX) return Math.min(100, q + 10)
+          if (t >= IDEAL_MIN && t <= IDEAL_MAX) return Math.min(100, q +100)
           return Math.max(0, q - 10)
         })
         // schedule next
@@ -439,8 +439,10 @@ export default function BatTrangLevel5Phase2({ onComplete, challengeMode }: { on
                   const all = await import('../../../api/levels/levelsService').then(m => m.levelsService.getByVillage(1, userId))
                   if (Array.isArray(all)) {
                     const current = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === 5)
-                    if (current) {
-                      await import('../../../api/progress/progressService').then(m => m.progressService.saveProgress({ user_id: 1, level_id: Number(current.level_id ?? current.id), status: 'completed', score: 100 }))
+                      if (current) {
+                      const payload: any = { level_id: Number(current.level_id ?? current.id), status: 'completed', score: 100 }
+                      if (typeof userId !== 'undefined') payload.user_id = userId
+                      await import('../../../api/progress/progressService').then(m => m.progressService.saveProgress(payload))
                       try {
                         const currentNum = Number(current.level_number ?? current.level_id ?? current.id)
                         const next = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === (currentNum + 1))
