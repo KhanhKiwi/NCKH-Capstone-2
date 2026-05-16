@@ -397,8 +397,8 @@ export default function Screen2({ challengeMode = false, onChallengeComplete }: 
   const handleContinue = async () => {
     try {
       if (userId) {
-        // Get all levels for fish sauce village (village_id = 8)
-        const levels = await levelsService.getByVillage(8, userId);
+        // Get all levels for fish sauce village (village_id = 2)
+        const levels = await levelsService.getByVillage(2, userId);
         const level2 = levels.find((l: any) => l.level_number === 2);
         
         if (level2) {

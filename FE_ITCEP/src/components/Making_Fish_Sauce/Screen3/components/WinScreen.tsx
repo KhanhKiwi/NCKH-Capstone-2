@@ -17,7 +17,7 @@ export function WinScreen({ quality, userId, challengeMode = false, onChallengeC
     try {
       if (userId) {
         // Get level 3 from fish sauce village (village_id = 8)
-        const levels = await levelsService.getByVillage(8, userId);
+        const levels = await levelsService.getByVillage(2, userId);
         const level3 = levels.find((l: any) => l.level_number === 3);
         
         if (level3) {

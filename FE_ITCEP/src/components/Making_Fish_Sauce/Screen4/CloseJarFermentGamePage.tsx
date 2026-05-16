@@ -23,7 +23,7 @@ export default function CloseJarFermentGamePage({ challengeMode = false, onCompl
       // Try to save progress if user is logged in AND passed the level
       if (userId && passed && quality >= 75) {
         try {
-          const levels = await levelsService.getByVillage(8, userId);
+          const levels = await levelsService.getByVillage(2, userId);
           console.log('[Screen4] Levels fetched:', levels);
           
           const level4 = levels.find((l: any) => l.level_number === 4);

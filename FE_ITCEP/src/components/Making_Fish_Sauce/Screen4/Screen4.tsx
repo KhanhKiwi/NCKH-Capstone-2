@@ -36,7 +36,7 @@ export default function Screen4({ challengeMode = false }: Screen4Props) {
     // Save progress to backend (only if passed)
     if (userId && passed) {
       try {
-        const levels = await levelsService.getByVillage(8, userId);
+        const levels = await levelsService.getByVillage(2, userId);
         const level4 = levels.find((l: any) => l.level_number === 4);
         
         if (level4) {

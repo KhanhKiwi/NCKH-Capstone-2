@@ -64,7 +64,7 @@ export function ResultScreen({ score, onPlayAgain, challengeMode = false }: Resu
       try {
         if (!userId) return;
 
-        const levels = await levelsService.getByVillage(8, userId);
+        const levels = await levelsService.getByVillage(2, userId);
         const level6 = levels.find((l: any) => l.level_number === 6);
 
         if (level6) {

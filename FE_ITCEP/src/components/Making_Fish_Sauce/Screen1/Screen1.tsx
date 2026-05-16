@@ -207,12 +207,12 @@ export default function Screen1({ challengeMode = false, onChallengeComplete }: 
     setIsUnlocking(true);
     try {
       if (userId) {
-        // Get all levels for fish sauce village (village_id = 8)
-        const levels = await levelsService.getByVillage(8, userId);
+        // Get all levels for fish sauce village (village_id = 2)
+        const levels = await levelsService.getByVillage(2, userId);
         const level1 = levels.find((l: any) => l.level_number === 1);
         
         if (level1) {
-          // Save progress for level 1
+          // Save progress for level 1 - backend will auto-unlock level 2
           await progressService.saveProgress({
             user_id: userId,
             level_id: level1.level_id,
@@ -220,13 +220,7 @@ export default function Screen1({ challengeMode = false, onChallengeComplete }: 
             score: quality
           });
           
-          // Unlock level 2
-          const level2 = levels.find((l: any) => l.level_number === 2);
-          if (level2) {
-            await progressService.unlockLevel(level2.level_id);
-          }
-          
-          console.log('[Screen1] Level 1 completed, Level 2 unlocked!');
+          console.log('[Screen1] Level 1 completed. Backend will auto-unlock Level 2!');
         }
       }
       

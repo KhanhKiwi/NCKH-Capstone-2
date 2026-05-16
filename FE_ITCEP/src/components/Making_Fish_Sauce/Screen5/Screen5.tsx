@@ -128,7 +128,7 @@ export default function Screen5({ challengeMode = false, onChallengeComplete }: 
   const saveProgress = async (finalQuality: number) => {
     try {
       if (userId) {
-        const levels = await levelsService.getByVillage(8, userId);
+        const levels = await levelsService.getByVillage(2, userId);
         const level5 = levels.find((l: any) => l.level_number === 5);
 
         if (level5) {
