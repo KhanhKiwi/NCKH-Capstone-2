@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { ChevronLeft } from 'lucide-react';
 import { IntroScreen } from './IntroScreen';
@@ -6,15 +6,28 @@ import { AdvancedFermentationGame } from './components/AdvancedFermentationGame'
 import { progressService } from '../../../api/progress/progressService';
 import { levelsService } from '../../../api/levels/levelsService';
 import { getUserId } from '../../../utils/authUtils';
+import { useAI } from '../../../contexts/AIContext';
 
 export default function CloseJarFermentGamePage({ challengeMode = false, onComplete }: { challengeMode?: boolean; onComplete?: () => void }) {
   const navigate = useNavigate();
+  const { triggerEvent } = useAI();
   const [gameStarted, setGameStarted] = useState(false);
   const [isFinishing, setIsFinishing] = useState(false);
+  const resultEventRef = useRef(false);
 
   const handleGameEnd = async (passed: boolean, quality: number) => {
     setIsFinishing(true);
     console.log('[Screen4] Game ended:', { passed, quality });
+    if (!resultEventRef.current) {
+      resultEventRef.current = true;
+      if (passed && quality >= 75) {
+        const event = quality >= 90 ? 'excellent' : 'win_fast';
+        triggerEvent({ event, level: 4, step: 1 }).catch(() => {});
+      } else {
+        triggerEvent({ event: 'wrong_action', level: 4, step: 1, fail_count: 1 }).catch(() => {});
+        triggerEvent({ event: 'fail_many', level: 4, step: 1, fail_count: 1 }).catch(() => {});
+      }
+    }
     
     try {
       const userId = getUserId();
@@ -81,6 +94,7 @@ export default function CloseJarFermentGamePage({ challengeMode = false, onCompl
         <button
           onClick={() => {
             if (gameStarted) {
+              resultEventRef.current = false;
               setGameStarted(false);
             } else {
               navigate(-1);

@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { levelsService } from '../../../api/levels/levelsService';
 import { progressService } from '../../../api/progress/progressService';
 import { getUserId } from '../../../utils/authUtils';
+import { useAI } from '../../../contexts/AIContext';
 import { LiquidPreview } from './components/LiquidPreview';
 import { ImageWithFallback } from '../../figma/ImageWithFallback';
 import { Button } from '../../ui/button';
@@ -18,13 +19,47 @@ import { EvaluationPhase } from './EvaluationPhase';
 
 type GamePhase = 'prep' | 'filtration' | 'blend' | 'evaluation' | 'complete' | 'failed';
 
-export default function Screen5({ challengeMode = false, onChallengeComplete }: { challengeMode?: boolean; onChallengeComplete?: () => void }) {
+export default function Screen5() {
   const navigate = useNavigate();
+  const { triggerEvent } = useAI();
   const userId = getUserId();
+  const wrongActionCountRef = useRef(0);
+  const completionEventRef = useRef(false);
+  const failureEventRef = useRef(false);
+
+  const triggerWrongAction = () => {
+    wrongActionCountRef.current += 1;
+    const fail_count = wrongActionCountRef.current;
+    triggerEvent({ event: 'wrong_action', level: 5, step: 1, fail_count }).catch(() => {});
+    if (fail_count >= 2) {
+      triggerEvent({ event: 'fail_many', level: 5, step: 1, fail_count }).catch(() => {});
+    }
+  };
+
+  const triggerFailureEvent = () => {
+    if (failureEventRef.current) return;
+    failureEventRef.current = true;
+    const fail_count = Math.max(1, wrongActionCountRef.current);
+    if (fail_count >= 2) {
+      triggerEvent({ event: 'fail_many', level: 5, step: 1, fail_count }).catch(() => {});
+    } else {
+      triggerEvent({ event: 'wrong_action', level: 5, step: 1, fail_count }).catch(() => {});
+    }
+  };
+
+  const triggerCompletionAI = (finalQuality: number) => {
+    if (completionEventRef.current) return;
+    completionEventRef.current = true;
+    if (finalQuality >= 90) {
+      triggerEvent({ event: 'excellent', level: 5, step: 1 }).catch(() => {});
+    } else if (finalQuality >= 80) {
+      triggerEvent({ event: 'high_score', level: 5, step: 1 }).catch(() => {});
+    }
+  };
 
   // Game state
   const [currentPhase, setCurrentPhase] = useState<GamePhase>('prep');
-  const [totalTime] = useState(125); // 15 + 45 + 25 + 20 + 20 buffer
+  const [totalTime] = useState(125);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [quality, setQuality] = useState(55); // Start with 55% (realistic base quality)
   const [clarity, setClarity] = useState(30);
@@ -40,32 +75,34 @@ export default function Screen5({ challengeMode = false, onChallengeComplete }: 
     colorQuality: 50  // Light amber color
   });
 
-  // Timer
   useEffect(() => {
     if (currentPhase === 'complete' || currentPhase === 'failed') return;
 
     const timer = setInterval(() => {
-      setElapsedTime(prev => prev + 1);
+      setElapsedTime((prev) => prev + 1);
     }, 1000);
 
     return () => clearInterval(timer);
   }, [currentPhase]);
 
-  // Handle phase completion
+  const failPhase = (reason: string) => {
+    setFailureReason(reason);
+    setCurrentPhase('failed');
+    triggerFailureEvent();
+  };
+
   const handlePrepComplete = (qualityBonus: number) => {
     const newQuality = Math.max(0, Math.min(100, quality + qualityBonus));
     if (qualityBonus > 0) {
       setComboCount(1);
     }
     setQuality(newQuality);
-    
-    // Check for failure - must stay above 30% at all times
-    if (newQuality < 30) {
-      setFailureReason('Chất lượng quá thấp ở bước Chuẩn Bị! (Dưới 30%)');
-      setCurrentPhase('failed');
+
+    if (newQuality < 20) {
+      failPhase('Chất lượng quá thấp ở bước Chuẩn Bị! (Dưới 20%)');
       return;
     }
-    
+
     setCurrentPhase('filtration');
   };
 
@@ -73,21 +110,18 @@ export default function Screen5({ challengeMode = false, onChallengeComplete }: 
     const newQuality = Math.max(0, Math.min(100, quality + qualityBonus));
     setQuality(newQuality);
     setClarity(newClarity);
-    
-    // Check for failure
-    if (newQuality < 30) {
-      setFailureReason('Chất lượng quá thấp ở bước Lọc! (Dưới 30%)');
-      setCurrentPhase('failed');
+
+    if (newQuality < 20) {
+      failPhase('Chất lượng quá thấp ở bước Lọc! (Dưới 20%)');
       return;
     }
-    
-    // Update flavor profile based on clarity (more realistic improvements)
-    setFlavorProfile(prev => ({
-      umami: Math.min(prev.umami + 8, 95),
-      saltiness: Math.min(prev.saltiness + 6, 92),
-      aroma: Math.min(prev.aroma + 10, 93),
-      aftertaste: Math.min(prev.aftertaste + 7, 90),
-      colorQuality: Math.min(prev.colorQuality + 12, 95)
+
+    setFlavorProfile((prev) => ({
+      umami: Math.min(prev.umami + 10, 98),
+      saltiness: Math.min(prev.saltiness + 8, 95),
+      aroma: Math.min(prev.aroma + 12, 98),
+      aftertaste: Math.min(prev.aftertaste + 9, 96),
+      colorQuality: Math.min(prev.colorQuality + 15, 98),
     }));
 
     setCurrentPhase('blend');
@@ -96,46 +130,28 @@ export default function Screen5({ challengeMode = false, onChallengeComplete }: 
   const handleBlendingComplete = (qualityBonus: number) => {
     const newQuality = Math.max(0, Math.min(100, quality + qualityBonus));
     setQuality(newQuality);
-    
-    // Check for failure
-    if (newQuality < 30) {
-      setFailureReason('Chất lượng quá thấp ở bước Pha Trộn! (Dưới 30%)');
-      setCurrentPhase('failed');
+
+    if (newQuality < 20) {
+      failPhase('Chất lượng quá thấp ở bước Pha Trộn! (Dưới 20%)');
       return;
     }
-    
+
     setCurrentPhase('evaluation');
   };
 
-  const handleEvaluationComplete = (qualityBonus: number) => {
-    const finalQuality = Math.max(0, Math.min(100, quality + qualityBonus));
-    setQuality(finalQuality);
-    
-    // Check for FINAL PASS threshold: must reach 75% (achievable goal)
-    if (finalQuality < 75) {
-      setFailureReason(`Chất lượng cuối cùng quá thấp: ${Math.round(finalQuality)}% (Cần đạt 75% trở lên!)`);
-      setCurrentPhase('failed');
-      return;
-    }
-    
-    setCurrentPhase('complete');
-
-    // Save progress
-    saveProgress(finalQuality);
-  };
-
   const saveProgress = async (finalQuality: number) => {
+    triggerCompletionAI(finalQuality);
     try {
       if (userId) {
-        const levels = await levelsService.getByVillage(2, userId);
-        const level5 = levels.find((l: any) => l.level_number === 5);
+        const levels = await levelsService.getByVillage(8, userId);
+        const level5 = levels.find((l: { level_number?: number }) => l.level_number === 5);
 
         if (level5) {
           await progressService.saveProgress({
             user_id: userId,
             level_id: level5.level_id,
             status: 'completed',
-            score: Math.round(finalQuality)
+            score: Math.round(finalQuality),
           });
 
           console.log('[Screen5] Level 5 completed with quality:', finalQuality);
@@ -146,12 +162,26 @@ export default function Screen5({ challengeMode = false, onChallengeComplete }: 
     }
   };
 
+  const handleEvaluationComplete = (qualityBonus: number) => {
+    const finalQuality = Math.max(0, Math.min(100, quality + qualityBonus));
+    setQuality(finalQuality);
+
+    if (finalQuality < 75) {
+      triggerWrongAction();
+      failPhase(`Chất lượng cuối cùng quá thấp: ${Math.round(finalQuality)}% (Cần đạt 75% trở lên!)`);
+      return;
+    }
+
+    setCurrentPhase('complete');
+    void saveProgress(finalQuality);
+  };
+
   const getGrade = (score: number) => {
-    if (score >= 92) return { grade: 'S+', name: 'Di sản Vàng 🏆', color: 'from-yellow-600 to-amber-600' };
+    if (score >= 95) return { grade: 'S+', name: 'Di sản Vàng 🏆', color: 'from-yellow-600 to-amber-600' };
     if (score >= 85) return { grade: 'S', name: 'Di sản Bạc ⭐', color: 'from-blue-600 to-cyan-600' };
-    if (score >= 75) return { grade: 'A', name: 'Nghệ nhân Tinh Hoa 🎖️', color: 'from-amber-600 to-orange-600' };
-    if (score >= 65) return { grade: 'B', name: 'Học Việc Lành Nghề 📜', color: 'from-green-600 to-emerald-600' };
-    return { grade: 'C', name: 'Cần Cố Gắng Hơn', color: 'from-red-600 to-red-500' };
+    if (score >= 80) return { grade: 'A', name: 'Nghệ nhân Tinh Hoa 🌟', color: 'from-amber-600 to-orange-600' };
+    if (score >= 70) return { grade: 'B', name: 'Học Việc Lành Nghề 📜', color: 'from-green-600 to-emerald-600' };
+    return { grade: 'F', name: 'Thất Bại', color: 'from-red-600 to-red-500' };
   };
 
   const gradeInfo = getGrade(quality);
@@ -160,8 +190,7 @@ export default function Screen5({ challengeMode = false, onChallengeComplete }: 
   return (
     <>
       <Toaster position="top-center" />
-      <div className="relative min-h-screen w-full overflow-hidden bg-slate-950">
-        {/* Background */}
+      <motion.div className="relative min-h-screen w-full overflow-hidden bg-slate-950">
         <div className="fixed inset-0 z-0">
           <ImageWithFallback
             src="https://images.unsplash.com/photo-1767825468724-d1960e18d6d4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080"
@@ -170,13 +199,11 @@ export default function Screen5({ challengeMode = false, onChallengeComplete }: 
           />
           <div className="absolute inset-0 bg-gradient-to-b from-slate-950/70 via-amber-950/50 to-slate-950/80" />
           <div className="absolute inset-0 bg-gradient-to-r from-slate-950/60 via-transparent to-slate-950/60" />
-          <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/5 blur-3xl rounded-full" />
-          <div className="absolute top-20 left-1/3 w-64 h-64 bg-yellow-600/5 blur-3xl rounded-full" />
+          <motion.div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/5 blur-3xl rounded-full" />
+          <motion.div className="absolute top-20 left-1/3 w-64 h-64 bg-yellow-600/5 blur-3xl rounded-full" />
         </div>
 
-        {/* Main Content */}
-        <div className="relative z-10 min-h-screen w-full flex flex-col">
-          {/* Header */}
+        <motion.div className="relative z-10 min-h-screen w-full flex flex-col">
           <header className="sticky top-0 z-50 backdrop-blur-md bg-slate-950/60 border-b border-amber-700/20 p-4">
             <div className="max-w-7xl mx-auto">
               <div className="flex items-center justify-between mb-4">
@@ -224,7 +251,6 @@ export default function Screen5({ challengeMode = false, onChallengeComplete }: 
                 </div>
               </div>
 
-              {/* Timeline */}
               <PhaseTimeline
                 currentPhase={currentPhase}
                 timeRemaining={timeRemaining}
@@ -233,10 +259,8 @@ export default function Screen5({ challengeMode = false, onChallengeComplete }: 
             </div>
           </header>
 
-          {/* Main Content */}
           <main className="flex-1 max-w-7xl mx-auto w-full px-4 lg:px-8 py-8 lg:py-12">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-              {/* Game Area - Left/Center */}
               <div className="lg:col-span-2">
                 <AnimatePresence mode="wait">
                   {currentPhase === 'prep' && (
@@ -304,19 +328,11 @@ export default function Screen5({ challengeMode = false, onChallengeComplete }: 
                       <p className="text-amber-200/60 mb-8">Chất lượng cuối cùng: {Math.round(quality)}%</p>
                       <motion.button
                         onClick={() => {
-                          if (!challengeMode) {
-                            toast.success('🎉 Level 5 hoàn thành! Mở khóa Level 6!', {
-                              description: 'Tiếp tục hành trình di sản mắm Nam Ô',
-                              duration: 5000
-                            });
-                          }
-                          setTimeout(() => {
-                            if (challengeMode && onChallengeComplete) {
-                              onChallengeComplete();
-                            } else {
-                              navigate('/game/eternal-fragrance');
-                            }
-                          }, 2000);
+                          toast.success('🎉 Level 5 hoàn thành! Mở khóa Level 6!', {
+                            description: 'Tiếp tục hành trình di sản mắm Nam Ô',
+                            duration: 5000,
+                          });
+                          setTimeout(() => navigate('/game/eternal-fragrance'), 2000);
                         }}
                         className="px-8 py-4 bg-gradient-to-r from-yellow-600 to-amber-600 text-amber-50 rounded-lg font-bold text-lg hover:from-yellow-500 hover:to-amber-500 transition-all"
                         whileHover={{ scale: 1.05 }}
@@ -344,7 +360,7 @@ export default function Screen5({ challengeMode = false, onChallengeComplete }: 
                       <h2 className="text-4xl font-bold text-red-200 mb-2">Thất Bại!</h2>
                       <p className="text-xl text-red-300 mb-2 font-semibold">{failureReason}</p>
                       <p className="text-red-200/60 mb-8">Chất lượng quá thấp. Hãy thử lại và cẩn thận hơn!</p>
-                      <div className="flex gap-4 justify-center flex-wrap">
+                      <motion.div className="flex gap-4 justify-center flex-wrap">
                         <motion.button
                           onClick={() => {
                             window.location.reload();
@@ -363,54 +379,43 @@ export default function Screen5({ challengeMode = false, onChallengeComplete }: 
                         >
                           ← Quay Lại
                         </motion.button>
-                      </div>
+                      </motion.div>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
 
-              {/* Right Sidebar - Charts */}
               <div className="space-y-6">
-                {/* Combo Counter */}
                 {comboCount > 0 && (
-                  <ComboCounter
-                    comboCount={comboCount}
-                    maxCombo={5}
-                    masterTouch={false}
-                  />
+                  <ComboCounter comboCount={comboCount} maxCombo={5} masterTouch={false} />
                 )}
 
-                {/* Liquid Preview */}
-                <div className="rounded-xl bg-gradient-to-br from-amber-900/20 to-slate-900/40 border border-amber-600/30 backdrop-blur-sm p-4 overflow-hidden">
+                <motion.div className="rounded-xl bg-gradient-to-br from-amber-900/20 to-slate-900/40 border border-amber-600/30 backdrop-blur-sm p-4 overflow-hidden">
                   <LiquidPreview
                     color={`rgba(180, 83, 9, ${clarity / 100})`}
                     viscosity={70 + (quality / 100) * 20}
                     quality={Math.round(quality)}
                   />
-                </div>
+                </motion.div>
 
-                {/* Grade Info - Predicted Ranking */}
                 <motion.div
-                  className={`rounded-xl bg-gradient-to-br ${gradeInfo.color} bg-opacity-20 border-2 border-opacity-60 backdrop-blur-sm p-8 shadow-lg`}
+                  className={`rounded-xl bg-gradient-to-br ${gradeInfo.color} bg-opacity-10 border border-opacity-30 backdrop-blur-sm p-6`}
                   animate={{ scale: [1, 1.02, 1] }}
                   transition={{ duration: 3, repeat: Infinity }}
                 >
-                  <div className="text-center space-y-4">
-                    <p className="text-amber-100 text-base font-bold uppercase tracking-wider">🏆 Xếp Hạng Dự Kiến</p>
-                    <div className={`bg-gradient-to-r ${gradeInfo.color} rounded-lg p-4 border border-opacity-70 shadow-md`}>
-                      <p className={`text-6xl font-black drop-shadow-lg`} style={{color: '#FCD34D'}}>
-                        {gradeInfo.grade}
-                      </p>
-                    </div>
-                    <p className="text-amber-50 text-sm font-semibold">{gradeInfo.name}</p>
-                    <p className="text-amber-200/80 text-xs">Chất lượng: {Math.round(quality)}%</p>
+                  <div className="text-center">
+                    <p className="text-amber-100 text-sm font-semibold mb-2">Xếp Hạng Dự Kiến</p>
+                    <p className={`text-4xl font-bold bg-gradient-to-r ${gradeInfo.color} bg-clip-text text-transparent`}>
+                      {gradeInfo.grade}
+                    </p>
+                    <p className="text-amber-200/60 text-xs mt-2">{gradeInfo.name}</p>
                   </div>
                 </motion.div>
               </div>
             </div>
           </main>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </>
   );
 }

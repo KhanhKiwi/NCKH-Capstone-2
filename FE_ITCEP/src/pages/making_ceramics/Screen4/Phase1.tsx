@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router'
 import { levelsService } from '../../../api/levels/levelsService'
 import { progressService } from '../../../api/progress/progressService'
 import GuideDialog from '../../../util/shared/GuideDialog'
+import { useAI } from '../../../contexts/AIContext'
 
 export default function Level4({ onComplete, challengeMode }: { onComplete?: (result?: any) => void, challengeMode?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -29,6 +30,25 @@ export default function Level4({ onComplete, challengeMode }: { onComplete?: (re
   const lastPointRef = useRef<{x:number,y:number}|null>(null)
   const potPathRef = useRef<Path2D | null>(null)
   const navigate = useNavigate()
+  const { triggerEvent } = useAI()
+  const finishModalStepCompletedHandledRef = useRef(false)
+  const firstValidStrokeCorrectSentRef = useRef(false)
+  const strokeGesturePaintedRef = useRef(false)
+
+  useEffect(() => {
+    if (!showFinishModal) {
+      finishModalStepCompletedHandledRef.current = false
+      return
+    }
+    if (finishModalStepCompletedHandledRef.current) return
+    finishModalStepCompletedHandledRef.current = true
+    triggerEvent({
+      event: 'step_completed',
+      level: 4,
+      step: 2,
+      village_name: 'Bát Tràng',
+    }).catch(() => {})
+  }, [showFinishModal, triggerEvent])
 
   useEffect(() => {
     // preload background image from public folder
@@ -439,6 +459,7 @@ export default function Level4({ onComplete, challengeMode }: { onComplete?: (re
     if (!drawAnywhere && !inside) return
     try { (canvas as any).setPointerCapture?.((e as any).pointerId) } catch {}
     isDrawingRef.current = true
+    strokeGesturePaintedRef.current = false
     lastPointRef.current = p
   }
 
@@ -467,6 +488,7 @@ export default function Level4({ onComplete, challengeMode }: { onComplete?: (re
     ctx.moveTo(last.x, last.y)
     ctx.lineTo(p.x, p.y)
     ctx.stroke()
+    strokeGesturePaintedRef.current = true
     if (pot) ctx.restore()
     lastPointRef.current = p
   }
@@ -475,6 +497,16 @@ export default function Level4({ onComplete, challengeMode }: { onComplete?: (re
     const canvas = drawCanvasRef.current
     if (!canvas) return
     try { (canvas as any).releasePointerCapture?.((e as any).pointerId) } catch {}
+    if (strokeGesturePaintedRef.current && !firstValidStrokeCorrectSentRef.current) {
+      firstValidStrokeCorrectSentRef.current = true
+      triggerEvent({
+        event: 'correct_action',
+        level: 4,
+        step: 2,
+        village_name: 'Bát Tràng',
+      }).catch(() => {})
+    }
+    strokeGesturePaintedRef.current = false
     isDrawingRef.current = false
     lastPointRef.current = null
   }
@@ -747,6 +779,7 @@ export default function Level4({ onComplete, challengeMode }: { onComplete?: (re
                   onClick={() => {
                     // reset level state and restart
                     setShowFinishModal(false)
+                    firstValidStrokeCorrectSentRef.current = false
                     clearDrawing()
                     setTimeLeft(135)
                     setDecorProgress(40)

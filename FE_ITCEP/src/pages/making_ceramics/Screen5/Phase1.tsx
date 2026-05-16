@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
+import { useAI } from '../../../contexts/AIContext'
 
 const QUESTIONS = [
   {
@@ -34,8 +35,13 @@ const QUESTIONS = [
   },
 ]
 
-export default function BatTrangLevel5Phase0({ onComplete }: { onComplete?: () => void }) {
+export default function BatTrangLevel5Phase1({ onComplete }: { onComplete?: () => void }) {
   const navigate = useNavigate()
+  const { triggerEvent } = useAI()
+  const failCountRef = useRef(0)
+  const stepCompletedSentRef = useRef(false)
+
+  const aiStep2 = { level: 5 as const, step: 2 as const, village_name: 'Bát Tràng' as const }
   type Q = { id: number; q: string; options: string[]; a: number }
   const shuffleArray = <T,>(arr: T[]) => {
     const a = arr.slice()
@@ -80,6 +86,19 @@ export default function BatTrangLevel5Phase0({ onComplete }: { onComplete?: () =
     }, 0)
     setCorrectCount(correct)
     setSubmitted(true)
+
+    if (correct === quiz.length) {
+      triggerEvent({ event: 'perfect_step', ...aiStep2 }).catch(() => {})
+    } else {
+      failCountRef.current += 1
+      const fail_count = failCountRef.current
+      if (fail_count >= 2) {
+        triggerEvent({ event: 'fail_many', fail_count, ...aiStep2 }).catch(() => {})
+      } else {
+        triggerEvent({ event: 'wrong_action', fail_count, ...aiStep2 }).catch(() => {})
+      }
+    }
+
     // trigger confetti if at least one correct
     if (correct > 0) {
       // create 24 confetti pieces
@@ -89,9 +108,23 @@ export default function BatTrangLevel5Phase0({ onComplete }: { onComplete?: () =
     }
   }
 
+  const handleRetry = () => {
+    if (submitted && correctCount !== quiz.length) {
+      triggerEvent({ event: 'retry_step', ...aiStep2 }).catch(() => {})
+    }
+    setSubmitted(false)
+    setAnswers({})
+    setCorrectCount(0)
+    setQuiz(makeShuffledQuiz())
+  }
+
   const handleContinue = () => {
     // only navigate if perfect score achieved -> go to firing phase (phase2)
     if (correctCount === quiz.length) {
+      if (!stepCompletedSentRef.current) {
+        stepCompletedSentRef.current = true
+        triggerEvent({ event: 'step_completed', ...aiStep2 }).catch(() => {})
+      }
       if (onComplete) return onComplete()
       navigate('/bat-trang/level-5/phase2')
     }
@@ -168,7 +201,7 @@ export default function BatTrangLevel5Phase0({ onComplete }: { onComplete?: () =
                 <button onClick={handleSubmit} className="px-4 py-2 bg-amber-500 text-white rounded-md">Nộp bài</button>
               ) : (
                 <>
-                  <button onClick={() => { setSubmitted(false); setAnswers({}); setCorrectCount(0); setQuiz(makeShuffledQuiz()) }} className="px-4 py-2 bg-white border rounded-md">Làm lại</button>
+                  <button onClick={handleRetry} className="px-4 py-2 bg-white border rounded-md">Làm lại</button>
                   <button
                     onClick={handleContinue}
                     disabled={correctCount !== quiz.length}

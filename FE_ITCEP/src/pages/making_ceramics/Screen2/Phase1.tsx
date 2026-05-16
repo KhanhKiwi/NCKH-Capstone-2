@@ -4,6 +4,7 @@ import { progressService } from '../../../api/progress/progressService'
 import { useNavigate } from 'react-router'
 import confetti from 'canvas-confetti'
 import GuideDialog from '../../../util/shared/GuideDialog'
+import { useAI } from '../../../contexts/AIContext'
 
 export default function BatTrangLevel2({ onComplete, challengeMode }: { onComplete?: (result?: any) => void, challengeMode?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -60,6 +61,11 @@ export default function BatTrangLevel2({ onComplete, challengeMode }: { onComple
   const [summaryOpen, setSummaryOpen] = useState(false)
   const [starCount, setStarCount] = useState(3)
   const finishedRef = useRef(false)
+  const completionEventRef = useRef(false)
+  const previousLostRef = useRef(false)
+  const loseCountRef = useRef(0)
+  const pullWrongEventSentRef = useRef(false)
+  const { triggerEvent } = useAI()
 
   useEffect(()=>{ document.title = 'Bát Tràng — Level 2: Tạo hình' }, [])
 
@@ -228,6 +234,7 @@ export default function BatTrangLevel2({ onComplete, challengeMode }: { onComple
       const p = toLocal(e)
       c.setPointerCapture(e.pointerId)
       last.current = p
+      pullWrongEventSentRef.current = false
       // detect if started inside clay
       const w = c.width, h = c.height
       const cx = w/2, cy = h/2
@@ -287,6 +294,10 @@ export default function BatTrangLevel2({ onComplete, challengeMode }: { onComple
             if (!pullPenaltyApplied.current) {
               addWorkFraction(-1/15)
               pullPenaltyApplied.current = true
+              if (!pullWrongEventSentRef.current) {
+                pullWrongEventSentRef.current = true
+                triggerEvent({ event: 'wrong_action', level: 2, step: 2, village_name: 'Bát Tràng' }).catch(() => {})
+              }
             }
             pullParallelLast.current = parallel
           }
@@ -295,6 +306,10 @@ export default function BatTrangLevel2({ onComplete, challengeMode }: { onComple
           if (Math.abs(deltaSigned) > 1 && !pullPenaltyApplied.current) {
             addWorkFraction(-1/15)
             pullPenaltyApplied.current = true
+            if (!pullWrongEventSentRef.current) {
+              pullWrongEventSentRef.current = true
+              triggerEvent({ event: 'wrong_action', level: 2, step: 2, village_name: 'Bát Tràng' }).catch(() => {})
+            }
             pullParallelLast.current = parallel
           }
         }
@@ -322,6 +337,7 @@ export default function BatTrangLevel2({ onComplete, challengeMode }: { onComple
         if (parallel >= successThreshold && perpDist <= tol) {
           // successful pull -> +1/15 progress (need 15 pulls)
           addWorkFraction(1/15)
+          triggerEvent({ event: 'correct_action', level: 2, step: 2, village_name: 'Bát Tràng' }).catch(() => {})
           // brief flash animation
           flashStart.current = performance.now()
           setTimeout(()=>{ flashStart.current = null }, 420)
@@ -353,12 +369,13 @@ export default function BatTrangLevel2({ onComplete, challengeMode }: { onComple
       pullStartPos.current = null
       pullParallelLast.current = null
       pullPenaltyApplied.current = false
+      pullWrongEventSentRef.current = false
       last.current = null
     }
 
     c.addEventListener('pointerdown', down); c.addEventListener('pointermove', move); c.addEventListener('pointerup', up); c.addEventListener('pointercancel', up)
     return ()=>{ c.removeEventListener('pointerdown', down); c.removeEventListener('pointermove', move); c.removeEventListener('pointerup', up); c.removeEventListener('pointercancel', up) }
-  },[state])
+  },[state, addWorkFraction, spawnWork, triggerEvent])
 
   // confetti on win
   useEffect(()=>{
@@ -373,6 +390,38 @@ export default function BatTrangLevel2({ onComplete, challengeMode }: { onComple
     const s = timeLeft > 40 ? 3 : timeLeft > 20 ? 2 : 1
     setStarCount(s)
   },[state, timeLeft])
+
+  useEffect(() => {
+    if (state === 'lost' && !previousLostRef.current) {
+      previousLostRef.current = true
+      loseCountRef.current += 1
+      if (loseCountRef.current >= 3) {
+        triggerEvent({
+          event: 'fail_many',
+          level: 2,
+          step: 2,
+          fail_count: loseCountRef.current,
+          village_name: 'Bát Tràng',
+        }).catch(() => {})
+      }
+      return
+    }
+
+    if (state !== 'lost') {
+      previousLostRef.current = false
+    }
+  }, [state, triggerEvent])
+
+  useEffect(() => {
+    if (state !== 'won' || completionEventRef.current) return
+    completionEventRef.current = true
+    const finalStars = timeLeft > 40 ? 3 : timeLeft > 20 ? 2 : 1
+    triggerEvent({ event: 'step_completed', level: 2, step: 2, village_name: 'Bát Tràng' }).catch(() => {})
+    if (finalStars >= 3) {
+      triggerEvent({ event: 'high_score', level: 2, step: 2, village_name: 'Bát Tràng' }).catch(() => {})
+      triggerEvent({ event: 'perfect_step', level: 2, step: 2, village_name: 'Bát Tràng' }).catch(() => {})
+    }
+  }, [state, timeLeft, triggerEvent])
 
   // helper to finish level: save progress, unlock next, then notify parent or navigate
   const finishAndNotify = useCallback(async (triggeredByAuto = false) => {
@@ -417,7 +466,12 @@ export default function BatTrangLevel2({ onComplete, challengeMode }: { onComple
     }
   },[state, onComplete, finishAndNotify, challengeMode])
 
-  const start = ()=>{ work.current = 0; setProgress(0); required.current = 650; setTimeLeft(60); setState('playing'); rodVisible.current = true; rodLenRef.current = 0; rodTargetLen.current = 0; rodAngle.current = -Math.PI/2 }
+  const start = ()=>{
+    if (state === 'lost') {
+      triggerEvent({ event: 'retry_step', level: 2, step: 2, village_name: 'Bát Tràng' }).catch(() => {})
+    }
+    work.current = 0; setProgress(0); required.current = 650; setTimeLeft(60); setState('playing'); rodVisible.current = true; rodLenRef.current = 0; rodTargetLen.current = 0; rodAngle.current = -Math.PI/2
+  }
   const pause = ()=> setState('paused')
   const resume = ()=> setState('playing')
   const reset = ()=>{ work.current = 0; setProgress(0); setTimeLeft(60); setState('idle'); rodVisible.current = false; rodTargetLen.current = 0; rodLenRef.current = 0 }

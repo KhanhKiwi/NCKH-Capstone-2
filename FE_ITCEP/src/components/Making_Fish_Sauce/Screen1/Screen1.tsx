@@ -4,6 +4,7 @@ import { motion, useMotionValue, AnimatePresence } from 'motion/react';
 import { levelsService } from '../../../api/levels/levelsService';
 import { progressService } from '../../../api/progress/progressService';
 import { getUserId } from '../../../utils/authUtils';
+import { useAI } from '../../../contexts/AIContext';
 
 // Fish type definitions
 type FishType = 'correct' | 'wrong' | 'spoiled';
@@ -21,6 +22,7 @@ interface Fish {
 
 export default function Screen1({ challengeMode = false, onChallengeComplete }: { challengeMode?: boolean; onChallengeComplete?: () => void }) {
   const navigate = useNavigate();
+  const { triggerEvent } = useAI();
   
   const [quality, setQuality] = useState(0); // 0-100% quality rating
   const [fishCaught, setFishCaught] = useState(0); // Count of correct fish
@@ -45,6 +47,8 @@ export default function Screen1({ challengeMode = false, onChallengeComplete }: 
 
   const boatY = useMotionValue(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
+  const completionEventRef = useRef(false);
+  const failureEventRef = useRef(false);
 
   // Generate initial fish
   useEffect(() => {
@@ -110,6 +114,19 @@ export default function Screen1({ challengeMode = false, onChallengeComplete }: 
     return () => clearInterval(interval);
   }, [time, gameStatus]);
 
+  useEffect(() => {
+    if (gameStatus === 'won' && !completionEventRef.current) {
+      completionEventRef.current = true;
+      const event = wrongCount === 0 && quality >= 95 ? 'excellent' : 'win_fast';
+      triggerEvent({ event, level: 1, step: 1 }).catch(() => {});
+    }
+
+    if (gameStatus === 'lost' && !failureEventRef.current) {
+      failureEventRef.current = true;
+      triggerEvent({ event: 'fail_many', level: 1, step: 1, fail_count: Math.max(wrongCount, 1) }).catch(() => {});
+    }
+  }, [gameStatus, quality, triggerEvent, wrongCount]);
+
   // Create new fish
   function createFish(): Fish {
     const types: FishType[] = ['correct', 'correct', 'correct', 'wrong', 'spoiled'];
@@ -159,6 +176,10 @@ export default function Screen1({ challengeMode = false, onChallengeComplete }: 
       // Wrong/spoiled fish: increase wrong count
       const newWrongCount = wrongCount + 1;
       setWrongCount(newWrongCount);
+      triggerEvent({ event: 'wrong_action', level: 1, step: 1, fail_count: newWrongCount }).catch(() => {});
+      if (newWrongCount >= 2) {
+        triggerEvent({ event: 'fail_many', level: 1, step: 1, fail_count: newWrongCount }).catch(() => {});
+      }
       
       // Check lose condition: 3 wrong fish = lose
       if (newWrongCount >= 3) {

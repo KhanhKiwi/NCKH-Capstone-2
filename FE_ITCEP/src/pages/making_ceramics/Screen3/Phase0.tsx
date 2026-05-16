@@ -1,8 +1,11 @@
 import { Link, useNavigate } from 'react-router'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
+import { useAI } from '../../../contexts/AIContext'
 
 export default function Phase0() {
   const navigate = useNavigate()
+  const { triggerEvent } = useAI()
+  const completeTriggeredRef = useRef(false)
 
   useEffect(()=>{
     document.title = 'Bát Tràng — Level 3: Giới thiệu'
@@ -18,6 +21,19 @@ export default function Phase0() {
       document.body.style.overflow = prevBody
     }
   }, [])
+
+  const handleStartPlay = () => {
+    if (!completeTriggeredRef.current) {
+      completeTriggeredRef.current = true
+      triggerEvent({
+        event: 'step_completed',
+        level: 3,
+        step: 1,
+        village_name: 'Bát Tràng',
+      }).catch(() => {})
+    }
+    navigate('/bat-trang/level-3/phase1')
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white py-12" style={{height: '100vh', overflow: 'hidden'}}>
@@ -38,7 +54,7 @@ export default function Phase0() {
           <p className="mb-6 text-gray-700">Khi sẵn sàng, bắt đầu màn để thực hành việc điều khiển gốm theo thời tiết. Bạn có thể quay lại danh sách nghề nếu muốn.</p>
 
           <div className="flex gap-4 mb-6">
-            <button onClick={() => navigate('/bat-trang/level-3/phase1')} className="px-6 py-3 bg-amber-500 text-white rounded-md font-semibold">Bắt đầu chơi</button>
+            <button onClick={handleStartPlay} className="px-6 py-3 bg-amber-500 text-white rounded-md font-semibold">Bắt đầu chơi</button>
             <Link to="/craft-selection" className="px-6 py-3 border rounded-md text-gray-700 font-semibold">Quay lại chọn nghề</Link>
           </div>
 
