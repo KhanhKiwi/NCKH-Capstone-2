@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Droplets, Layers, FlaskConical, Award, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -10,15 +10,28 @@ import { ImageWithFallback } from '../../figma/ImageWithFallback';
 import { Button } from '../../ui/button';
 import { Toaster } from '../../ui/sonner';
 import { toast } from 'sonner';
+import { useAI } from '../../../contexts/AIContext';
 
 export default function Screen5() {
   const navigate = useNavigate();
+  const { triggerEvent } = useAI();
   const userId = getUserId();
   const [filteringStage, setFilteringStage] = useState(0);
   const [clarity, setClarity] = useState(45);
   const [harvestComplete, setHarvestComplete] = useState(false);
   const [blendingActive, setBlendingActive] = useState(false);
   const [_finalQuality, _setFinalQuality] = useState(0);
+  const wrongActionCountRef = useRef(0);
+  const completionEventRef = useRef(false);
+
+  const triggerWrongAction = () => {
+    wrongActionCountRef.current += 1;
+    const failCount = wrongActionCountRef.current;
+    triggerEvent({ event: 'wrong_action', level: 5, step: 1, fail_count: failCount }).catch(() => {});
+    if (failCount >= 2) {
+      triggerEvent({ event: 'fail_many', level: 5, step: 1, fail_count: failCount }).catch(() => {});
+    }
+  };
 
   // Flavor profile state
   const [flavorProfile, setFlavorProfile] = useState({
@@ -86,6 +99,7 @@ export default function Screen5() {
       toast('Cần cải thiện', {
         description: 'Hãy tiếp tục lọc và pha blend',
       });
+      triggerWrongAction();
     }
   };
 
@@ -95,6 +109,11 @@ export default function Screen5() {
     );
 
     if (avgQuality >= 80 && filteringStage >= 3) {
+      if (!completionEventRef.current) {
+        completionEventRef.current = true;
+        const event = avgQuality >= 90 ? 'excellent' : 'win_fast';
+        triggerEvent({ event, level: 5, step: 1 }).catch(() => {});
+      }
       try {
         if (userId) {
           // Get level 5 from fish sauce village (village_id = 8)
@@ -124,12 +143,13 @@ export default function Screen5() {
       
       // Navigate to final level after a short delay
       setTimeout(() => {
-        navigate('/game/bottling-heritage');
+        navigate('/game/eternal-fragrance');
       }, 2000);
     } else {
       toast.error('Chưa đạt tiêu chuẩn', {
         description: 'Vui lòng hoàn thiện các công đoạn lọc',
       });
+      triggerWrongAction();
     }
   };
 

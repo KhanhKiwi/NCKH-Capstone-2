@@ -11,6 +11,7 @@ import { CheckCircle, AlertCircle } from 'lucide-react';
 import { levelsService } from '../../../api/levels/levelsService';
 import { progressService } from '../../../api/progress/progressService';
 import { getUserId } from '../../../utils/authUtils';
+import { useAI } from '../../../contexts/AIContext';
 
 interface Particle {
   id: number;
@@ -31,6 +32,7 @@ interface BrushStroke {
 
 export default function Screen2() {
   const navigate = useNavigate();
+  const { triggerEvent } = useAI();
   const [userId, setUserId] = useState<number | null>(null);
   
   // Get user ID from authUtils on mount
@@ -91,6 +93,9 @@ export default function Screen2() {
   const REQUIRED_RINSES = 2;
   const fishCleaned = fish.filter(f => f.cleaned === 100).length;
   const allFishCleaned = fishCleaned === fish.length;
+  const wrongActionCountRef = useRef(0);
+  const completionEventRef = useRef(false);
+  const failureEventRef = useRef(false);
 
   // ========== AUTO TRANSITIONS ==========
   useEffect(() => {
@@ -196,6 +201,24 @@ export default function Screen2() {
     }
   }, [allFishCleaned, currentStage, gameStatus]);
 
+  useEffect(() => {
+    if (gameStatus === 'completed' && !completionEventRef.current) {
+      completionEventRef.current = true;
+      const event = quality >= 90 ? 'excellent' : 'win_fast';
+      triggerEvent({ event, level: 2, step: currentStage + 1 }).catch(() => {});
+    }
+
+    if (gameStatus === 'failed' && !failureEventRef.current) {
+      failureEventRef.current = true;
+      triggerEvent({
+        event: 'fail_many',
+        level: 2,
+        step: currentStage + 1,
+        fail_count: Math.max(wrongActionCountRef.current, 1),
+      }).catch(() => {});
+    }
+  }, [currentStage, gameStatus, quality, triggerEvent]);
+
   // ========== STAGE 0: FISH CLICK ==========
   const handleFishClick = (fishId: number, isBad: boolean) => {
     if (removedFish.includes(fishId)) return;
@@ -212,6 +235,21 @@ export default function Screen2() {
       feedbackMsg = '✗ Sai! Cá tốt không nên loại. Chất lượng -5%!';
       feedbackType = 'error';
       qualityChange = -5;
+      wrongActionCountRef.current += 1;
+      triggerEvent({
+        event: 'wrong_action',
+        level: 2,
+        step: currentStage + 1,
+        fail_count: wrongActionCountRef.current,
+      }).catch(() => {});
+      if (wrongActionCountRef.current >= 3) {
+        triggerEvent({
+          event: 'fail_many',
+          level: 2,
+          step: currentStage + 1,
+          fail_count: wrongActionCountRef.current,
+        }).catch(() => {});
+      }
     }
 
     setRemovedFish([...removedFish, fishId]);
@@ -423,6 +461,9 @@ export default function Screen2() {
 
   const handleRetry = () => {
     // Reset game
+    wrongActionCountRef.current = 0;
+    completionEventRef.current = false;
+    failureEventRef.current = false;
     setQuality(50);
     setCurrentStage(0);
     setTimeRemaining(90);

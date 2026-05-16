@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import GuideDialog from '../../../util/shared/GuideDialog'
 import { useNavigate } from "react-router";
+import { useAI } from '../../../contexts/AIContext'
 
 export default function Level3({ onComplete, challengeMode }: { onComplete?: (result?: any) => void, challengeMode?: boolean }) {
   const [humidity, setHumidity] = useState(100);
@@ -24,6 +25,68 @@ export default function Level3({ onComplete, challengeMode }: { onComplete?: (re
   const timeLeftRef = useRef<number>(timeLeft);
   useEffect(() => { timeLeftRef.current = timeLeft; }, [timeLeft]);
   const navigate = useNavigate();
+  const { triggerEvent } = useAI();
+  const loseCountRef = useRef(0);
+  const loseFailManySentRef = useRef(false);
+  const failTransitionHandledRef = useRef(false);
+  const successTransitionHandledRef = useRef(false);
+
+  useEffect(() => {
+    if (!showFail) {
+      failTransitionHandledRef.current = false;
+      return;
+    }
+    if (failTransitionHandledRef.current) return;
+    failTransitionHandledRef.current = true;
+    loseCountRef.current += 1;
+    triggerEvent({
+      event: 'wrong_action',
+      level: 3,
+      step: 3,
+      village_name: 'Bát Tràng',
+    }).catch(() => {});
+    if (loseCountRef.current >= 3 && !loseFailManySentRef.current) {
+      loseFailManySentRef.current = true;
+      triggerEvent({
+        event: 'fail_many',
+        fail_count: loseCountRef.current,
+        level: 3,
+        step: 3,
+        village_name: 'Bát Tràng',
+      }).catch(() => {});
+    }
+  }, [showFail, triggerEvent]);
+
+  useEffect(() => {
+    if (!showSuccess) {
+      successTransitionHandledRef.current = false;
+      return;
+    }
+    if (successTransitionHandledRef.current) return;
+    successTransitionHandledRef.current = true;
+    const t = timeLeftRef.current ?? 0;
+    const stars = t > 60 ? 3 : t > 30 ? 2 : 1;
+    triggerEvent({
+      event: 'step_completed',
+      level: 3,
+      step: 3,
+      village_name: 'Bát Tràng',
+    }).catch(() => {});
+    if (stars >= 3) {
+      triggerEvent({
+        event: 'high_score',
+        level: 3,
+        step: 3,
+        village_name: 'Bát Tràng',
+      }).catch(() => {});
+      triggerEvent({
+        event: 'perfect_step',
+        level: 3,
+        step: 3,
+        village_name: 'Bát Tràng',
+      }).catch(() => {});
+    }
+  }, [showSuccess, triggerEvent]);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -849,6 +912,12 @@ export default function Level3({ onComplete, challengeMode }: { onComplete?: (re
                   <div className="flex gap-4 justify-center">
                     <button
                       onClick={() => {
+                        triggerEvent({
+                          event: 'retry_step',
+                          level: 3,
+                          step: 3,
+                          village_name: 'Bát Tràng',
+                        }).catch(() => {});
                         setHumidity(50);
                         setShowFail(false);
                         setTimeLeft(INITIAL_TIME);

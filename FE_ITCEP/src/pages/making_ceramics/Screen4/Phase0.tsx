@@ -1,10 +1,26 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { villagesData } from '../../../data/villagesData'
+import { useAI } from '../../../contexts/AIContext'
 
 export default function BatTrangLevel4Phase0(){
   const navigate = useNavigate()
   const village = villagesData.find(v => v.id === 'bat-trang')
+  const { triggerEvent } = useAI()
+  const introStepCompletedSentRef = useRef(false)
+
+  const handleStartPlay = () => {
+    if (!introStepCompletedSentRef.current) {
+      introStepCompletedSentRef.current = true
+      triggerEvent({
+        event: 'step_completed',
+        level: 4,
+        step: 1,
+        village_name: 'Bát Tràng',
+      }).catch(() => {})
+    }
+    navigate('/bat-trang/level-4/phase1')
+  }
 
   useEffect(()=>{
     document.title = 'Bát Tràng — Level 4: Giới thiệu'
@@ -40,7 +56,7 @@ export default function BatTrangLevel4Phase0(){
           <p className="mb-6 text-gray-700">Phần này không có câu hỏi trắc nghiệm — bạn sẽ thực hành trực tiếp trang trí và tráng men. Khi sẵn sàng, bắt đầu màn để thực hành. Bạn có thể quay lại danh sách nghề nếu muốn.</p>
 
           <div className="flex gap-4 mb-6">
-            <button onClick={() => navigate('/bat-trang/level-4/phase1')} className="px-6 py-3 bg-amber-500 text-white rounded-md font-semibold">Bắt đầu chơi</button>
+            <button onClick={handleStartPlay} className="px-6 py-3 bg-amber-500 text-white rounded-md font-semibold">Bắt đầu chơi</button>
             <Link to="/craft-selection?openName=B%C3%A1t%20Tr%C3%A0ng" className="px-6 py-3 border rounded-md text-gray-700 font-semibold">Quay lại chọn nghề</Link>
           </div>
 

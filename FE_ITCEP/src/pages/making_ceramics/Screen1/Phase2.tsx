@@ -4,6 +4,7 @@ import { progressService } from '../../../api/progress/progressService'
 import { useNavigate } from 'react-router'
 import confetti from 'canvas-confetti'
 import GuideDialog from '../../../util/shared/GuideDialog'
+import { useAI } from '../../../contexts/AIContext'
 
 type Phase2Props = {
 	onComplete?: (result?: { smoothness?: number; stars?: number }) => void;
@@ -21,7 +22,11 @@ export default function Phase2({ onComplete, challengeMode }: Phase2Props & { ch
 	const [summaryOpen, setSummaryOpen] = useState(false);
 	const [starCount, setStarCount] = useState(3);
 	const finishedRef = useRef(false)
+	const completionEventRef = useRef(false)
+	const progressEventRef = useRef(0)
+	const failCountRef = useRef(0)
 	const navigate = useNavigate()
+	const { triggerEvent } = useAI()
 
 	const finishAndNotify = useCallback(async (result?: { smoothness?: number; stars?: number }) => {
 		if (finishedRef.current) return
@@ -238,6 +243,39 @@ export default function Phase2({ onComplete, challengeMode }: Phase2Props & { ch
 		}
 	},[state, timeLeft]);
 
+	useEffect(() => {
+		if (state === 'lost') {
+			const failCount = failCountRef.current + 1
+			failCountRef.current = failCount
+			triggerEvent({
+				event: 'wrong_action',
+				level: 1,
+				step: 3,
+				fail_count: failCount,
+				village_name: 'Bát Tràng',
+			}).catch(() => {})
+			if (failCount >= 3) {
+				triggerEvent({
+					event: 'fail_many',
+					level: 1,
+					step: 3,
+					fail_count: failCount,
+					village_name: 'Bát Tràng',
+				}).catch(() => {})
+			}
+		}
+	}, [state, triggerEvent])
+
+	useEffect(() => {
+		if (state !== 'won' || completionEventRef.current) return
+		completionEventRef.current = true
+		triggerEvent({ event: 'step_completed', level: 1, step: 3, village_name: 'Bát Tràng' }).catch(() => {})
+		if (starCount >= 3) {
+			triggerEvent({ event: 'high_score', level: 1, step: 3, village_name: 'Bát Tràng' }).catch(() => {})
+			triggerEvent({ event: 'perfect_step', level: 1, step: 3, village_name: 'Bát Tràng' }).catch(() => {})
+		}
+	}, [starCount, state, triggerEvent])
+
 	// keep `timeLeft` referenced (timer is hidden from UI but used for scoring)
 	useEffect(() => {
 		// intentionally empty: referencing timeLeft to avoid linter unused-var warnings
@@ -268,6 +306,11 @@ export default function Phase2({ onComplete, challengeMode }: Phase2Props & { ch
 				// add small dent based on stroke intensity
 				dents.current.push({ x: p.x, y: p.y, strength: Math.min(1, dist/60), life: 1.0 });
 				lastPos.current=p; const pr = Math.min(1, knead.current/required.current); setProgress(pr);
+				const milestone = Math.floor(pr * 4)
+				if (milestone > progressEventRef.current) {
+					progressEventRef.current = milestone
+					triggerEvent({ event: 'correct_action', level: 1, step: 3, village_name: 'Bát Tràng' }).catch(() => {})
+				}
 				if (pr>=1){
 					setState('won');
 					// If running inside the challenge runner (onComplete provided) auto-finish.
@@ -282,9 +325,26 @@ export default function Phase2({ onComplete, challengeMode }: Phase2Props & { ch
 		return ()=>{ c.removeEventListener('pointerdown', down); c.removeEventListener('pointermove', move); c.removeEventListener('pointerup', up); c.removeEventListener('pointercancel', up); };
 	},[state,spawn,onComplete]);
 
-	const start = () => { knead.current=0; setProgress(0); setTimeLeft(INITIAL_TIME); required.current=INITIAL_REQUIRED; setState('playing'); };
+	const start = () => {
+		if (state === 'lost') {
+			triggerEvent({ event: 'retry_step', level: 1, step: 3, village_name: 'Bát Tràng' }).catch(() => {})
+		}
+		knead.current=0;
+		progressEventRef.current = 0;
+		setProgress(0);
+		setTimeLeft(INITIAL_TIME);
+		required.current=INITIAL_REQUIRED;
+		setState('playing');
+	};
 	// pause handler removed; primary button now toggles play/pause
-	const reset = () => { knead.current=0; setProgress(0); setTimeLeft(INITIAL_TIME); required.current=INITIAL_REQUIRED; setState('idle'); }
+	const reset = () => {
+		knead.current=0;
+		progressEventRef.current = 0;
+		setProgress(0);
+		setTimeLeft(INITIAL_TIME);
+		required.current=INITIAL_REQUIRED;
+		setState('idle');
+	}
 
 	return (
 		<div style={{width:'100%',height:'100%',position:'relative',fontFamily:'Inter,system-ui,Arial'}}>

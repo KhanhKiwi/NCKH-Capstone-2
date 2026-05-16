@@ -1,10 +1,26 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { villagesData } from '../../../data/villagesData'
+import { useAI } from '../../../contexts/AIContext'
 
 export default function BatTrangLevel5Phase0(){
   const navigate = useNavigate()
   const village = villagesData.find(v => v.id === 'bat-trang')
+  const { triggerEvent } = useAI()
+  const introStepCompletedSentRef = useRef(false)
+
+  const handleStart = () => {
+    if (!introStepCompletedSentRef.current) {
+      introStepCompletedSentRef.current = true
+      triggerEvent({
+        event: 'step_completed',
+        level: 5,
+        step: 1,
+        village_name: 'Bát Tràng',
+      }).catch(() => {})
+    }
+    navigate('/bat-trang/level-5/phase1')
+  }
 
   useEffect(()=>{
     document.title = 'Bát Tràng — Level 5: Giới thiệu'
@@ -40,7 +56,7 @@ export default function BatTrangLevel5Phase0(){
           <p className="mb-6 text-gray-700">Khi sẵn sàng, nhấn "Bắt đầu chơi" để làm Màn 1 (trắc nghiệm). Nếu trả lời đúng 5/5, bạn sẽ được chuyển tới Màn 2 (nung gốm).</p>
 
           <div className="flex gap-4 mb-6">
-            <button onClick={() => navigate('/bat-trang/level-5/phase1')} className="px-6 py-3 bg-amber-500 text-white rounded-md font-semibold">Bắt đầu chơi</button>
+            <button onClick={handleStart} className="px-6 py-3 bg-amber-500 text-white rounded-md font-semibold">Bắt đầu chơi</button>
             <Link to="/craft-selection" className="px-6 py-3 border rounded-md text-gray-700 font-semibold">Quay lại chọn nghề</Link>
           </div>
 

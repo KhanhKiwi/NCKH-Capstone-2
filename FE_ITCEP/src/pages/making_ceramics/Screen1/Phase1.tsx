@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { QUESTIONS } from '../../../util/question_ceramics/questions'
 import { progressService } from '../../../api/progress/progressService'
 import type { Q } from '../../../util/question_ceramics/questions'
+import { useAI } from '../../../contexts/AIContext'
 export default function BatTrangLevel1Screen1({ onComplete }: { onComplete?: () => void }) {
   // shuffle choices so correct answer isn't always in the same position
   function shuffle<T>(arr: T[]) {
@@ -25,6 +26,9 @@ export default function BatTrangLevel1Screen1({ onComplete }: { onComplete?: () 
   const [correctId, setCorrectId] = useState<string | null>(null)
   const [confetti, setConfetti] = useState<number[]>([])
   const navigate = useNavigate()
+  const { triggerEvent } = useAI()
+  const wrongCountRef = useRef(0)
+  const completionEventRef = useRef(false)
 
   useEffect(() => { document.title = 'Bát Tràng — Level 1.1: Nhào đất' }, [])
 
@@ -34,6 +38,7 @@ export default function BatTrangLevel1Screen1({ onComplete }: { onComplete?: () 
   function select(choiceId: string) {
     setAnswers(prev => ({ ...prev, [q.id]: choiceId }))
     if (q.correct === choiceId) {
+      triggerEvent({ event: 'correct_action', level: 1, step: 2, village_name: 'Bát Tràng' }).catch(() => {})
       setFeedback('Đúng — lựa chọn phù hợp')
       setCorrectId(choiceId)
       setConfetti(Array.from({ length: 18 }, (_, i) => i))
@@ -41,6 +46,12 @@ export default function BatTrangLevel1Screen1({ onComplete }: { onComplete?: () 
       // progress updates removed (UI no longer shows a progress bar)
       setTimeout(() => setCorrectId(null), 800)
     } else {
+      const failCount = wrongCountRef.current + 1
+      wrongCountRef.current = failCount
+      triggerEvent({ event: 'wrong_action', level: 1, step: 2, fail_count: failCount, village_name: 'Bát Tràng' }).catch(() => {})
+      if (failCount >= 3) {
+        triggerEvent({ event: 'fail_many', level: 1, step: 2, fail_count: failCount, village_name: 'Bát Tràng' }).catch(() => {})
+      }
       setFeedback('Sai — vui lòng thử lại')
       setShakeId(choiceId)
       setTimeout(() => setShakeId(null), 600)
@@ -54,6 +65,12 @@ export default function BatTrangLevel1Screen1({ onComplete }: { onComplete?: () 
       return
     }
     if (selected !== q.correct) {
+      const failCount = wrongCountRef.current + 1
+      wrongCountRef.current = failCount
+      triggerEvent({ event: 'wrong_action', level: 1, step: 2, fail_count: failCount, village_name: 'Bát Tràng' }).catch(() => {})
+      if (failCount >= 3) {
+        triggerEvent({ event: 'fail_many', level: 1, step: 2, fail_count: failCount, village_name: 'Bát Tràng' }).catch(() => {})
+      }
       setFeedback('Sai — vui lòng chọn lại')
       setShakeId(selected)
       setTimeout(() => setShakeId(null), 600)
@@ -69,6 +86,14 @@ export default function BatTrangLevel1Screen1({ onComplete }: { onComplete?: () 
     try {
       await progressService.saveProgress({ user_id: 1, level_id: 2, status: 'completed', score: 100 })
     } catch (e) { console.warn('progress save failed', e) }
+
+    if (!completionEventRef.current) {
+      completionEventRef.current = true
+      triggerEvent({ event: 'step_completed', level: 1, step: 2, village_name: 'Bát Tràng' }).catch(() => {})
+      if (wrongCountRef.current === 0) {
+        triggerEvent({ event: 'perfect_step', level: 1, step: 2, village_name: 'Bát Tràng' }).catch(() => {})
+      }
+    }
 
     if (onComplete) return onComplete()
     navigate('/bat-trang/level-1/phase2')

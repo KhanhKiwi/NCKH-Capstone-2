@@ -1,9 +1,16 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { QUESTIONS_LEVEL3 as QUESTIONS } from '../../../util/question_ceramics/questions_level3'
 import { progressService } from '../../../api/progress/progressService'
 import type { Q } from '../../../util/question_ceramics/questions'
+import { useAI } from '../../../contexts/AIContext'
+
 export default function BatTrangLevel3Screen3({ onComplete, challengeMode }: { onComplete?: () => void, challengeMode?: boolean }) {
+  const { triggerEvent } = useAI()
+  const wrongCountRef = useRef(0)
+  const failManySentRef = useRef(false)
+  const completionSentRef = useRef(false)
+  const correctOncePerQuestionRef = useRef<Set<number>>(new Set())
   function shuffle<T>(arr: T[]) {
     const a = arr.slice()
     for (let i = a.length - 1; i > 0; i--) {
@@ -23,6 +30,26 @@ export default function BatTrangLevel3Screen3({ onComplete, challengeMode }: { o
   const [correctId, setCorrectId] = useState<string | null>(null)
   const [confetti, setConfetti] = useState<number[]>([])
   const navigate = useNavigate()
+
+  const fireWrong = () => {
+    wrongCountRef.current += 1
+    triggerEvent({
+      event: 'wrong_action',
+      level: 3,
+      step: 2,
+      village_name: 'Bát Tràng',
+    }).catch(() => {})
+    if (wrongCountRef.current >= 3 && !failManySentRef.current) {
+      failManySentRef.current = true
+      triggerEvent({
+        event: 'fail_many',
+        fail_count: wrongCountRef.current,
+        level: 3,
+        step: 2,
+        village_name: 'Bát Tràng',
+      }).catch(() => {})
+    }
+  }
 
   useEffect(() => { document.title = 'Bát Tràng — Level 3.1: Phơi khô (Trắc nghiệm)' }, [])
 
@@ -47,6 +74,15 @@ export default function BatTrangLevel3Screen3({ onComplete, challengeMode }: { o
   function select(choiceId: string) {
     setAnswers(prev => ({ ...prev, [q.id]: choiceId }))
     if (q.correct === choiceId) {
+      if (!correctOncePerQuestionRef.current.has(q.id)) {
+        correctOncePerQuestionRef.current.add(q.id)
+        triggerEvent({
+          event: 'correct_action',
+          level: 3,
+          step: 2,
+          village_name: 'Bát Tràng',
+        }).catch(() => {})
+      }
       setFeedback('Đúng — lựa chọn phù hợp')
       setCorrectId(choiceId)
       if (!challengeMode) {
@@ -55,6 +91,8 @@ export default function BatTrangLevel3Screen3({ onComplete, challengeMode }: { o
       }
       setTimeout(() => setCorrectId(null), 800)
     } else {
+      correctOncePerQuestionRef.current.delete(q.id)
+      fireWrong()
       setFeedback('Sai — vui lòng thử lại')
       setShakeId(choiceId)
       setTimeout(() => setShakeId(null), 600)
@@ -68,6 +106,7 @@ export default function BatTrangLevel3Screen3({ onComplete, challengeMode }: { o
       return
     }
     if (selected !== q.correct) {
+      fireWrong()
       setFeedback('Sai — vui lòng chọn lại')
       setShakeId(selected)
       setTimeout(() => setShakeId(null), 600)
@@ -78,6 +117,24 @@ export default function BatTrangLevel3Screen3({ onComplete, challengeMode }: { o
       const nextIdx = index + 1
       setIndex(nextIdx)
       return
+    }
+
+    if (!completionSentRef.current) {
+      completionSentRef.current = true
+      triggerEvent({
+        event: 'step_completed',
+        level: 3,
+        step: 2,
+        village_name: 'Bát Tràng',
+      }).catch(() => {})
+      if (wrongCountRef.current === 0) {
+        triggerEvent({
+          event: 'perfect_step',
+          level: 3,
+          step: 2,
+          village_name: 'Bát Tràng',
+        }).catch(() => {})
+      }
     }
 
     try {

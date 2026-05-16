@@ -14,11 +14,12 @@ import { PressureGauge } from './components/PressureGauge';
 import { SealingDragGame } from './components/SealingDragGame';
 import { WinScreen } from './components/WinScreen';
 import { LossScreen } from './components/LossScreen';
-import { progressService } from '../../../api/services/progressService';
 import { getUserId } from '../../../utils/authUtils';
+import { useAI } from '../../../contexts/AIContext';
 
 export default function Screen3() {
   const navigate = useNavigate();
+  const { triggerEvent } = useAI();
   const [userId, setUserId] = useState<number | null>(null);
   
   // Get user ID from authUtils on mount
@@ -52,7 +53,30 @@ export default function Screen3() {
   const [_buttonPressed, _setButtonPressed] = useState<string | null>(null);
 
   const qualityDegradationRef = useRef(0);
+  const wrongActionCountRef = useRef(0);
+  const completionEventRef = useRef(false);
+  const failureEventRef = useRef(false);
   const [showSaltParticles, setShowSaltParticles] = useState(false);
+
+  const getAIStep = () => {
+    const stepMap = {
+      adding: 1,
+      mixing: 2,
+      transferring: 3,
+      pressing: 4,
+      sealing: 5,
+    } as const;
+    return stepMap[currentStep];
+  };
+
+  const triggerWrongAction = (step = getAIStep()) => {
+    wrongActionCountRef.current += 1;
+    const failCount = wrongActionCountRef.current;
+    triggerEvent({ event: 'wrong_action', level: 3, step, fail_count: failCount }).catch(() => {});
+    if (failCount >= 3) {
+      triggerEvent({ event: 'fail_many', level: 3, step, fail_count: failCount }).catch(() => {});
+    }
+  };
 
 
   // ========== INITIALIZE TARGET SALT RATIO ==========
@@ -139,6 +163,24 @@ export default function Screen3() {
     return () => clearTimeout(timeout);
   }, [feedback]);
 
+  useEffect(() => {
+    if (gameStatus === 'completed' && !completionEventRef.current) {
+      completionEventRef.current = true;
+      const event = quality >= 90 ? 'excellent' : 'win_fast';
+      triggerEvent({ event, level: 3, step: getAIStep() }).catch(() => {});
+    }
+
+    if (gameStatus === 'failed' && !failureEventRef.current) {
+      failureEventRef.current = true;
+      triggerEvent({
+        event: 'fail_many',
+        level: 3,
+        step: getAIStep(),
+        fail_count: Math.max(wrongActionCountRef.current, 1),
+      }).catch(() => {});
+    }
+  }, [gameStatus, quality, triggerEvent]);
+
   // ========== HANDLERS ==========
   const handleAddSalt = () => {
     if (gameStatus !== 'playing' || currentStep !== 'adding' || saltApplied) return;
@@ -159,6 +201,7 @@ export default function Screen3() {
         // WRONG! Heavy penalty
         feedbackMsg = `😭 Sai tỉ lệ muối! Cần ${targetSaltRatio.toFixed(1)}, bạn cho ${saltRatio.toFixed(1)} -20%`;
         qualityChange = -20;
+        triggerWrongAction(1);
       }
     } else {
       // Fallback (shouldn't happen)
@@ -271,6 +314,7 @@ export default function Screen3() {
     } else {
       // Missed timing: -6%
       qualityChange = -6;
+      triggerWrongAction(2);
       feedbackMsg = `✗ Lần ${newCount}/${requiredMixes}... Sai! Độ đều ${Math.round(newEvenness)}% -6%`;
     }
 
@@ -306,6 +350,7 @@ export default function Screen3() {
     if (Math.random() < 0.3) {
       setFeedback('⚠️ Chuyển không đều - một số muối rơi! -5%');
       setQuality(prev => Math.max(0, prev - 5));
+      triggerWrongAction(3);
     } else {
       setFeedback('✓ Chuyển hợn hợp vào thùng chum! +5%');
       setQuality(prev => Math.min(100, prev + 5));
@@ -332,6 +377,7 @@ export default function Screen3() {
     } else {
       // Bad pressure: -5%
       qualityChange = -5;
+      triggerWrongAction(4);
       feedbackMsg = '⚠️ Nén chặt không đúng lực! -5%';
     }
 
@@ -354,6 +400,7 @@ export default function Screen3() {
     if (Math.random() < 0.25) {
       setFeedback('⚠️ Nén không đều - một số về không phẳng! -3%');
       setQuality(prev => Math.max(0, prev - 3));
+      triggerWrongAction(4);
     } else {
       setFeedback('✓ Nén chặt mọ trường kị khí! +8%');
       setQuality(prev => Math.min(100, prev + 8));
@@ -380,6 +427,7 @@ export default function Screen3() {
     } else {
       // Bad sealing: -5%
       qualityChange = -5;
+      triggerWrongAction(5);
       feedbackMsg = '⚠️ Phủ muối không đều! -5%';
     }
 

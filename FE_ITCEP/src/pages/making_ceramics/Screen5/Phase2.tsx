@@ -1,9 +1,38 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import GuideDialog from '../../../util/shared/GuideDialog'
+import { useAI } from '../../../contexts/AIContext'
 
-export default function BatTrangLevel5Phase1({ onComplete, challengeMode }: { onComplete?: (result?: any) => void, challengeMode?: boolean }) {
+export default function BatTrangLevel5Phase2({ onComplete, challengeMode }: { onComplete?: (result?: any) => void, challengeMode?: boolean }) {
   const navigate = useNavigate()
+  const { triggerEvent } = useAI()
+
+  const aiStep3 = { level: 5 as const, step: 3 as const, village_name: 'Bát Tràng' as const }
+  const firingStartCorrectSentRef = useRef(false)
+  const outsideIdealWrongLatchRef = useRef(false)
+  const insideIdealCorrectLatchRef = useRef(false)
+  const successStepCompletedRef = useRef(false)
+  const highScoreSentRef = useRef(false)
+  const timeUpEventSentRef = useRef(false)
+
+  const resetAiRefs = () => {
+    firingStartCorrectSentRef.current = false
+    outsideIdealWrongLatchRef.current = false
+    insideIdealCorrectLatchRef.current = false
+    successStepCompletedRef.current = false
+    highScoreSentRef.current = false
+    timeUpEventSentRef.current = false
+  }
+
+  const handleStartFiring = () => {
+    if (!challengeMode && !firingStartCorrectSentRef.current) {
+      firingStartCorrectSentRef.current = true
+      triggerEvent({ event: 'correct_action', ...aiStep3 }).catch(() => {})
+    }
+    setQuality(0)
+    setRunning(true)
+    setStarted(true)
+  }
 
   const [temperature, setTemperature] = useState(900)
   const [timeLeft, setTimeLeft] = useState(3 * 60)
@@ -19,6 +48,8 @@ export default function BatTrangLevel5Phase1({ onComplete, challengeMode }: { on
 
   const sliderRef = useRef<HTMLDivElement | null>(null)
   const potCanvasRef = useRef<HTMLCanvasElement | null>(null)
+  const qualityRef = useRef(quality)
+  useEffect(() => { qualityRef.current = quality }, [quality])
 
   const MIN = 900
   const MAX = 1250
@@ -214,6 +245,53 @@ export default function BatTrangLevel5Phase1({ onComplete, challengeMode }: { on
       }
     }, [showSuccess, onComplete, starCount])
 
+    useEffect(() => {
+      if (challengeMode || !showSuccess) return
+      if (!successStepCompletedRef.current) {
+        successStepCompletedRef.current = true
+        triggerEvent({ event: 'step_completed', ...aiStep3 }).catch(() => {})
+      }
+      const stars = timeLeft > 60 ? 3 : timeLeft > 30 ? 2 : 1
+      if (stars !== 3 || highScoreSentRef.current) return
+      highScoreSentRef.current = true
+      const id = window.setTimeout(() => {
+        triggerEvent({ event: 'high_score', ...aiStep3 }).catch(() => {})
+      }, 900)
+      return () => clearTimeout(id)
+    }, [showSuccess, challengeMode, timeLeft, triggerEvent])
+
+    useEffect(() => {
+      if (challengeMode || !started || timeLeft !== 0) return
+      if (qualityRef.current >= 100) return
+      if (timeUpEventSentRef.current) return
+      timeUpEventSentRef.current = true
+      if (qualityRef.current >= 80) {
+        triggerEvent({ event: 'almost_success', ...aiStep3 }).catch(() => {})
+      } else {
+        triggerEvent({ event: 'fail_many', fail_count: 1, ...aiStep3 }).catch(() => {})
+      }
+    }, [timeLeft, started, challengeMode, triggerEvent])
+
+    useEffect(() => {
+      if (challengeMode || !running || !started) return
+      const inIdeal = temperature >= IDEAL_MIN && temperature <= IDEAL_MAX
+      if (!inIdeal) {
+        if (!outsideIdealWrongLatchRef.current) {
+          outsideIdealWrongLatchRef.current = true
+          triggerEvent({ event: 'wrong_action', ...aiStep3 }).catch(() => {})
+        }
+        insideIdealCorrectLatchRef.current = false
+      } else {
+        if (outsideIdealWrongLatchRef.current) {
+          outsideIdealWrongLatchRef.current = false
+        }
+        if (!insideIdealCorrectLatchRef.current) {
+          insideIdealCorrectLatchRef.current = true
+          triggerEvent({ event: 'correct_action', ...aiStep3 }).catch(() => {})
+        }
+      }
+    }, [temperature, running, started, challengeMode, triggerEvent])
+
     /* ===== AUTO-NUDGE TEMPERATURE WHEN IDLE ===== */
     useEffect(() => {
       if (!started) return
@@ -320,6 +398,7 @@ export default function BatTrangLevel5Phase1({ onComplete, challengeMode }: { on
 
                   <button
                     onClick={() => {
+                      resetAiRefs()
                       setShowSuccess(false)
                       setQuality(100)
                       setTimeLeft(3 * 60)
@@ -385,7 +464,7 @@ export default function BatTrangLevel5Phase1({ onComplete, challengeMode }: { on
                 }
                 navigate('/craft-selection?openName=B%C3%A1t%20Tr%C3%A0ng');
               }} style={{padding:'10px 18px',background:'linear-gradient(90deg,#10b981,#06a86b)',color:'white',borderRadius:12,border:'none',fontWeight:800}}>Hoàn tất</button>
-              <button onClick={()=>{ setSummaryOpen(false); setShowSuccess(false); setQuality(100); setTimeLeft(3 * 60); setRunning(false); setStarted(false); navigate('/craft-selection'); }} style={{padding:'10px 18px',background:'white',borderRadius:12,border:'1px solid rgba(0,0,0,0.06)',fontWeight:700,color:'#6b3f1a'}}>Thoát</button>
+              <button onClick={()=>{ resetAiRefs(); setSummaryOpen(false); setShowSuccess(false); setQuality(100); setTimeLeft(3 * 60); setRunning(false); setStarted(false); navigate('/craft-selection'); }} style={{padding:'10px 18px',background:'white',borderRadius:12,border:'1px solid rgba(0,0,0,0.06)',fontWeight:700,color:'#6b3f1a'}}>Thoát</button>
             </div>
           </div>
         </div>
@@ -424,7 +503,7 @@ export default function BatTrangLevel5Phase1({ onComplete, challengeMode }: { on
               <div className="flex items-center gap-3">
                 {!running ? (
                   <button
-                    onClick={() => { setQuality(0); setRunning(true); setStarted(true) }}
+                    onClick={handleStartFiring}
                     className="px-4 py-2 bg-emerald-600 text-white rounded-lg shadow"
                   >
                     {started ? 'Tiếp tục' : 'Bắt đầu'}

@@ -1,16 +1,19 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ArrowLeft, Droplet, Wine, Sparkles, Award } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { levelsService } from '../../../api/levels/levelsService';
 import { progressService } from '../../../api/progress/progressService';import { getUserId } from '../../../utils/authUtils';import { ImageWithFallback } from '../../figma/ImageWithFallback';
+import { useAI } from '../../../contexts/AIContext';
 
 export default function Screen6() {
   const navigate = useNavigate();
+  const { triggerEvent } = useAI();
   const userId = getUserId();
   const [selectedBottle, setSelectedBottle] = useState(2);
   const [isFilling, setIsFilling] = useState(false);
   const [isSealed, setIsSealed] = useState(false);
+  const completionEventRef = useRef(false);
 
   const heritageMetrics = [
     { name: 'Purity of Form', score: 96, subtitle: 'Tinh túy hình thái' },
@@ -29,6 +32,10 @@ export default function Screen6() {
   };
 
   const handleCompletion = async () => {
+    if (!completionEventRef.current) {
+      completionEventRef.current = true;
+      triggerEvent({ event: 'excellent', level: 6, step: 1 }).catch(() => {});
+    }
     try {
       if (userId && isSealed) {
         // Get level 6 from fish sauce village (village_id = 8) - FINAL LEVEL
