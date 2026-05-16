@@ -11,7 +11,7 @@ import { useAI } from '../../../contexts/AIContext';
 export default function CloseJarFermentGamePage({ challengeMode = false, onComplete }: { challengeMode?: boolean; onComplete?: () => void }) {
   const navigate = useNavigate();
   const { triggerEvent } = useAI();
-  const [gameStarted, setGameStarted] = useState(false);
+  const [gameStarted, setGameStarted] = useState(challengeMode);
   const [isFinishing, setIsFinishing] = useState(false);
   const resultEventRef = useRef(false);
 

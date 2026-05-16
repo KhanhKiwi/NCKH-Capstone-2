@@ -8,7 +8,7 @@ interface WashSaltGamePageProps {
 }
 
 export default function WashSaltGamePage({ challengeMode = false, onComplete }: WashSaltGamePageProps) {
-  const [gameStarted, setGameStarted] = useState(false);
+  const [gameStarted, setGameStarted] = useState(challengeMode);
 
   return (
     <div className="relative w-full min-h-screen overflow-y-auto overflow-x-hidden">

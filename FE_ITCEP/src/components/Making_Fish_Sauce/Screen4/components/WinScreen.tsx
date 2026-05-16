@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import type { JarState } from '../types/gameTypes';
 
 interface WinScreenProps {
@@ -18,7 +19,14 @@ export function WinScreen({
   challengeMode = false
 }: WinScreenProps) {
   
-  // Calculate average quality from all 3 jars
+  // Auto-proceed in challenge mode
+  useEffect(() => {
+    if (challengeMode) {
+      const t = setTimeout(() => { onContinue(); }, 2500);
+      return () => clearTimeout(t);
+    }
+  }, [challengeMode, onContinue]);
+
   const averageQuality = Math.round((jars[0].quality + jars[1].quality + jars[2].quality) / 3);
   
   // Determine quality rating
@@ -142,27 +150,29 @@ export function WinScreen({
 
           {/* Action Buttons */}
           <div className="flex gap-4 justify-center flex-wrap">
-            <button
-              onClick={onContinue}
-              className="bg-gradient-to-r from-[#5f7c8a] to-[#4a7c9a] hover:from-[#6a8c9a] hover:to-[#5a8caa] text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg"
-            >
-              🚀 Tiếp Tục → Level 5
-            </button>
-            {!challengeMode && (
-              <button
-                onClick={onRetry}
-                className="bg-gradient-to-r from-[#a0522d] to-[#8b4513] hover:from-[#b0623d] hover:to-[#9b5523] text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg"
-              >
-                🔄 Chơi Lại
-              </button>
-            )}
-            {!challengeMode && (
-              <button
-                onClick={onBack}
-                className="bg-gradient-to-r from-[#8b7355] to-[#6b5345] hover:from-[#9b8365] hover:to-[#7b6355] text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg"
-              >
-                ← Quay Lại
-              </button>
+            {challengeMode ? (
+              <p className="text-[#d4c4a8] text-lg animate-pulse">⏳ Đang chuyển sang màn tiếp theo...</p>
+            ) : (
+              <>
+                <button
+                  onClick={onContinue}
+                  className="bg-gradient-to-r from-[#5f7c8a] to-[#4a7c9a] hover:from-[#6a8c9a] hover:to-[#5a8caa] text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg"
+                >
+                  🚀 Tiếp Tục → Level 5
+                </button>
+                <button
+                  onClick={onRetry}
+                  className="bg-gradient-to-r from-[#a0522d] to-[#8b4513] hover:from-[#b0623d] hover:to-[#9b5523] text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg"
+                >
+                  🔄 Chơi Lại
+                </button>
+                <button
+                  onClick={onBack}
+                  className="bg-gradient-to-r from-[#8b7355] to-[#6b5345] hover:from-[#9b8365] hover:to-[#7b6355] text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg"
+                >
+                  ← Quay Lại
+                </button>
+              </>
             )}
           </div>
 

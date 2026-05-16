@@ -264,6 +264,14 @@ export default function Screen1({ challengeMode = false, onChallengeComplete }: 
     }
   }
 
+  // Auto-proceed in challenge mode when won
+  useEffect(() => {
+    if (gameStatus === 'won' && challengeMode && onChallengeComplete) {
+      const t = setTimeout(() => { handleContinueLevel(); }, 2000);
+      return () => clearTimeout(t);
+    }
+  }, [gameStatus, challengeMode]);
+
   const shakeX = screenShake ? Math.sin(Date.now() * 0.1) * 4 : 0;
 
   return (
@@ -609,23 +617,31 @@ export default function Screen1({ challengeMode = false, onChallengeComplete }: 
               </div>
 
               <div className="flex gap-3">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex-1 bg-gradient-to-r from-[#FFD166] to-[#EEC88F] text-[#1B4965] px-6 py-3 rounded-2xl shadow-xl font-semibold"
-                  onClick={() => window.location.reload()}
-                >
-                  🔄 Chơi lại
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  disabled={isUnlocking}
-                  className="flex-1 bg-gradient-to-r from-[#00C897] to-[#00E5A8] text-white px-6 py-3 rounded-2xl shadow-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={handleContinueLevel}
-                >
-                  {isUnlocking ? '⏳ Đang xử lý...' : '➡️ Đi Tiếp'}
-                </motion.button>
+                {challengeMode ? (
+                  <p className="flex-1 text-center text-[#1B4965] font-semibold animate-pulse py-2">
+                    ⏳ Đang chuyển sang màn tiếp theo...
+                  </p>
+                ) : (
+                  <>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="flex-1 bg-gradient-to-r from-[#FFD166] to-[#EEC88F] text-[#1B4965] px-6 py-3 rounded-2xl shadow-xl font-semibold"
+                      onClick={() => window.location.reload()}
+                    >
+                      🔄 Chơi lại
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      disabled={isUnlocking}
+                      className="flex-1 bg-gradient-to-r from-[#00C897] to-[#00E5A8] text-white px-6 py-3 rounded-2xl shadow-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={handleContinueLevel}
+                    >
+                      {isUnlocking ? '⏳ Đang xử lý...' : '➡️ Đi Tiếp'}
+                    </motion.button>
+                  </>
+                )}
               </div>
             </motion.div>
           </motion.div>

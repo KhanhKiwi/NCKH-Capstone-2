@@ -19,7 +19,7 @@ import { EvaluationPhase } from './EvaluationPhase';
 
 type GamePhase = 'prep' | 'filtration' | 'blend' | 'evaluation' | 'complete' | 'failed';
 
-export default function Screen5() {
+export default function Screen5({ challengeMode = false, onComplete }: { challengeMode?: boolean; onComplete?: () => void }) {
   const navigate = useNavigate();
   const { triggerEvent } = useAI();
   const userId = getUserId();
@@ -143,7 +143,7 @@ export default function Screen5() {
     triggerCompletionAI(finalQuality);
     try {
       if (userId) {
-        const levels = await levelsService.getByVillage(8, userId);
+        const levels = await levelsService.getByVillage(2, userId);
         const level5 = levels.find((l: { level_number?: number }) => l.level_number === 5);
 
         if (level5) {
@@ -174,6 +174,10 @@ export default function Screen5() {
 
     setCurrentPhase('complete');
     void saveProgress(finalQuality);
+    // In challenge mode, notify parent after a short delay
+    if (challengeMode && onComplete) {
+      setTimeout(() => onComplete(), 2500);
+    }
   };
 
   const getGrade = (score: number) => {
@@ -326,20 +330,25 @@ export default function Screen5() {
                         {gradeInfo.name}
                       </p>
                       <p className="text-amber-200/60 mb-8">Chất lượng cuối cùng: {Math.round(quality)}%</p>
-                      <motion.button
-                        onClick={() => {
-                          toast.success('🎉 Level 5 hoàn thành! Mở khóa Level 6!', {
-                            description: 'Tiếp tục hành trình di sản mắm Nam Ô',
-                            duration: 5000,
-                          });
-                          setTimeout(() => navigate('/game/eternal-fragrance'), 2000);
-                        }}
-                        className="px-8 py-4 bg-gradient-to-r from-yellow-600 to-amber-600 text-amber-50 rounded-lg font-bold text-lg hover:from-yellow-500 hover:to-amber-500 transition-all"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        Tiếp tục → Level 6: Vĩnh Cửu Hương
-                      </motion.button>
+                      {!challengeMode && (
+                        <motion.button
+                          onClick={() => {
+                            toast.success('🎉 Level 5 hoàn thành! Mở khóa Level 6!', {
+                              description: 'Tiếp tục hành trình di sản mắm Nam Ô',
+                              duration: 5000,
+                            });
+                            setTimeout(() => navigate('/game/eternal-fragrance'), 2000);
+                          }}
+                          className="px-8 py-4 bg-gradient-to-r from-yellow-600 to-amber-600 text-amber-50 rounded-lg font-bold text-lg hover:from-yellow-500 hover:to-amber-500 transition-all"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          Tiếp tục → Level 6: Vĩnh Cửu Hương
+                        </motion.button>
+                      )}
+                      {challengeMode && (
+                        <p className="text-amber-300/80 text-lg animate-pulse">Đang chuyển sang màn tiếp theo...</p>
+                      )}
                     </motion.div>
                   )}
 

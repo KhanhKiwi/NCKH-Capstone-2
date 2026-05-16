@@ -561,7 +561,7 @@ export default function Screen2({ challengeMode = false, onChallengeComplete }: 
 
   return (
     <div 
-      className="w-full min-h-screen overflow-y-auto"
+      className="relative w-full min-h-screen overflow-y-auto"
       onMouseMove={currentStage === 2 ? handleBrushMouseMove : undefined}
       onMouseUp={handleBrushMouseUp}
       onMouseLeave={handleBrushMouseUp}
@@ -569,7 +569,7 @@ export default function Screen2({ challengeMode = false, onChallengeComplete }: 
       <style>{animationStyle}</style>
       <div className="relative w-full flex flex-col lg:flex-row">
         {/* Background */}
-        <div className="fixed inset-0 -z-10 pointer-events-none">
+        <div className="absolute inset-0 -z-10 pointer-events-none">
           <ImageWithFallback
             src="https://images.unsplash.com/photo-1774434355015-bb547e11b32c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
             alt="Nam Ô fishing village"

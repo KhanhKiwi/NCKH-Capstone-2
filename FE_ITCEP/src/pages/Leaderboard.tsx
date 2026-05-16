@@ -25,7 +25,16 @@ export default function LeaderboardPage(){
       try{
         let cid: number | null = null
         if (village) {
-          try { cid = await userChallengesService.inferCraftIdForCeramics() } catch {}
+          const vid = Number(village)
+          // Map village_id → craft_id (they are equal in this DB schema)
+          // Village 1 = Làng Gốm Bát Tràng, Village 2 = Làng Mắm Nam Ô
+          if (vid === 2) {
+            cid = 2 // Làng Mắm Nam Ô → craft_id = 2
+          } else if (vid === 1) {
+            try { cid = await userChallengesService.inferCraftIdForCeramics() } catch { cid = 1 }
+          } else {
+            cid = vid // fallback: assume craft_id = village_id
+          }
         }
         if (!cid) cid = Number(params.get('craft') ?? params.get('craft_id') ?? 0) || null
         setCraftId(cid)

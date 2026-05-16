@@ -1,4 +1,5 @@
 import { CheckCircle, ArrowLeft } from 'lucide-react';
+import { useEffect } from 'react';
 
 interface CompletionBannerProps {
   quality: number;
@@ -10,6 +11,7 @@ interface CompletionBannerProps {
   cleanedFishCount: number;
   onContinue: () => void;
   onBack: () => void;
+  challengeMode?: boolean;
 }
 
 export function CompletionBanner({
@@ -21,8 +23,16 @@ export function CompletionBanner({
   rinseCount,
   cleanedFishCount,
   onContinue,
-  onBack
+  onBack,
+  challengeMode = false
 }: CompletionBannerProps) {
+  // Auto-proceed in challenge mode
+  useEffect(() => {
+    if (challengeMode) {
+      const t = setTimeout(() => onContinue(), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [challengeMode, onContinue]);
   const getQualityRating = () => {
     if (quality >= 90) return { label: 'Hoàn hảo ✨', color: '#4a7c59' };
     if (quality >= 75) return { label: 'Rất tốt ✓', color: '#5a8f6f' };
@@ -123,21 +133,28 @@ export function CompletionBanner({
         </div>
 
         {/* Footer Buttons */}
-        <div className="px-6 py-4 bg-gray-50 flex gap-3">
-          <button
-            onClick={onBack}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Quay lại
-          </button>
-          <button
-            onClick={onContinue}
-            className="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
-          >
-            ➡️ Đi Tiếp
-          </button>
-        </div>
+        {!challengeMode && (
+          <div className="px-6 py-4 bg-gray-50 flex gap-3">
+            <button
+              onClick={onBack}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Quay lại
+            </button>
+            <button
+              onClick={onContinue}
+              className="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
+            >
+              ➡️ Đi Tiếp
+            </button>
+          </div>
+        )}
+        {challengeMode && (
+          <div className="px-6 py-4 bg-gray-50 text-center">
+            <p className="text-green-700 font-semibold animate-pulse">⏳ Đang chuyển sang màn tiếp theo...</p>
+          </div>
+        )}
       </div>
     </div>
   );

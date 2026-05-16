@@ -8,7 +8,7 @@ interface CatchFishGamePageProps {
 }
 
 export default function CatchFishGamePage({ challengeMode = false, onComplete }: CatchFishGamePageProps) {
-  const [gameStarted, setGameStarted] = useState(false);
+  const [gameStarted, setGameStarted] = useState(challengeMode);
 
   return (
     <div className={`relative w-full ${gameStarted ? 'h-screen overflow-hidden' : 'min-h-screen overflow-y-auto'}`}>

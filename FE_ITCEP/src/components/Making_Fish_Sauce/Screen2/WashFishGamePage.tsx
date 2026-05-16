@@ -8,7 +8,7 @@ interface WashFishGamePageProps {
 }
 
 export default function WashFishGamePage({ challengeMode = false, onComplete }: WashFishGamePageProps) {
-  const [gameStarted, setGameStarted] = useState(false);
+  const [gameStarted, setGameStarted] = useState(challengeMode);
 
   return (
     <div className="relative w-full min-h-screen overflow-y-auto">

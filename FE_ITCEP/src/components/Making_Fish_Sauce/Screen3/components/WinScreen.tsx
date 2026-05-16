@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { levelsService } from '../../../../api/levels/levelsService';
@@ -12,6 +13,34 @@ interface WinScreenProps {
 
 export function WinScreen({ quality, userId, challengeMode = false, onChallengeComplete }: WinScreenProps) {
   const navigate = useNavigate();
+
+  // Auto-proceed in challenge mode
+  useEffect(() => {
+    if (challengeMode && onChallengeComplete) {
+      // Save progress then auto-navigate
+      const proceed = async () => {
+        try {
+          if (userId) {
+            const levels = await levelsService.getByVillage(2, userId);
+            const level3 = levels.find((l: any) => l.level_number === 3);
+            if (level3) {
+              await progressService.saveProgress({
+                user_id: userId,
+                level_id: level3.level_id,
+                status: 'completed',
+                score: quality
+              });
+            }
+          }
+        } catch (error) {
+          console.error('[Screen3] Error saving progress:', error);
+        }
+        onChallengeComplete();
+      };
+      const t = setTimeout(() => { proceed(); }, 2000);
+      return () => clearTimeout(t);
+    }
+  }, [challengeMode, onChallengeComplete, quality, userId]);
 
   const handleContinue = async () => {
     try {
@@ -181,24 +210,34 @@ export function WinScreen({ quality, userId, challengeMode = false, onChallengeC
         )}
 
         {/* Buttons */}
-        <div className="flex flex-col sm:flex-row gap-2">
-          <motion.button
-            onClick={handleContinue}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex-1 px-4 py-2 sm:py-3 bg-[#1a1a1a] text-[#d4af37] font-bold rounded-lg hover:bg-[#2a2a2a] transition-colors text-sm sm:text-base"
+        {challengeMode ? (
+          <motion.div
+            className="text-center text-sm font-semibold text-[#1a1a1a]/70 animate-pulse py-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
           >
-            ➡️ Đi Tiếp
-          </motion.button>
-          <motion.button
-            onClick={() => window.location.reload()}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex-1 px-4 py-2 sm:py-3 bg-[#d4af37] text-[#1a1a1a] font-bold rounded-lg hover:bg-[#e0c158] transition-colors text-sm sm:text-base"
-          >
-            🔁 Chơi Lại
-          </motion.button>
-        </div>
+            ⏳ Đang chuyển sang màn tiếp theo...
+          </motion.div>
+        ) : (
+          <div className="flex flex-col sm:flex-row gap-2">
+            <motion.button
+              onClick={handleContinue}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex-1 px-4 py-2 sm:py-3 bg-[#1a1a1a] text-[#d4af37] font-bold rounded-lg hover:bg-[#2a2a2a] transition-colors text-sm sm:text-base"
+            >
+              ➡️ Đi Tiếp
+            </motion.button>
+            <motion.button
+              onClick={() => window.location.reload()}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex-1 px-4 py-2 sm:py-3 bg-[#d4af37] text-[#1a1a1a] font-bold rounded-lg hover:bg-[#e0c158] transition-colors text-sm sm:text-base"
+            >
+              🔁 Chơi Lại
+            </motion.button>
+          </div>
+        )}
 
         {/* Bottom decoration */}
         <motion.div

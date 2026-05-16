@@ -79,7 +79,7 @@ export default function ChallengeMakingFishSauce() {
           return
         }
 
-        const levels = await levelsService.getByVillage(8, userId)
+        const levels = await levelsService.getByVillage(2, userId)
         if (!Array.isArray(levels) || levels.length === 0) {
           console.warn('[fish-sauce-challenge] no levels found for village 8')
           setIsChecking(false)
@@ -154,8 +154,8 @@ export default function ChallengeMakingFishSauce() {
     let cancelled = false
     ;(async () => {
       try {
-        // infer craft id for fish sauce (village_id = 8)
-        const craftId = 8
+        // infer craft id for fish sauce (village_id = 2)
+        const craftId = 2
 
         // get existing records for current user and check if we should save
         let shouldSave = true
@@ -342,30 +342,6 @@ export default function ChallengeMakingFishSauce() {
       <div style={{padding:'0',position:'relative'}}>
         <Component challengeMode={true} onComplete={() => setIndex(i => i + 1)} />
       </div>
-
-      <button 
-        onClick={() => setIndex(i => i + 1)}
-        style={{
-          position:'fixed',
-          bottom:20,
-          right:20,
-          background:'linear-gradient(135deg,#b7843b,#8b6f47)',
-          color:'white',
-          border:'none',
-          padding:'12px 20px',
-          borderRadius:'8px',
-          fontWeight:'700',
-          cursor:'pointer',
-          fontSize:14,
-          zIndex:2000,
-          boxShadow:'0 6px 20px rgba(0,0,0,0.15)',
-          display: index < SEQUENCE.length - 1 ? 'block' : 'none'
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-2px)', e.currentTarget.style.boxShadow = '0 8px 28px rgba(0,0,0,0.2)')}
-        onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)', e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)')}
-      >
-        Tiếp theo →
-      </button>
     </div>
   )
 }

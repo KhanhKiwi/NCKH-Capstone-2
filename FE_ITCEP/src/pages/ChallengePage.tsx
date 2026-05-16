@@ -121,7 +121,7 @@ export default function ChallengePage() {
 
     // If this is the ceramics village (Bát Tràng) open the challenge runner
     const isCeramics = vid === 1 || (typeof name === 'string' && /b(á|a)t\s*tràng/i.test(name))
-    const isFishSauce = vid === 8 || (typeof name === 'string' && /m(ắ|a)m|nam\s*ô/i.test(name))
+    const isFishSauce = vid === 2 || (typeof name === 'string' && /m(ắ|a)m|nam\s*ô/i.test(name))
     setTimeout(() => {
       if (isCeramics) navigate('/challenge-making-cere')
       else if (isFishSauce) navigate('/challenge-making-fish-sauce')
@@ -206,7 +206,7 @@ export default function ChallengePage() {
                       <span className="text-sm font-medium">Xếp hạng</span>
                     </Link>
 
-                    <button onClick={() => startChallenge(v.id)} className="px-6 py-2 rounded-full bg-gradient-to-r from-[#10b981] to-[#059669] text-white shadow-2xl hover:scale-105 transform transition">
+                    <button onClick={() => startChallenge(v)} className="px-6 py-2 rounded-full bg-gradient-to-r from-[#10b981] to-[#059669] text-white shadow-2xl hover:scale-105 transform transition">
                       <span className="inline-flex items-center gap-2"><Trophy className="w-4 h-4" />Vào thử thách</span>
                     </button>
                   </div>
