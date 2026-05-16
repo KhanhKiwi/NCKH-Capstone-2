@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { levelsService } from '../../../api/levels/levelsService';
 import { progressService } from '../../../api/progress/progressService';
 import { getUserId } from '../../../utils/authUtils';
-import { FlavorRadarChart } from './components/FlavorRadarChart';
 import { LiquidPreview } from './components/LiquidPreview';
 import { ImageWithFallback } from '../../figma/ImageWithFallback';
 import { Button } from '../../ui/button';
@@ -196,9 +195,31 @@ export default function Screen5({ challengeMode = false, onChallengeComplete }: 
                   </h1>
                 </div>
 
-                <div className="w-24 text-right">
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-900/30 border border-amber-600/30">
-                    <span className="text-amber-100 text-sm font-bold">{Math.round(quality)}%</span>
+                <div className="w-32 text-right">
+                  <div className="space-y-1.5">
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-900/40 border border-amber-500/50 w-full justify-center">
+                      <span className="text-amber-100 text-sm font-bold">{Math.round(quality)}%</span>
+                    </div>
+                    <motion.div
+                      className="h-2.5 rounded-full bg-slate-700/50 border border-amber-500/40 overflow-hidden"
+                      animate={{ boxShadow: quality > 75 ? ['0 0 10px rgba(34, 197, 94, 0.3)', '0 0 15px rgba(34, 197, 94, 0.5)'] : 'none' }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      <motion.div
+                        className={`h-full rounded-full transition-all ${
+                          quality < 30
+                            ? 'bg-gradient-to-r from-red-600 to-red-500'
+                            : quality < 50
+                            ? 'bg-gradient-to-r from-orange-600 to-orange-500'
+                            : quality < 75
+                            ? 'bg-gradient-to-r from-amber-500 to-yellow-500'
+                            : 'bg-gradient-to-r from-green-500 to-emerald-500'
+                        }`}
+                        initial={{ width: '0%' }}
+                        animate={{ width: `${Math.min(quality, 100)}%` }}
+                        transition={{ duration: 0.5, ease: 'easeOut' }}
+                      />
+                    </motion.div>
                   </div>
                 </div>
               </div>
@@ -359,13 +380,6 @@ export default function Screen5({ challengeMode = false, onChallengeComplete }: 
                   />
                 )}
 
-                {/* Flavor Radar Chart */}
-                <div className="h-80 rounded-xl bg-gradient-to-br from-amber-900/20 to-slate-900/40 border border-amber-600/30 backdrop-blur-sm p-4 overflow-hidden flex items-center justify-center" style={{ minHeight: '320px' }}>
-                  <div className="w-full h-full flex items-center justify-center">
-                    <FlavorRadarChart {...flavorProfile} />
-                  </div>
-                </div>
-
                 {/* Liquid Preview */}
                 <div className="rounded-xl bg-gradient-to-br from-amber-900/20 to-slate-900/40 border border-amber-600/30 backdrop-blur-sm p-4 overflow-hidden">
                   <LiquidPreview
@@ -375,18 +389,21 @@ export default function Screen5({ challengeMode = false, onChallengeComplete }: 
                   />
                 </div>
 
-                {/* Grade Info */}
+                {/* Grade Info - Predicted Ranking */}
                 <motion.div
-                  className={`rounded-xl bg-gradient-to-br ${gradeInfo.color} bg-opacity-10 border border-opacity-30 backdrop-blur-sm p-6`}
+                  className={`rounded-xl bg-gradient-to-br ${gradeInfo.color} bg-opacity-20 border-2 border-opacity-60 backdrop-blur-sm p-8 shadow-lg`}
                   animate={{ scale: [1, 1.02, 1] }}
                   transition={{ duration: 3, repeat: Infinity }}
                 >
-                  <div className="text-center">
-                    <p className="text-amber-100 text-sm font-semibold mb-2">Xếp Hạng Dự Kiến</p>
-                    <p className={`text-4xl font-bold bg-gradient-to-r ${gradeInfo.color} bg-clip-text text-transparent`}>
-                      {gradeInfo.grade}
-                    </p>
-                    <p className="text-amber-200/60 text-xs mt-2">{gradeInfo.name}</p>
+                  <div className="text-center space-y-4">
+                    <p className="text-amber-100 text-base font-bold uppercase tracking-wider">🏆 Xếp Hạng Dự Kiến</p>
+                    <div className={`bg-gradient-to-r ${gradeInfo.color} rounded-lg p-4 border border-opacity-70 shadow-md`}>
+                      <p className={`text-6xl font-black drop-shadow-lg`} style={{color: '#FCD34D'}}>
+                        {gradeInfo.grade}
+                      </p>
+                    </div>
+                    <p className="text-amber-50 text-sm font-semibold">{gradeInfo.name}</p>
+                    <p className="text-amber-200/80 text-xs">Chất lượng: {Math.round(quality)}%</p>
                   </div>
                 </motion.div>
               </div>
