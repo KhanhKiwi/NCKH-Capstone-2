@@ -36,7 +36,7 @@ export default function BatTrangLevel0() {
           <div className="absolute -top-6 -left-6 w-24 h-24 rounded-full bg-amber-200 opacity-30 animate-float -z-0" />
           <div className="absolute -bottom-8 -right-8 w-36 h-36 rounded-full bg-emerald-100 opacity-25 animate-float-slow -z-0" />
           <div className="p-10">
-            <h1 className="text-4xl font-extrabold mb-3">làng gốm Thanh Hà</h1>
+            <h1 className="text-4xl font-extrabold mb-3">làng gốm Bát Tràng</h1>
             <p className="text-lg text-gray-700 mb-6">Khám phá lịch sử, kỹ thuật và những truyền kỳ gắn với nghề gốm — nơi đất, nước và lửa hòa quyện để tạo nên những sản phẩm nghệ thuật sống động.</p>
 
             <div className="flex gap-3">

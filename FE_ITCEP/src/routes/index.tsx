@@ -93,6 +93,8 @@ export const router = createBrowserRouter([
       // Make Phase0 the default view for /bat-trang/level-1
       { path: 'bat-trang/level-1/phase0', Component: BatTrangLevel1Phase0 },
       { path: 'bat-trang/level-1', Component: BatTrangLevel1Phase0 },
+      // Ensure level-0 phase0 path exists to match links
+      { path: 'bat-trang/level-0/phase0', Component: BatTrangLevel0 },
       // Bat Trang Level 3
       { path: 'bat-trang/level-3/phase0', Component: BatTrangLevel3Phase0 },
       { path: 'bat-trang/level-3/phase1', Component: BatTrangLevel3Screen1 },
