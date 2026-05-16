@@ -12,13 +12,13 @@ import { userChallengesService } from '../../api/userChallenges/userChallengesSe
 import { levelsService } from '../../api/levels/levelsService'
 
 const SEQUENCE = [
-  //{ id: '1-1', comp: Screen1P1 },
-  //{ id: '1-2', comp: Screen1P2 },
-  //{ id: '2-1', comp: Screen2P1 },
-  //{ id: '3-1', comp: Screen3P1 },
-  //{ id: '3-2', comp: Screen3P2 },
- // { id: '4-1', comp: Screen4P1 },
-  //{ id: '5-1', comp: Screen5P1 },
+  { id: '1-1', comp: Screen1P1 },
+  { id: '1-2', comp: Screen1P2 },
+  { id: '2-1', comp: Screen2P1 },
+  { id: '3-1', comp: Screen3P1 },
+  { id: '3-2', comp: Screen3P2 },
+ { id: '4-1', comp: Screen4P1 },
+  { id: '5-1', comp: Screen5P1 },
   { id: '5-2', comp: Screen5P2 },
 ]
 

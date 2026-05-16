@@ -519,7 +519,7 @@ export default function HomePage() {
             <div className="flex-1 h-px bg-[#b48a3c] opacity-60"></div>
             <h3 className="text-5xl md:text-6xl font-extrabold text-[#b48a3c] drop-shadow-lg tracking-wide flex items-center gap-3 px-6" style={{ fontFamily: 'serif' }}>
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z" fill="#ffe9b0"/></svg>
-              Khám phá các làng nghề
+              Thước phim & Góc ảnh
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#b48a3c"/><path d="M8 12l2 2 4-4" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </h3>
             <div className="flex-1 h-px bg-[#b48a3c] opacity-60"></div>

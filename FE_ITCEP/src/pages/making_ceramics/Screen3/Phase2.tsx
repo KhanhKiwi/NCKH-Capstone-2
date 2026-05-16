@@ -414,7 +414,7 @@ export default function Level3({ onComplete, challengeMode }: { onComplete?: (re
         if (!potVisible) return prev;
 
         if (selectedWeather === 'sun') {
-          const next = Math.min(100, prev +50);
+          const next = Math.min(100, prev +10);
           if (next >= 100) {
             // success
             const t = timeLeftRef.current ?? 0;
