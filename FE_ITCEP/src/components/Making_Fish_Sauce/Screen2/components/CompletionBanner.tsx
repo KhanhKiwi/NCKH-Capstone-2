@@ -1,5 +1,5 @@
 import { CheckCircle, ArrowLeft } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface CompletionBannerProps {
   quality: number;
@@ -26,13 +26,19 @@ export function CompletionBanner({
   onBack,
   challengeMode = false
 }: CompletionBannerProps) {
-  // Auto-proceed in challenge mode
+  // Keep the latest onContinue in a ref so the timeout can call it
+  // without being in the dependency array (avoids infinite clear/reset loop)
+  const onContinueRef = useRef(onContinue);
+  useEffect(() => { onContinueRef.current = onContinue; });
+
+  // Auto-proceed in challenge mode — run only once on mount
   useEffect(() => {
-    if (challengeMode) {
-      const t = setTimeout(() => onContinue(), 2000);
-      return () => clearTimeout(t);
-    }
-  }, [challengeMode, onContinue]);
+    if (!challengeMode) return;
+    const t = setTimeout(() => onContinueRef.current(), 2000);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const getQualityRating = () => {
     if (quality >= 90) return { label: 'Hoàn hảo ✨', color: '#4a7c59' };
     if (quality >= 75) return { label: 'Rất tốt ✓', color: '#5a8f6f' };

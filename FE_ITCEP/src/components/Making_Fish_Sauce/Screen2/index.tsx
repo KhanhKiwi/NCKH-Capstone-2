@@ -1278,6 +1278,7 @@ export default function Screen2({ challengeMode = false, onChallengeComplete }: 
           cleanedFishCount={fishCleaned}
           onContinue={handleContinue}
           onBack={handleBack}
+          challengeMode={challengeMode}
         />
       )}
 

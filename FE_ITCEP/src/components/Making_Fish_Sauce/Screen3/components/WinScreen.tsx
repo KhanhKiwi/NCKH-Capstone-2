@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { levelsService } from '../../../../api/levels/levelsService';
@@ -14,33 +14,36 @@ interface WinScreenProps {
 export function WinScreen({ quality, userId, challengeMode = false, onChallengeComplete }: WinScreenProps) {
   const navigate = useNavigate();
 
-  // Auto-proceed in challenge mode
+  // Keep latest callback in ref to avoid stale closure / infinite re-run
+  const onChallengeCompleteRef = useRef(onChallengeComplete);
+  useEffect(() => { onChallengeCompleteRef.current = onChallengeComplete; });
+
+  // Auto-proceed in challenge mode — run only once on mount
   useEffect(() => {
-    if (challengeMode && onChallengeComplete) {
-      // Save progress then auto-navigate
-      const proceed = async () => {
-        try {
-          if (userId) {
-            const levels = await levelsService.getByVillage(2, userId);
-            const level3 = levels.find((l: any) => l.level_number === 3);
-            if (level3) {
-              await progressService.saveProgress({
-                user_id: userId,
-                level_id: level3.level_id,
-                status: 'completed',
-                score: quality
-              });
-            }
+    if (!challengeMode) return;
+    const proceed = async () => {
+      try {
+        if (userId) {
+          const levels = await levelsService.getByVillage(2, userId);
+          const level3 = levels.find((l: any) => l.level_number === 3);
+          if (level3) {
+            await progressService.saveProgress({
+              user_id: userId,
+              level_id: level3.level_id,
+              status: 'completed',
+              score: quality
+            });
           }
-        } catch (error) {
-          console.error('[Screen3] Error saving progress:', error);
         }
-        onChallengeComplete();
-      };
-      const t = setTimeout(() => { proceed(); }, 2000);
-      return () => clearTimeout(t);
-    }
-  }, [challengeMode, onChallengeComplete, quality, userId]);
+      } catch (error) {
+        console.error('[Screen3] Error saving progress:', error);
+      }
+      onChallengeCompleteRef.current?.();
+    };
+    const t = setTimeout(() => { proceed(); }, 2000);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleContinue = async () => {
     try {

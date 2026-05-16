@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { JarState } from '../types/gameTypes';
 
 interface WinScreenProps {
@@ -19,13 +19,17 @@ export function WinScreen({
   challengeMode = false
 }: WinScreenProps) {
   
-  // Auto-proceed in challenge mode
+  // Keep latest callback in ref to avoid stale closure / infinite re-run
+  const onContinueRef = useRef(onContinue);
+  useEffect(() => { onContinueRef.current = onContinue; });
+
+  // Auto-proceed in challenge mode — run only once on mount
   useEffect(() => {
-    if (challengeMode) {
-      const t = setTimeout(() => { onContinue(); }, 2500);
-      return () => clearTimeout(t);
-    }
-  }, [challengeMode, onContinue]);
+    if (!challengeMode) return;
+    const t = setTimeout(() => { onContinueRef.current(); }, 2500);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const averageQuality = Math.round((jars[0].quality + jars[1].quality + jars[2].quality) / 3);
   

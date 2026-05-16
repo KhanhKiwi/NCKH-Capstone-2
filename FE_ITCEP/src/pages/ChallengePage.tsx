@@ -108,18 +108,7 @@ export default function ChallengePage() {
 
     try { confetti({ particleCount: 120, spread: 160, origin: { y: 0.6 } }) } catch {}
 
-    // best-effort: create a UserChallenge record when starting (doesn't block nav)
-    ;(async () => {
-      try {
-        const craftId = Number(vid ?? await userChallengesService.inferCraftIdForCeramics())
-        await userChallengesService.saveChallenge({ craft_id: craftId })
-        console.debug('[ChallengePage] created user-challenge for craft', craftId)
-      } catch (e) {
-        console.warn('[ChallengePage] failed to create user-challenge', e)
-      }
-    })()
-
-    // If this is the ceramics village (Bát Tràng) open the challenge runner
+    // Navigate to the challenge runner — saving to DB is done ONLY on completion
     const isCeramics = vid === 1 || (typeof name === 'string' && /b(á|a)t\s*tràng/i.test(name))
     const isFishSauce = vid === 2 || (typeof name === 'string' && /m(ắ|a)m|nam\s*ô/i.test(name))
     setTimeout(() => {
