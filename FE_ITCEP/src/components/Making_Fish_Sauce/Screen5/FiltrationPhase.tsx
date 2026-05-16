@@ -216,13 +216,13 @@ export function FiltrationPhase({ onComplete, timeLimit }: FiltrationPhaseProps)
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
         >
-          <p className="text-amber-100 text-lg font-semibold mb-8">Lớp 2: Lọc Chi Tiết - Click nhanh chóng!</p>
-          <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto">
-            {[1, 2, 3, 4].map(i => (
+          <p className="text-amber-100 text-lg font-semibold mb-8">Lớp 2: Lọc Chi Tiết - Click liên tục!</p>
+          <div className="grid grid-cols-4 gap-3 max-w-2xl mx-auto mb-6">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
               <motion.button
                 key={i}
                 onClick={handleLayer2Click}
-                className={`p-6 rounded-lg border-2 transition-all font-bold text-lg ${
+                className={`p-4 rounded-lg border-2 transition-all font-bold text-lg ${
                   clickCount >= i
                     ? 'border-green-400 bg-green-500/20 text-green-300'
                     : 'border-amber-400/50 bg-amber-600/20 text-amber-200 hover:bg-amber-500/30'
@@ -234,8 +234,8 @@ export function FiltrationPhase({ onComplete, timeLimit }: FiltrationPhaseProps)
               </motion.button>
             ))}
           </div>
-          <p className="text-amber-200/60 mt-6 text-sm">Cần click 8 lần để hoàn tất</p>
-          <p className="text-amber-300 font-semibold mt-2">{clickCount}/8</p>
+          <p className="text-amber-200/60 text-sm">Tiến độ: {clickCount}/8</p>
+          <p className="text-amber-300 font-semibold mt-2">💡 Bấm tất cả 8 nút hoặc SPACE để hoàn tất</p>
         </motion.div>
       )}
 
@@ -288,7 +288,7 @@ export function FiltrationPhase({ onComplete, timeLimit }: FiltrationPhaseProps)
             Nhấn SPACE khi sóng ở đỉnh
           </motion.button>
 
-          <p className="text-amber-200/60 text-xs mt-2">💡 Bấm hoặc nhấn SPACE để lọc ở đỉnh sóng (Green Zone)</p>
+          <p className="text-amber-200/60 text-xs mt-2">💡 Bấm hoặc nhấn SPACE khi sóng ở vùng xanh (60-80%)</p>
 
           <AnimatePresence>
             {accuracy && (
@@ -304,15 +304,15 @@ export function FiltrationPhase({ onComplete, timeLimit }: FiltrationPhaseProps)
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0, opacity: 0 }}
               >
-                {accuracy === 'perfect' && '✨ PERFECT! +8%'}
-                {accuracy === 'good' && '✓ Good! +4%'}
-                {accuracy === 'miss' && '✗ Miss! -10%'}
+                {accuracy === 'perfect' && '✨ PERFECT! +12%'}
+                {accuracy === 'good' && '✓ Good! +6%'}
+                {accuracy === 'miss' && '✗ Miss! -15%'}
               </motion.div>
             )}
           </AnimatePresence>
 
           <div className="mt-6 text-sm text-cyan-200">
-            Perfect Hits: {perfectHits}/3 {perfectHits >= 3 && '⭐ MASTER\'S TOUCH! +20%'}
+            Perfect Hits: {perfectHits}/3 {perfectHits >= 3 && '🌟 MASTER\'S TOUCH! +25%'}
           </div>
         </motion.div>
       )}

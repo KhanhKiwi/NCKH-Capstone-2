@@ -6,6 +6,7 @@ interface WinScreenProps {
   onContinue: () => void | Promise<void>;
   onRetry: () => void | Promise<void>;
   onBack: () => void | Promise<void>;
+  challengeMode?: boolean;
 }
 
 export function WinScreen({
@@ -13,7 +14,8 @@ export function WinScreen({
   baseQuality,
   onContinue,
   onRetry,
-  onBack
+  onBack,
+  challengeMode = false
 }: WinScreenProps) {
   
   // Calculate average quality from all 3 jars
@@ -146,18 +148,22 @@ export function WinScreen({
             >
               🚀 Tiếp Tục → Level 5
             </button>
-            <button
-              onClick={onRetry}
-              className="bg-gradient-to-r from-[#a0522d] to-[#8b4513] hover:from-[#b0623d] hover:to-[#9b5523] text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg"
-            >
-              🔄 Chơi Lại
-            </button>
-            <button
-              onClick={onBack}
-              className="bg-gradient-to-r from-[#8b7355] to-[#6b5345] hover:from-[#9b8365] hover:to-[#7b6355] text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg"
-            >
-              ← Quay Lại
-            </button>
+            {!challengeMode && (
+              <button
+                onClick={onRetry}
+                className="bg-gradient-to-r from-[#a0522d] to-[#8b4513] hover:from-[#b0623d] hover:to-[#9b5523] text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg"
+              >
+                🔄 Chơi Lại
+              </button>
+            )}
+            {!challengeMode && (
+              <button
+                onClick={onBack}
+                className="bg-gradient-to-r from-[#8b7355] to-[#6b5345] hover:from-[#9b8365] hover:to-[#7b6355] text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg"
+              >
+                ← Quay Lại
+              </button>
+            )}
           </div>
 
           {/* Footer */}

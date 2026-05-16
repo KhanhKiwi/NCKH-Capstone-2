@@ -2,7 +2,12 @@ import { useState } from 'react';
 import Screen1 from './Screen1';
 import IntroScreen from './IntroScreen';
 
-export default function CatchFishGamePage() {
+interface CatchFishGamePageProps {
+  challengeMode?: boolean;
+  onComplete?: () => void;
+}
+
+export default function CatchFishGamePage({ challengeMode = false, onComplete }: CatchFishGamePageProps) {
   const [gameStarted, setGameStarted] = useState(false);
 
   return (
@@ -11,7 +16,7 @@ export default function CatchFishGamePage() {
       {!gameStarted ? (
         <IntroScreen onStart={() => setGameStarted(true)} />
       ) : (
-        <Screen1 />
+        <Screen1 challengeMode={challengeMode} onChallengeComplete={onComplete} />
       )}
     </div>
   );

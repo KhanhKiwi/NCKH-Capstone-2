@@ -4,12 +4,14 @@ interface LoseScreenProps {
   jars: JarState[];
   onRetry: () => void | Promise<void>;
   onBack: () => void | Promise<void>;
+  challengeMode?: boolean;
 }
 
 export function LoseScreen({
   jars,
   onRetry,
-  onBack
+  onBack,
+  challengeMode = false
 }: LoseScreenProps) {
   // Determine failure reasons
   const failures = jars.map((jar, idx) => {
@@ -177,12 +179,14 @@ export function LoseScreen({
             >
               🔄 Chơi Lại
             </button>
-            <button
-              onClick={onBack}
-              className="bg-gradient-to-r from-[#8b7355] to-[#6b5345] hover:from-[#9b8365] hover:to-[#7b6355] text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg"
-            >
-              ← Quay Lại
-            </button>
+            {!challengeMode && (
+              <button
+                onClick={onBack}
+                className="bg-gradient-to-r from-[#8b7355] to-[#6b5345] hover:from-[#9b8365] hover:to-[#7b6355] text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg"
+              >
+                ← Quay Lại
+              </button>
+            )}
           </div>
 
           {/* Footer */}

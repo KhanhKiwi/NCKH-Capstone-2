@@ -22,7 +22,7 @@ interface GameLevel {
 const gameLevels: GameLevel[] = [
   {
     id: 1,
-    levelId: 1, // Database level ID for Bắt Cá
+    levelId: 7, // Database level ID for Bắt Cá (craft 2 = levels 7-12)
     name: 'Bắt Cá Cơm Than Tươi',
     description: 'Bắt những con cá cơm than tươi, bỏ qua những con cá không phù hợp. Giới hạn thời gian 2 phút.',
     icon: '🎣',
@@ -30,7 +30,7 @@ const gameLevels: GameLevel[] = [
   },
   {
     id: 2,
-    levelId: 2, // Database level ID for Rửa Cá
+    levelId: 8, // Database level ID for Rửa Cá
     name: 'Rửa & Làm Sạch Cá',
     description: 'Rửa sạch cá cơm bằng nước biển tươi để chuẩn bị cho bước tiếp theo. Hãy rửa kỹ lưỡng để giữ độ tươi và vị ngọt của cá!',
     icon: '💧',
@@ -38,7 +38,7 @@ const gameLevels: GameLevel[] = [
   },
   {
     id: 3,
-    levelId: 3, // Database level ID for Pha Muối
+    levelId: 9, // Database level ID for Pha Muối
     name: 'Pha Muối & Ướp Cá',
     description: 'Pha muối với tỷ lệ phù hợp, trộn đều, chuyển vào thùng chượp, nén chặt và đậy nắp. Công đoạn quan trọng để chuẩn bị cho quá trình lên men!',
     icon: '🧂',
@@ -46,7 +46,7 @@ const gameLevels: GameLevel[] = [
   },
   {
     id: 4,
-    levelId: 4, // Database level ID for Đóng lu
+    levelId: 10, // Database level ID for Đóng lu
     name: 'Đóng lu & Ủ chứa',
     description: 'Đóng nắp lu cẩn thận, niêm phong kín khí, tạo điều kiện lên men tự nhiên. Quá trình lên men kéo dài 12 tháng để tạo ra nước mắm hoàn hảo!',
     icon: '🏺',
@@ -54,7 +54,7 @@ const gameLevels: GameLevel[] = [
   },
   {
     id: 5,
-    levelId: 5, // Database level ID for Di sản Giọt Cuối
+    levelId: 11, // Database level ID for Di sản Giọt Cuối
     name: 'Di sản Giọt Cuối',
     description: 'Lọc thanh nước mắm qua 4 lớp vật liệu khác nhau, pha blend tinh hoa, và đánh giá chất lượng. Chiết xuất những giọt quý báu từ di sản của cha ông!',
     icon: '✨',
@@ -62,7 +62,7 @@ const gameLevels: GameLevel[] = [
   },
   {
     id: 6,
-    levelId: 6, // Database level ID for Vĩnh Cửu Hương
+    levelId: 12, // Database level ID for Vĩnh Cửu Hương
     name: 'Vĩnh Cửu Hương',
     description: 'Nghi thức niêm phong tinh hoa bất diệt - chọn chai quý nhất, rót mắm với lễ nghi truyền thống, và đánh giá hương vị. Hoàn thành di sản Nam Ô qua muôn đời!',
     icon: '🏆',
@@ -89,8 +89,8 @@ export default function MamNamOModal({ onClose }: MamNamOModalProps) {
         if (userId) {
           console.log('[Modal] Initializing progress for level 1...');
           
-          // Get all levels for fish sauce village (village_id = 8)
-          const levels = await levelsService.getByVillage(8, userId);
+          // Get all levels for fish sauce village (village_id = 2)
+          const levels = await levelsService.getByVillage(2, userId);
           console.log('[Modal] Available levels:', levels);
           
           // Get current user progress

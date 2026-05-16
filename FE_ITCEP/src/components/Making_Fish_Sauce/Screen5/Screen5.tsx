@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { levelsService } from '../../../api/levels/levelsService';
 import { progressService } from '../../../api/progress/progressService';
 import { getUserId } from '../../../utils/authUtils';
-import { FlavorRadarChart } from './components/FlavorRadarChart';
 import { LiquidPreview } from './components/LiquidPreview';
 import { ImageWithFallback } from '../../figma/ImageWithFallback';
 import { Button } from '../../ui/button';
@@ -19,7 +18,7 @@ import { EvaluationPhase } from './EvaluationPhase';
 
 type GamePhase = 'prep' | 'filtration' | 'blend' | 'evaluation' | 'complete' | 'failed';
 
-export default function Screen5() {
+export default function Screen5({ challengeMode = false, onChallengeComplete }: { challengeMode?: boolean; onChallengeComplete?: () => void }) {
   const navigate = useNavigate();
   const userId = getUserId();
 
@@ -27,18 +26,18 @@ export default function Screen5() {
   const [currentPhase, setCurrentPhase] = useState<GamePhase>('prep');
   const [totalTime] = useState(125); // 15 + 45 + 25 + 20 + 20 buffer
   const [elapsedTime, setElapsedTime] = useState(0);
-  const [quality, setQuality] = useState(30); // Start with 30% (need to reach 80%)
-  const [clarity, setClarity] = useState(20);
+  const [quality, setQuality] = useState(55); // Start with 55% (realistic base quality)
+  const [clarity, setClarity] = useState(30);
   const [comboCount, setComboCount] = useState(0);
   const [failureReason, setFailureReason] = useState<string>('');
 
-  // Flavor profile
+  // Flavor profile - Realistic Nam Ô fish sauce starting values
   const [flavorProfile, setFlavorProfile] = useState({
-    umami: 50,
-    saltiness: 45,
-    aroma: 55,
-    aftertaste: 48,
-    colorQuality: 40
+    umami: 65,        // Strong umami base
+    saltiness: 58,    // Moderately salty
+    aroma: 52,        // Moderate fishy aroma
+    aftertaste: 60,   // Lingering flavor
+    colorQuality: 50  // Light amber color
   });
 
   // Timer
@@ -60,9 +59,9 @@ export default function Screen5() {
     }
     setQuality(newQuality);
     
-    // Check for failure - must stay above 20% at all times
-    if (newQuality < 20) {
-      setFailureReason('Chất lượng quá thấp ở bước Chuẩn Bị! (Dưới 20%)');
+    // Check for failure - must stay above 30% at all times
+    if (newQuality < 30) {
+      setFailureReason('Chất lượng quá thấp ở bước Chuẩn Bị! (Dưới 30%)');
       setCurrentPhase('failed');
       return;
     }
@@ -76,19 +75,19 @@ export default function Screen5() {
     setClarity(newClarity);
     
     // Check for failure
-    if (newQuality < 20) {
-      setFailureReason('Chất lượng quá thấp ở bước Lọc! (Dưới 20%)');
+    if (newQuality < 30) {
+      setFailureReason('Chất lượng quá thấp ở bước Lọc! (Dưới 30%)');
       setCurrentPhase('failed');
       return;
     }
     
-    // Update flavor profile based on clarity
+    // Update flavor profile based on clarity (more realistic improvements)
     setFlavorProfile(prev => ({
-      umami: Math.min(prev.umami + 10, 98),
-      saltiness: Math.min(prev.saltiness + 8, 95),
-      aroma: Math.min(prev.aroma + 12, 98),
-      aftertaste: Math.min(prev.aftertaste + 9, 96),
-      colorQuality: Math.min(prev.colorQuality + 15, 98)
+      umami: Math.min(prev.umami + 8, 95),
+      saltiness: Math.min(prev.saltiness + 6, 92),
+      aroma: Math.min(prev.aroma + 10, 93),
+      aftertaste: Math.min(prev.aftertaste + 7, 90),
+      colorQuality: Math.min(prev.colorQuality + 12, 95)
     }));
 
     setCurrentPhase('blend');
@@ -99,8 +98,8 @@ export default function Screen5() {
     setQuality(newQuality);
     
     // Check for failure
-    if (newQuality < 20) {
-      setFailureReason('Chất lượng quá thấp ở bước Pha Trộn! (Dưới 20%)');
+    if (newQuality < 30) {
+      setFailureReason('Chất lượng quá thấp ở bước Pha Trộn! (Dưới 30%)');
       setCurrentPhase('failed');
       return;
     }
@@ -112,9 +111,9 @@ export default function Screen5() {
     const finalQuality = Math.max(0, Math.min(100, quality + qualityBonus));
     setQuality(finalQuality);
     
-    // Check for FINAL PASS threshold: must reach 80%!
-    if (finalQuality < 80) {
-      setFailureReason(`Chất lượng cuối cùng quá thấp: ${Math.round(finalQuality)}% (Cần ủy 80% trở lên!)`);
+    // Check for FINAL PASS threshold: must reach 75% (achievable goal)
+    if (finalQuality < 75) {
+      setFailureReason(`Chất lượng cuối cùng quá thấp: ${Math.round(finalQuality)}% (Cần đạt 75% trở lên!)`);
       setCurrentPhase('failed');
       return;
     }
@@ -128,7 +127,7 @@ export default function Screen5() {
   const saveProgress = async (finalQuality: number) => {
     try {
       if (userId) {
-        const levels = await levelsService.getByVillage(8, userId);
+        const levels = await levelsService.getByVillage(2, userId);
         const level5 = levels.find((l: any) => l.level_number === 5);
 
         if (level5) {
@@ -148,11 +147,11 @@ export default function Screen5() {
   };
 
   const getGrade = (score: number) => {
-    if (score >= 95) return { grade: 'S+', name: 'Di sản Vàng 🏆', color: 'from-yellow-600 to-amber-600' };
+    if (score >= 92) return { grade: 'S+', name: 'Di sản Vàng 🏆', color: 'from-yellow-600 to-amber-600' };
     if (score >= 85) return { grade: 'S', name: 'Di sản Bạc ⭐', color: 'from-blue-600 to-cyan-600' };
-    if (score >= 80) return { grade: 'A', name: 'Nghệ nhân Tinh Hoa 🌟', color: 'from-amber-600 to-orange-600' };
-    if (score >= 70) return { grade: 'B', name: 'Học ViỆc Lành Nghề 📜', color: 'from-green-600 to-emerald-600' };
-    return { grade: 'F', name: 'Thất Bại', color: 'from-red-600 to-red-500' };
+    if (score >= 75) return { grade: 'A', name: 'Nghệ nhân Tinh Hoa 🎖️', color: 'from-amber-600 to-orange-600' };
+    if (score >= 65) return { grade: 'B', name: 'Học Việc Lành Nghề 📜', color: 'from-green-600 to-emerald-600' };
+    return { grade: 'C', name: 'Cần Cố Gắng Hơn', color: 'from-red-600 to-red-500' };
   };
 
   const gradeInfo = getGrade(quality);
@@ -196,9 +195,31 @@ export default function Screen5() {
                   </h1>
                 </div>
 
-                <div className="w-24 text-right">
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-900/30 border border-amber-600/30">
-                    <span className="text-amber-100 text-sm font-bold">{Math.round(quality)}%</span>
+                <div className="w-32 text-right">
+                  <div className="space-y-1.5">
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-900/40 border border-amber-500/50 w-full justify-center">
+                      <span className="text-amber-100 text-sm font-bold">{Math.round(quality)}%</span>
+                    </div>
+                    <motion.div
+                      className="h-2.5 rounded-full bg-slate-700/50 border border-amber-500/40 overflow-hidden"
+                      animate={{ boxShadow: quality > 75 ? ['0 0 10px rgba(34, 197, 94, 0.3)', '0 0 15px rgba(34, 197, 94, 0.5)'] : 'none' }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      <motion.div
+                        className={`h-full rounded-full transition-all ${
+                          quality < 30
+                            ? 'bg-gradient-to-r from-red-600 to-red-500'
+                            : quality < 50
+                            ? 'bg-gradient-to-r from-orange-600 to-orange-500'
+                            : quality < 75
+                            ? 'bg-gradient-to-r from-amber-500 to-yellow-500'
+                            : 'bg-gradient-to-r from-green-500 to-emerald-500'
+                        }`}
+                        initial={{ width: '0%' }}
+                        animate={{ width: `${Math.min(quality, 100)}%` }}
+                        transition={{ duration: 0.5, ease: 'easeOut' }}
+                      />
+                    </motion.div>
                   </div>
                 </div>
               </div>
@@ -283,11 +304,19 @@ export default function Screen5() {
                       <p className="text-amber-200/60 mb-8">Chất lượng cuối cùng: {Math.round(quality)}%</p>
                       <motion.button
                         onClick={() => {
-                          toast.success('🎉 Level 5 hoàn thành! Mở khóa Level 6!', {
-                            description: 'Tiếp tục hành trình di sản mắm Nam Ô',
-                            duration: 5000
-                          });
-                          setTimeout(() => navigate('/game/eternal-fragrance'), 2000);
+                          if (!challengeMode) {
+                            toast.success('🎉 Level 5 hoàn thành! Mở khóa Level 6!', {
+                              description: 'Tiếp tục hành trình di sản mắm Nam Ô',
+                              duration: 5000
+                            });
+                          }
+                          setTimeout(() => {
+                            if (challengeMode && onChallengeComplete) {
+                              onChallengeComplete();
+                            } else {
+                              navigate('/game/eternal-fragrance');
+                            }
+                          }, 2000);
                         }}
                         className="px-8 py-4 bg-gradient-to-r from-yellow-600 to-amber-600 text-amber-50 rounded-lg font-bold text-lg hover:from-yellow-500 hover:to-amber-500 transition-all"
                         whileHover={{ scale: 1.05 }}
@@ -351,13 +380,6 @@ export default function Screen5() {
                   />
                 )}
 
-                {/* Flavor Radar Chart */}
-                <div className="h-80 rounded-xl bg-gradient-to-br from-amber-900/20 to-slate-900/40 border border-amber-600/30 backdrop-blur-sm p-4 overflow-hidden flex items-center justify-center" style={{ minHeight: '320px' }}>
-                  <div className="w-full h-full flex items-center justify-center">
-                    <FlavorRadarChart {...flavorProfile} />
-                  </div>
-                </div>
-
                 {/* Liquid Preview */}
                 <div className="rounded-xl bg-gradient-to-br from-amber-900/20 to-slate-900/40 border border-amber-600/30 backdrop-blur-sm p-4 overflow-hidden">
                   <LiquidPreview
@@ -367,18 +389,21 @@ export default function Screen5() {
                   />
                 </div>
 
-                {/* Grade Info */}
+                {/* Grade Info - Predicted Ranking */}
                 <motion.div
-                  className={`rounded-xl bg-gradient-to-br ${gradeInfo.color} bg-opacity-10 border border-opacity-30 backdrop-blur-sm p-6`}
+                  className={`rounded-xl bg-gradient-to-br ${gradeInfo.color} bg-opacity-20 border-2 border-opacity-60 backdrop-blur-sm p-8 shadow-lg`}
                   animate={{ scale: [1, 1.02, 1] }}
                   transition={{ duration: 3, repeat: Infinity }}
                 >
-                  <div className="text-center">
-                    <p className="text-amber-100 text-sm font-semibold mb-2">Xếp Hạng Dự Kiến</p>
-                    <p className={`text-4xl font-bold bg-gradient-to-r ${gradeInfo.color} bg-clip-text text-transparent`}>
-                      {gradeInfo.grade}
-                    </p>
-                    <p className="text-amber-200/60 text-xs mt-2">{gradeInfo.name}</p>
+                  <div className="text-center space-y-4">
+                    <p className="text-amber-100 text-base font-bold uppercase tracking-wider">🏆 Xếp Hạng Dự Kiến</p>
+                    <div className={`bg-gradient-to-r ${gradeInfo.color} rounded-lg p-4 border border-opacity-70 shadow-md`}>
+                      <p className={`text-6xl font-black drop-shadow-lg`} style={{color: '#FCD34D'}}>
+                        {gradeInfo.grade}
+                      </p>
+                    </div>
+                    <p className="text-amber-50 text-sm font-semibold">{gradeInfo.name}</p>
+                    <p className="text-amber-200/80 text-xs">Chất lượng: {Math.round(quality)}%</p>
                   </div>
                 </motion.div>
               </div>

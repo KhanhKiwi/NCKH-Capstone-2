@@ -6,16 +6,18 @@ import { progressService } from '../../../../api/progress/progressService';
 interface WinScreenProps {
   quality: number;
   userId: number | null;
+  challengeMode?: boolean;
+  onChallengeComplete?: () => void;
 }
 
-export function WinScreen({ quality, userId }: WinScreenProps) {
+export function WinScreen({ quality, userId, challengeMode = false, onChallengeComplete }: WinScreenProps) {
   const navigate = useNavigate();
 
   const handleContinue = async () => {
     try {
       if (userId) {
         // Get level 3 from fish sauce village (village_id = 8)
-        const levels = await levelsService.getByVillage(8, userId);
+        const levels = await levelsService.getByVillage(2, userId);
         const level3 = levels.find((l: any) => l.level_number === 3);
         
         if (level3) {
@@ -34,8 +36,12 @@ export function WinScreen({ quality, userId }: WinScreenProps) {
       console.error('[Screen3] Error saving progress:', error);
     }
     
-    // Navigate to next level
-    navigate('/game/close-jar-ferment');
+    // Navigate to next level or call challenge complete callback
+    if (challengeMode && onChallengeComplete) {
+      onChallengeComplete();
+    } else {
+      navigate('/game/close-jar-ferment');
+    }
   };
 
   const getEncouragingMessage = (q: number) => {

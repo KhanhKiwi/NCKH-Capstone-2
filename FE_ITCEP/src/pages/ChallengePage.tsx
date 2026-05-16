@@ -121,8 +121,10 @@ export default function ChallengePage() {
 
     // If this is the ceramics village (Bát Tràng) open the challenge runner
     const isCeramics = vid === 1 || (typeof name === 'string' && /b(á|a)t\s*tràng/i.test(name))
+    const isFishSauce = vid === 8 || (typeof name === 'string' && /m(ắ|a)m|nam\s*ô/i.test(name))
     setTimeout(() => {
       if (isCeramics) navigate('/challenge-making-cere')
+      else if (isFishSauce) navigate('/challenge-making-fish-sauce')
       else if (vid) navigate(`/village/${vid}`)
     }, 420)
   }

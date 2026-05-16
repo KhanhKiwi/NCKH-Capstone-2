@@ -19,7 +19,7 @@ interface Fish {
   scale: number;
 }
 
-export default function Screen1() {
+export default function Screen1({ challengeMode = false, onChallengeComplete }: { challengeMode?: boolean; onChallengeComplete?: () => void }) {
   const navigate = useNavigate();
   
   const [quality, setQuality] = useState(0); // 0-100% quality rating
@@ -207,12 +207,12 @@ export default function Screen1() {
     setIsUnlocking(true);
     try {
       if (userId) {
-        // Get all levels for fish sauce village (village_id = 8)
-        const levels = await levelsService.getByVillage(8, userId);
+        // Get all levels for fish sauce village (village_id = 2)
+        const levels = await levelsService.getByVillage(2, userId);
         const level1 = levels.find((l: any) => l.level_number === 1);
         
         if (level1) {
-          // Save progress for level 1
+          // Save progress for level 1 - backend will auto-unlock level 2
           await progressService.saveProgress({
             user_id: userId,
             level_id: level1.level_id,
@@ -220,22 +220,24 @@ export default function Screen1() {
             score: quality
           });
           
-          // Unlock level 2
-          const level2 = levels.find((l: any) => l.level_number === 2);
-          if (level2) {
-            await progressService.unlockLevel(level2.level_id);
-          }
-          
-          console.log('[Screen1] Level 1 completed, Level 2 unlocked!');
+          console.log('[Screen1] Level 1 completed. Backend will auto-unlock Level 2!');
         }
       }
       
-      // Navigate to next level
-      navigate('/game/wash-fish');
+      // Navigate to next level or call challenge complete callback
+      if (challengeMode && onChallengeComplete) {
+        onChallengeComplete();
+      } else {
+        navigate('/game/wash-fish');
+      }
     } catch (error) {
       console.error('[Screen1] Error saving progress:', error);
-      // Still navigate even if unlock fails (graceful degradation)
-      navigate('/game/wash-fish');
+      // Still navigate/complete even if unlock fails (graceful degradation)
+      if (challengeMode && onChallengeComplete) {
+        onChallengeComplete();
+      } else {
+        navigate('/game/wash-fish');
+      }
     } finally {
       setIsUnlocking(false);
     }
