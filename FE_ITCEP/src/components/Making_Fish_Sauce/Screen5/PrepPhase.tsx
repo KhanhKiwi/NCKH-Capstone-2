@@ -70,7 +70,7 @@ export function PrepPhase({ onComplete, timeLimit }: PrepPhaseProps) {
     let bonus = 0;
     let feedback = '';
 
-    if (closeness < 5) {
+    if (closeness < 8) {
       bonus = 18;
       feedback = '✓ Hoàn hảo! +18%';
       setDensityFeedback(feedback);
@@ -78,8 +78,8 @@ export function PrepPhase({ onComplete, timeLimit }: PrepPhaseProps) {
       setTimeout(() => {
         setStep('aroma');
         setQualityBonus(prev => prev + bonus);
-      }, 600);
-    } else if (closeness < 15) {
+      }, 800);
+    } else if (closeness < 18) {
       bonus = 8;
       feedback = '~ Khá tốt! +8%';
       setDensityFeedback(feedback);
@@ -87,7 +87,7 @@ export function PrepPhase({ onComplete, timeLimit }: PrepPhaseProps) {
         setStep('aroma');
         setQualityBonus(prev => prev + bonus);
       }, 1200);
-    } else if (closeness < 30) {
+    } else if (closeness < 35) {
       bonus = -10;
       feedback = '⚠️ Sai! -10%';
       setDensityFeedback(feedback);
@@ -117,6 +117,9 @@ export function PrepPhase({ onComplete, timeLimit }: PrepPhaseProps) {
     } else {
       setQualityBonus(prev => Math.max(-30, prev - 15));
       toast.error('✗ Sai rồi! -15%', { duration: 2000 });
+      setTimeout(() => {
+        setStep('complete');
+      }, 600);
     }
   };
 

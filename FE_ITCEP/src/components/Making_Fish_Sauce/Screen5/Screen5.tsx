@@ -27,18 +27,18 @@ export default function Screen5({ challengeMode = false, onChallengeComplete }: 
   const [currentPhase, setCurrentPhase] = useState<GamePhase>('prep');
   const [totalTime] = useState(125); // 15 + 45 + 25 + 20 + 20 buffer
   const [elapsedTime, setElapsedTime] = useState(0);
-  const [quality, setQuality] = useState(30); // Start with 30% (need to reach 80%)
-  const [clarity, setClarity] = useState(20);
+  const [quality, setQuality] = useState(55); // Start with 55% (realistic base quality)
+  const [clarity, setClarity] = useState(30);
   const [comboCount, setComboCount] = useState(0);
   const [failureReason, setFailureReason] = useState<string>('');
 
-  // Flavor profile
+  // Flavor profile - Realistic Nam Ô fish sauce starting values
   const [flavorProfile, setFlavorProfile] = useState({
-    umami: 50,
-    saltiness: 45,
-    aroma: 55,
-    aftertaste: 48,
-    colorQuality: 40
+    umami: 65,        // Strong umami base
+    saltiness: 58,    // Moderately salty
+    aroma: 52,        // Moderate fishy aroma
+    aftertaste: 60,   // Lingering flavor
+    colorQuality: 50  // Light amber color
   });
 
   // Timer
@@ -60,9 +60,9 @@ export default function Screen5({ challengeMode = false, onChallengeComplete }: 
     }
     setQuality(newQuality);
     
-    // Check for failure - must stay above 20% at all times
-    if (newQuality < 20) {
-      setFailureReason('Chất lượng quá thấp ở bước Chuẩn Bị! (Dưới 20%)');
+    // Check for failure - must stay above 30% at all times
+    if (newQuality < 30) {
+      setFailureReason('Chất lượng quá thấp ở bước Chuẩn Bị! (Dưới 30%)');
       setCurrentPhase('failed');
       return;
     }
@@ -76,19 +76,19 @@ export default function Screen5({ challengeMode = false, onChallengeComplete }: 
     setClarity(newClarity);
     
     // Check for failure
-    if (newQuality < 20) {
-      setFailureReason('Chất lượng quá thấp ở bước Lọc! (Dưới 20%)');
+    if (newQuality < 30) {
+      setFailureReason('Chất lượng quá thấp ở bước Lọc! (Dưới 30%)');
       setCurrentPhase('failed');
       return;
     }
     
-    // Update flavor profile based on clarity
+    // Update flavor profile based on clarity (more realistic improvements)
     setFlavorProfile(prev => ({
-      umami: Math.min(prev.umami + 10, 98),
-      saltiness: Math.min(prev.saltiness + 8, 95),
-      aroma: Math.min(prev.aroma + 12, 98),
-      aftertaste: Math.min(prev.aftertaste + 9, 96),
-      colorQuality: Math.min(prev.colorQuality + 15, 98)
+      umami: Math.min(prev.umami + 8, 95),
+      saltiness: Math.min(prev.saltiness + 6, 92),
+      aroma: Math.min(prev.aroma + 10, 93),
+      aftertaste: Math.min(prev.aftertaste + 7, 90),
+      colorQuality: Math.min(prev.colorQuality + 12, 95)
     }));
 
     setCurrentPhase('blend');
@@ -99,8 +99,8 @@ export default function Screen5({ challengeMode = false, onChallengeComplete }: 
     setQuality(newQuality);
     
     // Check for failure
-    if (newQuality < 20) {
-      setFailureReason('Chất lượng quá thấp ở bước Pha Trộn! (Dưới 20%)');
+    if (newQuality < 30) {
+      setFailureReason('Chất lượng quá thấp ở bước Pha Trộn! (Dưới 30%)');
       setCurrentPhase('failed');
       return;
     }
@@ -112,9 +112,9 @@ export default function Screen5({ challengeMode = false, onChallengeComplete }: 
     const finalQuality = Math.max(0, Math.min(100, quality + qualityBonus));
     setQuality(finalQuality);
     
-    // Check for FINAL PASS threshold: must reach 80%!
-    if (finalQuality < 80) {
-      setFailureReason(`Chất lượng cuối cùng quá thấp: ${Math.round(finalQuality)}% (Cần ủy 80% trở lên!)`);
+    // Check for FINAL PASS threshold: must reach 75% (achievable goal)
+    if (finalQuality < 75) {
+      setFailureReason(`Chất lượng cuối cùng quá thấp: ${Math.round(finalQuality)}% (Cần đạt 75% trở lên!)`);
       setCurrentPhase('failed');
       return;
     }
@@ -148,11 +148,11 @@ export default function Screen5({ challengeMode = false, onChallengeComplete }: 
   };
 
   const getGrade = (score: number) => {
-    if (score >= 95) return { grade: 'S+', name: 'Di sản Vàng 🏆', color: 'from-yellow-600 to-amber-600' };
+    if (score >= 92) return { grade: 'S+', name: 'Di sản Vàng 🏆', color: 'from-yellow-600 to-amber-600' };
     if (score >= 85) return { grade: 'S', name: 'Di sản Bạc ⭐', color: 'from-blue-600 to-cyan-600' };
-    if (score >= 80) return { grade: 'A', name: 'Nghệ nhân Tinh Hoa 🌟', color: 'from-amber-600 to-orange-600' };
-    if (score >= 70) return { grade: 'B', name: 'Học ViỆc Lành Nghề 📜', color: 'from-green-600 to-emerald-600' };
-    return { grade: 'F', name: 'Thất Bại', color: 'from-red-600 to-red-500' };
+    if (score >= 75) return { grade: 'A', name: 'Nghệ nhân Tinh Hoa 🎖️', color: 'from-amber-600 to-orange-600' };
+    if (score >= 65) return { grade: 'B', name: 'Học Việc Lành Nghề 📜', color: 'from-green-600 to-emerald-600' };
+    return { grade: 'C', name: 'Cần Cố Gắng Hơn', color: 'from-red-600 to-red-500' };
   };
 
   const gradeInfo = getGrade(quality);
