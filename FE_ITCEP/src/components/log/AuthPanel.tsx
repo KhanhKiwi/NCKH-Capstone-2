@@ -212,6 +212,14 @@ export default function AuthPanel({
               </span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
+
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="w-full text-center text-sm text-gray-500 hover:text-amber-600 transition-colors mt-3"
+            >
+              Quay về trang chủ
+            </button>
             
             {isForgotPassword && (
               <button
