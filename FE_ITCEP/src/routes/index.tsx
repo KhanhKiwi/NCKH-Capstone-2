@@ -31,6 +31,7 @@ import VillageDetailPage from '../pages/VillageDetailPage'
 import VillagesPage from '../pages/VillagesPage'
 import ChallengePage from '../pages/ChallengePage'
 import ChallengeMakingCere from '../pages/challenge_making_cere'
+import ChallengeMakingFishSauce from '../pages/challenge_making_fish_sauce'
 import LeaderboardPage from '../pages/Leaderboard'
 import AdminPage from '../pages/admin/AdminPage'
 import Screen1 from '../components/making_mats/Screen1'
@@ -75,6 +76,7 @@ export const router = createBrowserRouter([
       { path: 'challenge', Component: ChallengePage },
       { path: 'leaderboard', Component: LeaderboardPage },
       { path: 'challenge-making-cere', Component: ChallengeMakingCere },
+      { path: 'challenge-making-fish-sauce', Component: ChallengeMakingFishSauce },
       { path: 'game/catch-fish', Component: CatchFishGamePage },
       { path: 'game/wash-fish', Component: WashFishGamePage },
       { path: 'game/wash-salt', Component: WashSaltGamePage },
@@ -93,6 +95,8 @@ export const router = createBrowserRouter([
       // Make Phase0 the default view for /bat-trang/level-1
       { path: 'bat-trang/level-1/phase0', Component: BatTrangLevel1Phase0 },
       { path: 'bat-trang/level-1', Component: BatTrangLevel1Phase0 },
+      // Ensure level-0 phase0 path exists to match links
+      { path: 'bat-trang/level-0/phase0', Component: BatTrangLevel0 },
       // Bat Trang Level 3
       { path: 'bat-trang/level-3/phase0', Component: BatTrangLevel3Phase0 },
       { path: 'bat-trang/level-3/phase1', Component: BatTrangLevel3Screen1 },

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import type { JarState } from '../types/gameTypes';
 
 interface WinScreenProps {
@@ -6,6 +7,7 @@ interface WinScreenProps {
   onContinue: () => void | Promise<void>;
   onRetry: () => void | Promise<void>;
   onBack: () => void | Promise<void>;
+  challengeMode?: boolean;
 }
 
 export function WinScreen({
@@ -13,10 +15,22 @@ export function WinScreen({
   baseQuality,
   onContinue,
   onRetry,
-  onBack
+  onBack,
+  challengeMode = false
 }: WinScreenProps) {
   
-  // Calculate average quality from all 3 jars
+  // Keep latest callback in ref to avoid stale closure / infinite re-run
+  const onContinueRef = useRef(onContinue);
+  useEffect(() => { onContinueRef.current = onContinue; });
+
+  // Auto-proceed in challenge mode — run only once on mount
+  useEffect(() => {
+    if (!challengeMode) return;
+    const t = setTimeout(() => { onContinueRef.current(); }, 2500);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const averageQuality = Math.round((jars[0].quality + jars[1].quality + jars[2].quality) / 3);
   
   // Determine quality rating
@@ -140,24 +154,30 @@ export function WinScreen({
 
           {/* Action Buttons */}
           <div className="flex gap-4 justify-center flex-wrap">
-            <button
-              onClick={onContinue}
-              className="bg-gradient-to-r from-[#5f7c8a] to-[#4a7c9a] hover:from-[#6a8c9a] hover:to-[#5a8caa] text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg"
-            >
-              🚀 Tiếp Tục → Level 5
-            </button>
-            <button
-              onClick={onRetry}
-              className="bg-gradient-to-r from-[#a0522d] to-[#8b4513] hover:from-[#b0623d] hover:to-[#9b5523] text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg"
-            >
-              🔄 Chơi Lại
-            </button>
-            <button
-              onClick={onBack}
-              className="bg-gradient-to-r from-[#8b7355] to-[#6b5345] hover:from-[#9b8365] hover:to-[#7b6355] text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg"
-            >
-              ← Quay Lại
-            </button>
+            {challengeMode ? (
+              <p className="text-[#d4c4a8] text-lg animate-pulse">⏳ Đang chuyển sang màn tiếp theo...</p>
+            ) : (
+              <>
+                <button
+                  onClick={onContinue}
+                  className="bg-gradient-to-r from-[#5f7c8a] to-[#4a7c9a] hover:from-[#6a8c9a] hover:to-[#5a8caa] text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg"
+                >
+                  🚀 Tiếp Tục → Level 5
+                </button>
+                <button
+                  onClick={onRetry}
+                  className="bg-gradient-to-r from-[#a0522d] to-[#8b4513] hover:from-[#b0623d] hover:to-[#9b5523] text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg"
+                >
+                  🔄 Chơi Lại
+                </button>
+                <button
+                  onClick={onBack}
+                  className="bg-gradient-to-r from-[#8b7355] to-[#6b5345] hover:from-[#9b8365] hover:to-[#7b6355] text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg"
+                >
+                  ← Quay Lại
+                </button>
+              </>
+            )}
           </div>
 
           {/* Footer */}

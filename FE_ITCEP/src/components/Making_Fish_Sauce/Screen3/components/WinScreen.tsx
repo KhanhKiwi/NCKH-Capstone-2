@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { levelsService } from '../../../../api/levels/levelsService';
@@ -6,16 +7,49 @@ import { progressService } from '../../../../api/progress/progressService';
 interface WinScreenProps {
   quality: number;
   userId: number | null;
+  challengeMode?: boolean;
+  onChallengeComplete?: () => void;
 }
 
-export function WinScreen({ quality, userId }: WinScreenProps) {
+export function WinScreen({ quality, userId, challengeMode = false, onChallengeComplete }: WinScreenProps) {
   const navigate = useNavigate();
+
+  // Keep latest callback in ref to avoid stale closure / infinite re-run
+  const onChallengeCompleteRef = useRef(onChallengeComplete);
+  useEffect(() => { onChallengeCompleteRef.current = onChallengeComplete; });
+
+  // Auto-proceed in challenge mode — run only once on mount
+  useEffect(() => {
+    if (!challengeMode) return;
+    const proceed = async () => {
+      try {
+        if (userId) {
+          const levels = await levelsService.getByVillage(2, userId);
+          const level3 = levels.find((l: any) => l.level_number === 3);
+          if (level3) {
+            await progressService.saveProgress({
+              user_id: userId,
+              level_id: level3.level_id,
+              status: 'completed',
+              score: quality
+            });
+          }
+        }
+      } catch (error) {
+        console.error('[Screen3] Error saving progress:', error);
+      }
+      onChallengeCompleteRef.current?.();
+    };
+    const t = setTimeout(() => { proceed(); }, 2000);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleContinue = async () => {
     try {
       if (userId) {
         // Get level 3 from fish sauce village (village_id = 8)
-        const levels = await levelsService.getByVillage(8, userId);
+        const levels = await levelsService.getByVillage(2, userId);
         const level3 = levels.find((l: any) => l.level_number === 3);
         
         if (level3) {
@@ -34,8 +68,12 @@ export function WinScreen({ quality, userId }: WinScreenProps) {
       console.error('[Screen3] Error saving progress:', error);
     }
     
-    // Navigate to next level
-    navigate('/game/close-jar-ferment');
+    // Navigate to next level or call challenge complete callback
+    if (challengeMode && onChallengeComplete) {
+      onChallengeComplete();
+    } else {
+      navigate('/game/close-jar-ferment');
+    }
   };
 
   const getEncouragingMessage = (q: number) => {
@@ -175,24 +213,34 @@ export function WinScreen({ quality, userId }: WinScreenProps) {
         )}
 
         {/* Buttons */}
-        <div className="flex flex-col sm:flex-row gap-2">
-          <motion.button
-            onClick={handleContinue}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex-1 px-4 py-2 sm:py-3 bg-[#1a1a1a] text-[#d4af37] font-bold rounded-lg hover:bg-[#2a2a2a] transition-colors text-sm sm:text-base"
+        {challengeMode ? (
+          <motion.div
+            className="text-center text-sm font-semibold text-[#1a1a1a]/70 animate-pulse py-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
           >
-            ➡️ Đi Tiếp
-          </motion.button>
-          <motion.button
-            onClick={() => window.location.reload()}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex-1 px-4 py-2 sm:py-3 bg-[#d4af37] text-[#1a1a1a] font-bold rounded-lg hover:bg-[#e0c158] transition-colors text-sm sm:text-base"
-          >
-            🔁 Chơi Lại
-          </motion.button>
-        </div>
+            ⏳ Đang chuyển sang màn tiếp theo...
+          </motion.div>
+        ) : (
+          <div className="flex flex-col sm:flex-row gap-2">
+            <motion.button
+              onClick={handleContinue}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex-1 px-4 py-2 sm:py-3 bg-[#1a1a1a] text-[#d4af37] font-bold rounded-lg hover:bg-[#2a2a2a] transition-colors text-sm sm:text-base"
+            >
+              ➡️ Đi Tiếp
+            </motion.button>
+            <motion.button
+              onClick={() => window.location.reload()}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex-1 px-4 py-2 sm:py-3 bg-[#d4af37] text-[#1a1a1a] font-bold rounded-lg hover:bg-[#e0c158] transition-colors text-sm sm:text-base"
+            >
+              🔁 Chơi Lại
+            </motion.button>
+          </div>
+        )}
 
         {/* Bottom decoration */}
         <motion.div

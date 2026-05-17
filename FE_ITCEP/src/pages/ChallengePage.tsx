@@ -108,21 +108,12 @@ export default function ChallengePage() {
 
     try { confetti({ particleCount: 120, spread: 160, origin: { y: 0.6 } }) } catch {}
 
-    // best-effort: create a UserChallenge record when starting (doesn't block nav)
-    ;(async () => {
-      try {
-        const craftId = Number(vid ?? await userChallengesService.inferCraftIdForCeramics())
-        await userChallengesService.saveChallenge({ craft_id: craftId })
-        console.debug('[ChallengePage] created user-challenge for craft', craftId)
-      } catch (e) {
-        console.warn('[ChallengePage] failed to create user-challenge', e)
-      }
-    })()
-
-    // If this is the ceramics village (Bát Tràng) open the challenge runner
+    // Navigate to the challenge runner — saving to DB is done ONLY on completion
     const isCeramics = vid === 1 || (typeof name === 'string' && /b(á|a)t\s*tràng/i.test(name))
+    const isFishSauce = vid === 2 || (typeof name === 'string' && /m(ắ|a)m|nam\s*ô/i.test(name))
     setTimeout(() => {
       if (isCeramics) navigate('/challenge-making-cere')
+      else if (isFishSauce) navigate('/challenge-making-fish-sauce')
       else if (vid) navigate(`/village/${vid}`)
     }, 420)
   }
@@ -204,7 +195,7 @@ export default function ChallengePage() {
                       <span className="text-sm font-medium">Xếp hạng</span>
                     </Link>
 
-                    <button onClick={() => startChallenge(v.id)} className="px-6 py-2 rounded-full bg-gradient-to-r from-[#10b981] to-[#059669] text-white shadow-2xl hover:scale-105 transform transition">
+                    <button onClick={() => startChallenge(v)} className="px-6 py-2 rounded-full bg-gradient-to-r from-[#10b981] to-[#059669] text-white shadow-2xl hover:scale-105 transform transition">
                       <span className="inline-flex items-center gap-2"><Trophy className="w-4 h-4" />Vào thử thách</span>
                     </button>
                   </div>

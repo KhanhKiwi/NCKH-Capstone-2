@@ -91,6 +91,47 @@ export class ProgressService {
 	}
 
 	async getProgressForUser(user_id: number) {
-		return this.progressRepo.find({ where: { user: { user_id } }, relations: ['level'] });
+		const progress = await this.progressRepo.find({ where: { user: { user_id } }, relations: ['level'] });
+		
+		// Auto-initialize level 1 for each craft if user has no progress yet
+		if (progress.length === 0) {
+			this.logger.log(`No progress found for user ${user_id}. Auto-initializing level 1 for all crafts...`);
+			const user = await this.userRepo.findOne({ where: { user_id } });
+			if (user) {
+				// Get all levels, find level 1 of each craft
+				const allLevels = await this.levelRepo.find({ relations: ['craft'] });
+				const level1ByCraft = new Map<number, any>();
+				
+				for (const level of allLevels) {
+					const craftId = level.craft?.craft_id;
+					// Only keep level_number 1 of each craft
+					if (craftId && level.level_number === 1 && !level1ByCraft.has(craftId)) {
+						level1ByCraft.set(craftId, level);
+					}
+				}
+				
+				// Create initial progress for each level 1
+				for (const level of level1ByCraft.values()) {
+					const existing = await this.progressRepo.findOne({
+						where: { user: { user_id }, level: { level_id: level.level_id } },
+					});
+					
+					if (!existing) {
+						const initial = this.progressRepo.create({
+							user,
+							level,
+							status: 'unlocked',
+						});
+						await this.progressRepo.save(initial);
+						this.logger.log(`Created initial progress for user ${user_id} level ${level.level_id} (craft ${level.craft?.craft_id})`);
+					}
+				}
+			}
+			
+			// Fetch and return updated progress
+			return this.progressRepo.find({ where: { user: { user_id } }, relations: ['level'] });
+		}
+		
+		return progress;
 	}
 }

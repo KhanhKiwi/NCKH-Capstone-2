@@ -414,9 +414,9 @@ export default function Level3({ onComplete, challengeMode }: { onComplete?: (re
         if (!potVisible) return prev;
 
         if (selectedWeather === 'sun') {
-          const next = Math.min(100, prev +10);
+          const next = Math.min(100, prev +100);
           if (next >= 100) {
-            // success
+            // successs
             const t = timeLeftRef.current ?? 0;
             const stars = t > 60 ? 3 : t > 30 ? 2 : 1;
             setStarCount(stars);
@@ -473,7 +473,9 @@ export default function Level3({ onComplete, challengeMode }: { onComplete?: (re
       if (Array.isArray(all)) {
         const current = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === 3)
         if (current) {
-          await import('../../../api/progress/progressService').then(m => m.progressService.saveProgress({ user_id: 1, level_id: Number(current.level_id ?? current.id), status: 'completed', score: 100 }))
+          const payload: any = { level_id: Number(current.level_id ?? current.id), status: 'completed', score: 100 }
+          if (typeof userId !== 'undefined') payload.user_id = userId
+          await import('../../../api/progress/progressService').then(m => m.progressService.saveProgress(payload))
           try {
             const currentNum = Number(current.level_number ?? current.level_id ?? current.id)
             const next = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === (currentNum + 1))
@@ -861,7 +863,9 @@ export default function Level3({ onComplete, challengeMode }: { onComplete?: (re
                     if (Array.isArray(all)) {
                       const current = all.find(x => Number(x.level_number ?? x.level_id ?? x.id) === 3)
                       if (current) {
-                        await import('../../../api/progress/progressService').then(m => m.progressService.saveProgress({ user_id: 1, level_id: Number(current.level_id ?? current.id), status: 'completed', score: 100 }))
+                        const payload: any = { level_id: Number(current.level_id ?? current.id), status: 'completed', score: 100 }
+                        if (typeof userId !== 'undefined') payload.user_id = userId
+                        await import('../../../api/progress/progressService').then(m => m.progressService.saveProgress(payload))
                         try {
                           // attempt to unlock the next level (level_number + 1)
                           const currentNum = Number(current.level_number ?? current.level_id ?? current.id)

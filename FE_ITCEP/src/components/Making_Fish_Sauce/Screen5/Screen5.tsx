@@ -5,7 +5,6 @@ import { levelsService } from '../../../api/levels/levelsService';
 import { progressService } from '../../../api/progress/progressService';
 import { getUserId } from '../../../utils/authUtils';
 import { useAI } from '../../../contexts/AIContext';
-import { FlavorRadarChart } from './components/FlavorRadarChart';
 import { LiquidPreview } from './components/LiquidPreview';
 import { ImageWithFallback } from '../../figma/ImageWithFallback';
 import { Button } from '../../ui/button';
@@ -20,7 +19,7 @@ import { EvaluationPhase } from './EvaluationPhase';
 
 type GamePhase = 'prep' | 'filtration' | 'blend' | 'evaluation' | 'complete' | 'failed';
 
-export default function Screen5() {
+export default function Screen5({ challengeMode = false, onComplete }: { challengeMode?: boolean; onComplete?: () => void }) {
   const navigate = useNavigate();
   const { triggerEvent } = useAI();
   const userId = getUserId();
@@ -62,17 +61,18 @@ export default function Screen5() {
   const [currentPhase, setCurrentPhase] = useState<GamePhase>('prep');
   const [totalTime] = useState(125);
   const [elapsedTime, setElapsedTime] = useState(0);
-  const [quality, setQuality] = useState(30);
-  const [clarity, setClarity] = useState(20);
+  const [quality, setQuality] = useState(55); // Start with 55% (realistic base quality)
+  const [clarity, setClarity] = useState(30);
   const [comboCount, setComboCount] = useState(0);
   const [failureReason, setFailureReason] = useState<string>('');
 
+  // Flavor profile - Realistic Nam Ô fish sauce starting values
   const [flavorProfile, setFlavorProfile] = useState({
-    umami: 50,
-    saltiness: 45,
-    aroma: 55,
-    aftertaste: 48,
-    colorQuality: 40,
+    umami: 65,        // Strong umami base
+    saltiness: 58,    // Moderately salty
+    aroma: 52,        // Moderate fishy aroma
+    aftertaste: 60,   // Lingering flavor
+    colorQuality: 50  // Light amber color
   });
 
   useEffect(() => {
@@ -143,7 +143,7 @@ export default function Screen5() {
     triggerCompletionAI(finalQuality);
     try {
       if (userId) {
-        const levels = await levelsService.getByVillage(8, userId);
+        const levels = await levelsService.getByVillage(2, userId);
         const level5 = levels.find((l: { level_number?: number }) => l.level_number === 5);
 
         if (level5) {
@@ -166,14 +166,18 @@ export default function Screen5() {
     const finalQuality = Math.max(0, Math.min(100, quality + qualityBonus));
     setQuality(finalQuality);
 
-    if (finalQuality < 80) {
+    if (finalQuality < 75) {
       triggerWrongAction();
-      failPhase(`Chất lượng cuối cùng quá thấp: ${Math.round(finalQuality)}% (Cần đủ 80% trở lên!)`);
+      failPhase(`Chất lượng cuối cùng quá thấp: ${Math.round(finalQuality)}% (Cần đạt 75% trở lên!)`);
       return;
     }
 
     setCurrentPhase('complete');
     void saveProgress(finalQuality);
+    // In challenge mode, notify parent after a short delay
+    if (challengeMode && onComplete) {
+      setTimeout(() => onComplete(), 2500);
+    }
   };
 
   const getGrade = (score: number) => {
@@ -222,9 +226,31 @@ export default function Screen5() {
                   </h1>
                 </div>
 
-                <div className="w-24 text-right">
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-900/30 border border-amber-600/30">
-                    <span className="text-amber-100 text-sm font-bold">{Math.round(quality)}%</span>
+                <div className="w-32 text-right">
+                  <div className="space-y-1.5">
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-900/40 border border-amber-500/50 w-full justify-center">
+                      <span className="text-amber-100 text-sm font-bold">{Math.round(quality)}%</span>
+                    </div>
+                    <motion.div
+                      className="h-2.5 rounded-full bg-slate-700/50 border border-amber-500/40 overflow-hidden"
+                      animate={{ boxShadow: quality > 75 ? ['0 0 10px rgba(34, 197, 94, 0.3)', '0 0 15px rgba(34, 197, 94, 0.5)'] : 'none' }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      <motion.div
+                        className={`h-full rounded-full transition-all ${
+                          quality < 30
+                            ? 'bg-gradient-to-r from-red-600 to-red-500'
+                            : quality < 50
+                            ? 'bg-gradient-to-r from-orange-600 to-orange-500'
+                            : quality < 75
+                            ? 'bg-gradient-to-r from-amber-500 to-yellow-500'
+                            : 'bg-gradient-to-r from-green-500 to-emerald-500'
+                        }`}
+                        initial={{ width: '0%' }}
+                        animate={{ width: `${Math.min(quality, 100)}%` }}
+                        transition={{ duration: 0.5, ease: 'easeOut' }}
+                      />
+                    </motion.div>
                   </div>
                 </div>
               </div>
@@ -304,20 +330,25 @@ export default function Screen5() {
                         {gradeInfo.name}
                       </p>
                       <p className="text-amber-200/60 mb-8">Chất lượng cuối cùng: {Math.round(quality)}%</p>
-                      <motion.button
-                        onClick={() => {
-                          toast.success('🎉 Level 5 hoàn thành! Mở khóa Level 6!', {
-                            description: 'Tiếp tục hành trình di sản mắm Nam Ô',
-                            duration: 5000,
-                          });
-                          setTimeout(() => navigate('/game/eternal-fragrance'), 2000);
-                        }}
-                        className="px-8 py-4 bg-gradient-to-r from-yellow-600 to-amber-600 text-amber-50 rounded-lg font-bold text-lg hover:from-yellow-500 hover:to-amber-500 transition-all"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        Tiếp tục → Level 6: Vĩnh Cửu Hương
-                      </motion.button>
+                      {!challengeMode && (
+                        <motion.button
+                          onClick={() => {
+                            toast.success('🎉 Level 5 hoàn thành! Mở khóa Level 6!', {
+                              description: 'Tiếp tục hành trình di sản mắm Nam Ô',
+                              duration: 5000,
+                            });
+                            setTimeout(() => navigate('/game/eternal-fragrance'), 2000);
+                          }}
+                          className="px-8 py-4 bg-gradient-to-r from-yellow-600 to-amber-600 text-amber-50 rounded-lg font-bold text-lg hover:from-yellow-500 hover:to-amber-500 transition-all"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          Tiếp tục → Level 6: Vĩnh Cửu Hương
+                        </motion.button>
+                      )}
+                      {challengeMode && (
+                        <p className="text-amber-300/80 text-lg animate-pulse">Đang chuyển sang màn tiếp theo...</p>
+                      )}
                     </motion.div>
                   )}
 
@@ -367,15 +398,6 @@ export default function Screen5() {
                 {comboCount > 0 && (
                   <ComboCounter comboCount={comboCount} maxCombo={5} masterTouch={false} />
                 )}
-
-                <motion.div
-                  className="h-80 rounded-xl bg-gradient-to-br from-amber-900/20 to-slate-900/40 border border-amber-600/30 backdrop-blur-sm p-4 overflow-hidden flex items-center justify-center"
-                  style={{ minHeight: '320px' }}
-                >
-                  <div className="w-full h-full flex items-center justify-center">
-                    <FlavorRadarChart {...flavorProfile} />
-                  </div>
-                </motion.div>
 
                 <motion.div className="rounded-xl bg-gradient-to-br from-amber-900/20 to-slate-900/40 border border-amber-600/30 backdrop-blur-sm p-4 overflow-hidden">
                   <LiquidPreview

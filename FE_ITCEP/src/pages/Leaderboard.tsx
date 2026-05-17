@@ -25,7 +25,16 @@ export default function LeaderboardPage(){
       try{
         let cid: number | null = null
         if (village) {
-          try { cid = await userChallengesService.inferCraftIdForCeramics() } catch {}
+          const vid = Number(village)
+          // Map village_id → craft_id (they are equal in this DB schema)
+          // Village 1 = Làng Gốm Bát Tràng, Village 2 = Làng Mắm Nam Ô
+          if (vid === 2) {
+            cid = 2 // Làng Mắm Nam Ô → craft_id = 2
+          } else if (vid === 1) {
+            try { cid = await userChallengesService.inferCraftIdForCeramics() } catch { cid = 1 }
+          } else {
+            cid = vid // fallback: assume craft_id = village_id
+          }
         }
         if (!cid) cid = Number(params.get('craft') ?? params.get('craft_id') ?? 0) || null
         setCraftId(cid)
@@ -110,10 +119,14 @@ export default function LeaderboardPage(){
                 const delay = i * 80
                 const name = r?.user?.displayName ?? r?.user?.name ?? r?.user?.email ?? `User ${r?.user?.user_id ?? ''}`
                 const initials = initialsFromName(name)
-                const timeLabel = typeof r?.time === 'number' ? `${r.time}s` : '—'
+                const sec = typeof r?.time === 'number' ? r.time : null
+                const timeLabel = sec !== null
+                  ? `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`
+                  : '—'
+                const rankEmoji = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : null
                 const isCurrent = Number(r?.user?.user_id) === Number(currentUserId)
                 return (
-                  <li data-current-user={isCurrent ? '1' : undefined} key={r?.id ?? i} style={{animationDelay:`${delay}ms`}} className={`flex items-center gap-4 p-4 rounded-xl bg-white/60 shadow-sm transform transition hover:-translate-y-1 hover:shadow-md animate-slideUp border border-transparent ${isCurrent ? 'border-gray-200 bg-white/80' : ''}`}>
+                  <li data-current-user={isCurrent ? '1' : undefined} key={r?.id ?? i} style={{animationDelay:`${delay}ms`}} className={`flex items-center gap-4 p-4 rounded-xl bg-white/60 shadow-sm transform transition hover:-translate-y-1 hover:shadow-md animate-slideUp border border-transparent ${isCurrent ? 'border-amber-200 bg-amber-50/60' : ''}`}>
                     <div className="relative flex items-center" style={{minWidth:64}}>
                       <div className={`w-16 h-16 rounded-full flex items-center justify-center text-lg font-bold ${'bg-amber-100 text-amber-800'}`}>
                         {r?.user?.avatar ? <img src={r.user.avatar} alt={name} className="w-full h-full object-cover rounded-full" /> : initials}
@@ -121,8 +134,11 @@ export default function LeaderboardPage(){
                     </div>
 
                     <div className="flex-1">
-                      <div className="font-semibold text-lg" style={{letterSpacing:0.2, color:'#2f2f2f'}}>{name}</div>
-                      
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">{rankEmoji ?? <span className="text-gray-400 font-bold text-base">#{i+1}</span>}</span>
+                        <div className="font-semibold text-lg" style={{letterSpacing:0.2, color:'#2f2f2f'}}>{name}</div>
+                        {isCurrent && <span className="ml-1 text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">Bạn</span>}
+                      </div>
                     </div>
 
                     <div className="text-right min-w-[140px]">

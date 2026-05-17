@@ -8,10 +8,10 @@ import { levelsService } from '../../../api/levels/levelsService';
 import { getUserId } from '../../../utils/authUtils';
 import { useAI } from '../../../contexts/AIContext';
 
-export default function CloseJarFermentGamePage() {
+export default function CloseJarFermentGamePage({ challengeMode = false, onComplete }: { challengeMode?: boolean; onComplete?: () => void }) {
   const navigate = useNavigate();
   const { triggerEvent } = useAI();
-  const [gameStarted, setGameStarted] = useState(false);
+  const [gameStarted, setGameStarted] = useState(challengeMode);
   const [isFinishing, setIsFinishing] = useState(false);
   const resultEventRef = useRef(false);
 
@@ -36,7 +36,7 @@ export default function CloseJarFermentGamePage() {
       // Try to save progress if user is logged in AND passed the level
       if (userId && passed && quality >= 75) {
         try {
-          const levels = await levelsService.getByVillage(8, userId);
+          const levels = await levelsService.getByVillage(2, userId);
           console.log('[Screen4] Levels fetched:', levels);
           
           const level4 = levels.find((l: any) => l.level_number === 4);
@@ -64,7 +64,11 @@ export default function CloseJarFermentGamePage() {
       if (passed && quality >= 75) {
         console.log('[Screen4] Navigating to Level 5...');
         setTimeout(() => {
-          navigate('/game/final-extraction');
+          if (challengeMode && onComplete) {
+            onComplete();
+          } else {
+            navigate('/game/final-extraction');
+          }
         }, 1500);
       } else {
         console.log('[Screen4] Level not passed - staying on result screen');
@@ -82,7 +86,7 @@ export default function CloseJarFermentGamePage() {
       {!gameStarted ? (
         <IntroScreen onStart={() => setGameStarted(true)} />
       ) : (
-        <AdvancedFermentationGame onGameEnd={handleGameEnd} />
+        <AdvancedFermentationGame onGameEnd={handleGameEnd} challengeMode={challengeMode} />
       )}
 
       {/* Back Button - Floating */}

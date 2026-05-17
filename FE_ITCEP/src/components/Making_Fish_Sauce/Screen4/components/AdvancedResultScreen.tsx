@@ -16,6 +16,7 @@ interface AdvancedResultScreenProps {
   history: GameMetrics[];
   temperature: number;
   humidity: number;
+  challengeMode?: boolean;
 }
 
 export function AdvancedResultScreen({
@@ -23,7 +24,8 @@ export function AdvancedResultScreen({
   finalQuality,
   history,
   temperature,
-  humidity
+  humidity,
+  challengeMode = false
 }: AdvancedResultScreenProps) {
   const navigate = useNavigate();
 
@@ -233,12 +235,14 @@ export function AdvancedResultScreen({
           >
             {passed ? '✨ Tiếp Tục Chơi' : '🔄 Thử Lại'}
           </button>
-          <button
-            onClick={() => navigate(-3)}
-            className="px-8 py-4 rounded-xl font-bold text-[#3d2b1f] bg-white border-2 border-[#b87333] hover:shadow-lg transition-all transform hover:scale-105 text-lg"
-          >
-            🏠 Về Làng Mắm
-          </button>
+          {!challengeMode && (
+            <button
+              onClick={() => navigate(-3)}
+              className="px-8 py-4 rounded-xl font-bold text-[#3d2b1f] bg-white border-2 border-[#b87333] hover:shadow-lg transition-all transform hover:scale-105 text-lg"
+            >
+              🏠 Về Làng Mắm
+            </button>
+          )}
         </div>
       </div>
     </div>

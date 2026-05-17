@@ -17,7 +17,7 @@ import { LossScreen } from './components/LossScreen';
 import { getUserId } from '../../../utils/authUtils';
 import { useAI } from '../../../contexts/AIContext';
 
-export default function Screen3() {
+export default function Screen3({ challengeMode = false, onChallengeComplete }: { challengeMode?: boolean; onChallengeComplete?: () => void }) {
   const navigate = useNavigate();
   const { triggerEvent } = useAI();
   const [userId, setUserId] = useState<number | null>(null);
@@ -579,7 +579,7 @@ export default function Screen3() {
 
       {/* Win Screen */}
       <AnimatePresence>
-        {gameStatus === 'completed' && <WinScreen quality={quality} userId={userId} />}
+        {gameStatus === 'completed' && <WinScreen quality={quality} userId={userId} challengeMode={challengeMode} onChallengeComplete={onChallengeComplete} />}
       </AnimatePresence>
 
       {/* Loss Screen */}

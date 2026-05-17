@@ -20,7 +20,7 @@ interface Fish {
   scale: number;
 }
 
-export default function Screen1() {
+export default function Screen1({ challengeMode = false, onChallengeComplete }: { challengeMode?: boolean; onChallengeComplete?: () => void }) {
   const navigate = useNavigate();
   const { triggerEvent } = useAI();
   
@@ -228,12 +228,12 @@ export default function Screen1() {
     setIsUnlocking(true);
     try {
       if (userId) {
-        // Get all levels for fish sauce village (village_id = 8)
-        const levels = await levelsService.getByVillage(8, userId);
+        // Get all levels for fish sauce village (village_id = 2)
+        const levels = await levelsService.getByVillage(2, userId);
         const level1 = levels.find((l: any) => l.level_number === 1);
         
         if (level1) {
-          // Save progress for level 1
+          // Save progress for level 1 - backend will auto-unlock level 2
           await progressService.saveProgress({
             user_id: userId,
             level_id: level1.level_id,
@@ -241,26 +241,36 @@ export default function Screen1() {
             score: quality
           });
           
-          // Unlock level 2
-          const level2 = levels.find((l: any) => l.level_number === 2);
-          if (level2) {
-            await progressService.unlockLevel(level2.level_id);
-          }
-          
-          console.log('[Screen1] Level 1 completed, Level 2 unlocked!');
+          console.log('[Screen1] Level 1 completed. Backend will auto-unlock Level 2!');
         }
       }
       
-      // Navigate to next level
-      navigate('/game/wash-fish');
+      // Navigate to next level or call challenge complete callback
+      if (challengeMode && onChallengeComplete) {
+        onChallengeComplete();
+      } else {
+        navigate('/game/wash-fish');
+      }
     } catch (error) {
       console.error('[Screen1] Error saving progress:', error);
-      // Still navigate even if unlock fails (graceful degradation)
-      navigate('/game/wash-fish');
+      // Still navigate/complete even if unlock fails (graceful degradation)
+      if (challengeMode && onChallengeComplete) {
+        onChallengeComplete();
+      } else {
+        navigate('/game/wash-fish');
+      }
     } finally {
       setIsUnlocking(false);
     }
   }
+
+  // Auto-proceed in challenge mode when won
+  useEffect(() => {
+    if (gameStatus === 'won' && challengeMode && onChallengeComplete) {
+      const t = setTimeout(() => { handleContinueLevel(); }, 2000);
+      return () => clearTimeout(t);
+    }
+  }, [gameStatus, challengeMode]);
 
   const shakeX = screenShake ? Math.sin(Date.now() * 0.1) * 4 : 0;
 
@@ -607,23 +617,31 @@ export default function Screen1() {
               </div>
 
               <div className="flex gap-3">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex-1 bg-gradient-to-r from-[#FFD166] to-[#EEC88F] text-[#1B4965] px-6 py-3 rounded-2xl shadow-xl font-semibold"
-                  onClick={() => window.location.reload()}
-                >
-                  🔄 Chơi lại
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  disabled={isUnlocking}
-                  className="flex-1 bg-gradient-to-r from-[#00C897] to-[#00E5A8] text-white px-6 py-3 rounded-2xl shadow-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={handleContinueLevel}
-                >
-                  {isUnlocking ? '⏳ Đang xử lý...' : '➡️ Đi Tiếp'}
-                </motion.button>
+                {challengeMode ? (
+                  <p className="flex-1 text-center text-[#1B4965] font-semibold animate-pulse py-2">
+                    ⏳ Đang chuyển sang màn tiếp theo...
+                  </p>
+                ) : (
+                  <>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="flex-1 bg-gradient-to-r from-[#FFD166] to-[#EEC88F] text-[#1B4965] px-6 py-3 rounded-2xl shadow-xl font-semibold"
+                      onClick={() => window.location.reload()}
+                    >
+                      🔄 Chơi lại
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      disabled={isUnlocking}
+                      className="flex-1 bg-gradient-to-r from-[#00C897] to-[#00E5A8] text-white px-6 py-3 rounded-2xl shadow-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={handleContinueLevel}
+                    >
+                      {isUnlocking ? '⏳ Đang xử lý...' : '➡️ Đi Tiếp'}
+                    </motion.button>
+                  </>
+                )}
               </div>
             </motion.div>
           </motion.div>

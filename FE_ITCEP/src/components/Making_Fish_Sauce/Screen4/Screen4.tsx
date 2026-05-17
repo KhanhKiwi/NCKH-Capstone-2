@@ -11,7 +11,11 @@ import type { JarState } from './types/gameTypes';
 
 type GamePhase = 'sealing' | 'survival' | 'finished';
 
-export default function Screen4() {
+interface Screen4Props {
+  challengeMode?: boolean;
+}
+
+export default function Screen4({ challengeMode = false }: Screen4Props) {
   const navigate = useNavigate();
   const [gamePhase, setGamePhase] = useState<GamePhase>('sealing');
   const [baseQuality, setBaseQuality] = useState(0);
@@ -32,7 +36,7 @@ export default function Screen4() {
     // Save progress to backend (only if passed)
     if (userId && passed) {
       try {
-        const levels = await levelsService.getByVillage(8, userId);
+        const levels = await levelsService.getByVillage(2, userId);
         const level4 = levels.find((l: any) => l.level_number === 4);
         
         if (level4) {
@@ -87,6 +91,7 @@ export default function Screen4() {
             setJars([]);
           }}
           onBack={() => navigate(-1)}
+          challengeMode={challengeMode}
         />
       );
     } else {
@@ -100,6 +105,7 @@ export default function Screen4() {
             setJars([]);
           }}
           onBack={() => navigate(-1)}
+          challengeMode={challengeMode}
         />
       );
     }

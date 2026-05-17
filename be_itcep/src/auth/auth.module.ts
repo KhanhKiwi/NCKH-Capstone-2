@@ -5,14 +5,18 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../modules/users/entities/user.entity';
+import { UserProgress } from '../modules/progress/entities/user-progress.entity';
+import { Level } from '../modules/levels/entities/level.entity';
 import { JwtStrategy } from './jwt.strategy';
 import { GoogleStrategy } from './google.strategy';
 import { MailService } from '../common/mail/mail.service';
+import { ProgressModule } from '../modules/progress/progress.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, UserProgress, Level]),
+    ProgressModule,
     PassportModule,
     ConfigModule,
     JwtModule.registerAsync({

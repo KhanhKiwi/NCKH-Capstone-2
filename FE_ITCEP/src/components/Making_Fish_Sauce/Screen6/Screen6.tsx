@@ -12,12 +12,17 @@ import { ResultScreen } from './components/ResultScreen';
 
 type GamePhase = 'intro' | 'instructions' | 'breathing' | 'sequence' | 'result';
 
-export default function Screen6() {
+interface Screen6Props {
+  challengeMode?: boolean;
+  onComplete?: () => void;
+}
+
+export default function Screen6({ challengeMode = false, onComplete }: Screen6Props) {
   const { triggerEvent } = useAI();
   const userId = getUserId();
   const completionEventRef = useRef(false);
-
-  const [gamePhase, setGamePhase] = useState<GamePhase>('intro');
+  // Skip intro & instructions in challenge mode — go straight to breathing exercise
+  const [gamePhase, setGamePhase] = useState<GamePhase>(challengeMode ? 'sequence' : 'intro');
   const [finalScore, setFinalScore] = useState(0);
 
   const triggerSequenceAI = (score: number) => {
@@ -37,7 +42,7 @@ export default function Screen6() {
   const saveProgress = async (score: number) => {
     try {
       if (userId) {
-        const levels = await levelsService.getByVillage(8, userId);
+        const levels = await levelsService.getByVillage(2, userId);
         const level6 = levels.find((l: { level_number?: number }) => l.level_number === 6);
 
         if (level6) {
@@ -73,6 +78,10 @@ export default function Screen6() {
     triggerSequenceAI(score);
     await saveProgress(score);
     setGamePhase('result');
+    // In challenge mode, notify parent after showing result briefly
+    if (challengeMode && onComplete) {
+      setTimeout(() => onComplete(), 3000);
+    }
   };
 
   const handlePlayAgain = () => {
@@ -139,7 +148,7 @@ export default function Screen6() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <ResultScreen score={finalScore} onPlayAgain={handlePlayAgain} />
+          <ResultScreen score={finalScore} onPlayAgain={handlePlayAgain} challengeMode={challengeMode} />
         </motion.div>
       )}
     </AnimatePresence>

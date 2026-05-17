@@ -84,7 +84,7 @@ export default function BatTrangLevel1Screen1({ onComplete }: { onComplete?: () 
     }
 
     try {
-      await progressService.saveProgress({ user_id: 1, level_id: 2, status: 'completed', score: 100 })
+      await progressService.saveProgress({ level_id: 2, status: 'completed', score: 100 })
     } catch (e) { console.warn('progress save failed', e) }
 
     if (!completionEventRef.current) {
