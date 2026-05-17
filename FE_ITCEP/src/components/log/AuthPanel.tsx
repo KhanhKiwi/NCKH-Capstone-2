@@ -292,6 +292,19 @@ export default function AuthPanel({
                   </>
                 )}
               </p>
+
+              {/* Continue as Guest */}
+              <div className="mt-4 flex flex-col items-center">
+                <div className="w-full h-px bg-gray-100 mb-4" />
+                <button
+                  type="button"
+                  onClick={() => navigate('/')}
+                  className="group flex items-center justify-center gap-2 px-6 py-2.5 w-full rounded-xl bg-gray-50 text-gray-500 font-medium border border-gray-200 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200 transition-all duration-300"
+                >
+                  <User className="w-4 h-4 text-gray-400 group-hover:text-amber-600 transition-colors" />
+                  Tiếp tục với tư cách Khách
+                </button>
+              </div>
             </>
           )}
         </div>

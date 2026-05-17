@@ -5,93 +5,124 @@ interface IntroScreenProps {
 
 export function IntroScreen({ onStart }: IntroScreenProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#2a1f17] to-[#3d2b1f] text-[#f5f0e8] flex items-center justify-center p-4">
-      <div className="max-w-4xl w-full space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <div className="text-7xl md:text-8xl mb-4">🏺</div>
-          <h1 className="text-4xl md:text-5xl font-bold">Công Đoạn 4: Đóng Lu & Ủ Chượp</h1>
-          <p className="text-lg text-[#b87333]">Hoàn thiện quá trình lên men mắm tự nhiên</p>
+    <div className="min-h-screen bg-gradient-to-b from-[#2a1f17] to-[#3d2b1f] text-[#f5f0e8] flex items-center justify-center p-4 font-sans">
+      <div className="max-w-4xl w-full space-y-8 animate-fade-in">
+        
+        {/* Title & Intro */}
+        <div className="text-center space-y-3">
+          <div className="text-6xl md:text-7xl mb-2 drop-shadow-lg">🏺</div>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-[#e8c39e] drop-shadow-md tracking-wide">
+            Thử Thách Ủ Chượp Nam Ô
+          </h1>
+          <p className="text-lg md:text-xl text-[#b87333] font-medium italic">
+            "Sự kiên nhẫn làm nên những giọt nước mắm tuyệt hảo"
+          </p>
         </div>
 
-        {/* Game Overview */}
-        <div className="bg-gradient-to-br from-[#5c3d2e]/60 to-[#3d2b1f]/60 backdrop-blur-sm border border-[#8b7355]/40 rounded-2xl p-8 space-y-6">
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-[#5f7c8a] flex items-center gap-2">
-              📋 Mục Đích Của Trò Chơi
+        {/* Main Content Container */}
+        <div className="bg-[#3d2b1f]/80 backdrop-blur-md border border-[#8b7355]/50 rounded-3xl p-6 md:p-8 space-y-8 shadow-2xl">
+          
+          {/* Mission */}
+          <section className="text-center">
+            <h2 className="text-2xl font-bold text-[#e8c39e] mb-3 flex items-center justify-center gap-2">
+              <span className="text-3xl">📜</span> Nhiệm Vụ Của Bạn
             </h2>
-            <p className="text-lg leading-relaxed text-[#d4c4a8]">
-              Bạn sẽ quản lý 3 chum mắm trong quá trình lên men 12 tháng. Xử lý các sự cố như áp suất cao, nước thải, nhiệt độ bất thường, 
-              và nhiễm khuẩn để duy trì chất lượng tối ưu. Mục tiêu: đạt chất lượng ≥ 30% để hoàn thành thành công.
+            <p className="text-[#d4c4a8] text-lg max-w-2xl mx-auto leading-relaxed">
+              Vào vai một nghệ nhân Nam Ô thực thụ. Bạn phải niêm phong lu mắm thật kín, sau đó <strong>bảo vệ 3 lu mắm</strong> khỏi thời tiết khắc nghiệt và côn trùng trong suốt 12 tháng ủ ròng rã!
             </p>
+          </section>
+
+          {/* Gameplay Split */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Phase 1: Rhythm */}
+            <div className="bg-[#2a1f17]/90 border border-[#8b7355]/30 rounded-2xl p-5 shadow-inner">
+              <h3 className="text-xl font-bold text-[#e8c39e] mb-4 flex items-center gap-2">
+                <span>🔨</span> Giai Đoạn 1: Đóng Lu
+              </h3>
+              <p className="text-[#d4c4a8] mb-4 text-sm leading-relaxed">
+                Canh nhịp thở, dùng búa gõ niêm phong thật chắc chắn để mắm không bị hỏng!
+              </p>
+              <div className="bg-[#3d2b1f] rounded-xl p-4 border border-white/5">
+                <p className="text-[#e8c39e] font-semibold mb-2">Điều khiển:</p>
+                <div className="flex items-center gap-3 text-sm text-[#d4c4a8]">
+                  <kbd className="px-2 py-1 bg-[#2a1f17] border border-[#8b7355]/50 rounded font-mono shadow-sm">SPACE</kbd>
+                  <span>hoặc</span>
+                  <kbd className="px-2 py-1 bg-[#2a1f17] border border-[#8b7355]/50 rounded font-mono shadow-sm">→</kbd>
+                  <span className="ml-1">Gõ trúng vùng xanh</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Phase 2: Defense */}
+            <div className="bg-[#2a1f17]/90 border border-[#8b7355]/30 rounded-2xl p-5 shadow-inner">
+              <h3 className="text-xl font-bold text-[#e8c39e] mb-4 flex items-center gap-2">
+                <span>🛡️</span> Giai Đoạn 2: Bảo Quản
+              </h3>
+              <p className="text-[#d4c4a8] mb-4 text-sm leading-relaxed">
+                Luân chuyển giữa 3 lu mắm để phản ứng nhanh với các sự kiện bất ngờ.
+              </p>
+              
+              <div className="space-y-3">
+                <div className="bg-[#3d2b1f] rounded-xl p-3 border border-white/5 flex items-center gap-4">
+                  <p className="text-[#e8c39e] font-semibold text-sm whitespace-nowrap">Chọn Lu:</p>
+                  <div className="flex gap-2">
+                    <kbd className="px-2 py-1 bg-[#2a1f17] border border-[#8b7355]/50 rounded font-mono text-sm text-[#d4c4a8]">A</kbd>
+                    <kbd className="px-2 py-1 bg-[#2a1f17] border border-[#8b7355]/50 rounded font-mono text-sm text-[#d4c4a8]">S</kbd>
+                    <kbd className="px-2 py-1 bg-[#2a1f17] border border-[#8b7355]/50 rounded font-mono text-sm text-[#d4c4a8]">D</kbd>
+                  </div>
+                </div>
+
+                <div className="bg-[#3d2b1f] rounded-xl p-3 border border-white/5">
+                  <p className="text-[#e8c39e] font-semibold text-sm mb-2">Hành Động Khẩn Cấp:</p>
+                  <div className="grid grid-cols-2 gap-2 text-sm text-[#d4c4a8]">
+                    <div><kbd className="px-1.5 py-0.5 bg-[#2a1f17] rounded mr-1 border border-[#8b7355]/50">K</kbd> Xả khí</div>
+                    <div><kbd className="px-1.5 py-0.5 bg-[#2a1f17] rounded mr-1 border border-[#8b7355]/50">L</kbd> Lau nước</div>
+                    <div><kbd className="px-1.5 py-0.5 bg-[#2a1f17] rounded mr-1 border border-[#8b7355]/50">I</kbd> Hạ nhiệt</div>
+                    <div><kbd className="px-1.5 py-0.5 bg-[#2a1f17] rounded mr-1 border border-[#8b7355]/50">H</kbd> Đuổi ruồi</div>
+                    <div className="col-span-2 text-[#f87171] mt-1"><kbd className="px-1.5 py-0.5 bg-[#2a1f17] rounded mr-1 border border-[#ef4444]/50">J</kbd> Diệt khuẩn (cực kỳ nguy hiểm)</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
 
-          {/* Phase 1 */}
-          <div className="bg-[#2a1f17]/80 border-l-4 border-[#5f7c8a] rounded-lg p-6 space-y-3">
-            <h3 className="text-xl font-bold text-[#5f7c8a]">Giai Đoạn 1: Niêm Phong Nhạc 🎵</h3>
-            <p className="text-[#d4c4a8]">
-              <strong>Thời gian:</strong> 30 giây
-            </p>
-            <ul className="space-y-2 text-[#d4c4a8] ml-4">
-              <li>✓ Bấm phím <strong>PHẢI</strong> hoặc <strong>SPACE</strong> khi thanh vào vùng xanh (Perfect Zone)</li>
-              <li>✓ Cần hoàn thành <strong>ít nhất 5 niêm phong</strong> thành công</li>
-              <li>✓ Perfect hit = +20%, Good hit = +10%, Miss = -5% chất lượng</li>
-              <li>✓ Base quality khởi đầu: <strong>30%</strong></li>
-            </ul>
-            <p className="text-sm text-[#8b7355] italic mt-2">⚠️ Hết 30 giây mà chưa 5 niêm phong = thua cuộc</p>
-          </div>
-
-          {/* Phase 2 */}
-          <div className="bg-[#2a1f17]/80 border-l-4 border-[#a0522d] rounded-lg p-6 space-y-3">
-            <h3 className="text-xl font-bold text-[#a0522d]">Giai Đoạn 2: Ủ Chượp 🌾</h3>
-            <p className="text-[#d4c4a8]">
-              <strong>Thời gian:</strong> 72 giây (12 tháng mô phỏng)
-            </p>
-            <ul className="space-y-2 text-[#d4c4a8] ml-4">
-              <li>🔄 <strong>A:</strong> Chọn Chum 1</li>
-              <li>🔄 <strong>S:</strong> Chọn Chum 2</li>
-              <li>🔄 <strong>D:</strong> Chọn Chum 3</li>
-              <li>💨 <strong>K:</strong> Xả khí (xử lý sự kiện áp suất)</li>
-              <li>💧 <strong>L:</strong> Lau nước (xử lý sự kiện nước thải)</li>
-              <li>🌡️ <strong>I:</strong> Hạ nhiệt độ (xử lý sự kiện quá nóng)</li>
-              <li>🤪 <strong>H:</strong> Đuổi ruồi (xử lý sự kiện ruồi bay)</li>
-              <li>🔬 <strong>J:</strong> Xử lý nhiễm khuẩn (khóa chum 3s, chất lượng -1%/s khi bị nhiễm)</li>
-            </ul>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 text-sm">
-              <div className="bg-[#5f7c8a]/20 p-3 rounded border border-[#5f7c8a]/30">
-                <p className="font-bold text-[#5f7c8a]">Thành công</p>
-                <p className="text-[#d4c4a8]">Xử lý đúng event = +6-10% chất lượng</p>
-              </div>
-              <div className="bg-[#b87333]/20 p-3 rounded border border-[#b87333]/30">
-                <p className="font-bold text-[#b87333]">Sai hành động</p>
-                <p className="text-[#d4c4a8]">Ấn nút sai = -8% chất lượng</p>
-              </div>
-              <div className="bg-[#8b4513]/20 p-3 rounded border border-[#8b4513]/30">
-                <p className="font-bold text-[#8b4513]">Event hết hạn</p>
-                <p className="text-[#d4c4a8]">-10 đến -20% chất lượng + sức khỏe</p>
-              </div>
+          {/* Conditions & Tips */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-gradient-to-r from-emerald-900/40 to-transparent border-l-4 border-emerald-500 p-4 rounded-r-xl">
+              <h4 className="font-bold text-emerald-400 mb-2 flex items-center gap-2">🏆 Điều Kiện Thắng</h4>
+              <ul className="text-sm text-emerald-100/80 space-y-1 ml-2">
+                <li>• Đóng thành công 5 niêm phong</li>
+                <li>• Sinh tồn đủ 12 tháng (72 giây)</li>
+                <li>• Chất lượng mắm cuối cùng ≥ 30%</li>
+              </ul>
+            </div>
+            
+            <div className="bg-gradient-to-r from-rose-900/40 to-transparent border-l-4 border-rose-500 p-4 rounded-r-xl">
+              <h4 className="font-bold text-rose-400 mb-2 flex items-center gap-2">💀 Cảnh Báo Mất Điểm</h4>
+              <ul className="text-sm text-rose-100/80 space-y-1 ml-2">
+                <li>• Bấm sai phím: <strong>-8% chất lượng</strong></li>
+                <li>• Bỏ lỡ sự kiện: <strong>Giảm chất lượng liên tục</strong></li>
+                <li>• Nhiễm khuẩn: <strong>Phá hủy mắm rất nhanh</strong></li>
+              </ul>
             </div>
           </div>
 
-          {/* Tips */}
-          <div className="bg-[#5f7c8a]/20 border border-[#5f7c8a]/40 rounded-lg p-4 space-y-2">
-            <p className="font-bold text-[#5f7c8a]">💡 Mẹo Thắng:</p>
-            <ul className="text-sm text-[#d4c4a8] space-y-1 ml-4">
-              <li>• Chú ý các biểu tượng event trên chum để xác định cần xử lý gì</li>
-              <li>• Ưu tiên chum bị nhiễm (🦠) - xử lý sớm để tránh mất quá nhiều chất lượng</li>
-              <li>• Đừng ấn nút nếu không có event tương ứng (sẽ bị -8%)</li>
-              <li>• Duy trì chất lượng ≥ 30% để chiến thắng</li>
-            </ul>
-          </div>
         </div>
 
         {/* Start Button */}
-        <button
-          onClick={onStart}
-          className="w-full bg-gradient-to-r from-[#a0522d] to-[#b87333] hover:from-[#b87333] hover:to-[#d4a574] text-white font-bold py-4 px-6 rounded-2xl text-xl transition-all hover:scale-105 active:scale-95 shadow-lg"
-        >
-          ▶️ Bắt Đầu Quản Lý Lu Chượp
-        </button>
+        <div className="flex justify-center pt-2">
+          <button
+            onClick={onStart}
+            className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 font-bold text-white transition-all duration-300 bg-gradient-to-r from-amber-600 to-orange-600 rounded-full hover:from-amber-500 hover:to-orange-500 hover:scale-105 hover:shadow-[0_0_20px_rgba(217,119,6,0.4)] active:scale-95 overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-white/20 group-hover:translate-x-full -translate-x-full transition-transform duration-700 skew-x-12" />
+            <span className="text-xl tracking-wider uppercase drop-shadow-md">Bắt Đầu Thử Thách</span>
+            <span className="text-2xl transition-transform group-hover:translate-x-1">🚀</span>
+          </button>
+        </div>
+
       </div>
     </div>
   );

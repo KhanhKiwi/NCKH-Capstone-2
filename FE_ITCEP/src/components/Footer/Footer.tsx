@@ -138,16 +138,7 @@ export default function Footer() {
               <p className={styles.creditsText}>
                 Made with <span className={styles.heart}>❤️</span> vì Di sản Văn hóa Việt Nam
               </p>
-              <span className={`${styles.separator} hidden md:inline`}>|</span>
-              <div className={styles.languageToggle}>
-                <button className={`${styles.languageBtn} ${styles.languageBtnActive}`}>
-                  VN
-                </button>
-                <span className={styles.separator}>/</span>
-                <button className={styles.languageBtn}>
-                  EN
-                </button>
-              </div>
+              {/* language toggle removed */}
             </div>
           </div>
         </div>
