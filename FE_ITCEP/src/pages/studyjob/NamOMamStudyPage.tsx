@@ -3,29 +3,29 @@ import useRevealOnScroll from '../../hooks/useRevealOnScroll'
 
 const processSteps = [
   {
-    title: 'Chuẩn bị nguyên liệu',
+    title: 'Tuyển chọn cá cơm than',
     description:
-      'Bắt đầu bằng việc lựa chọn cá tươi — ưu tiên các loài nhỏ như cá cơm, cá nục hoặc cá trích tùy truyền thống địa phương. Kiểm tra độ tươi: mắt trong, mang đỏ, không có mùi ôi; loại bỏ cá hư hoặc có ký sinh trùng. Chuẩn bị muối biển chất lượng, dụng cụ sạch (hũ, thớt, dao), và nơi ủ thoáng mát, tránh ánh nắng trực tiếp. Tính toán tỷ lệ muối theo khối lượng cá (thông thường 15–30% tùy công thức) và chuẩn bị các vật liệu bổ sung nếu làm theo công thức gia truyền (gạo, men lá, ớt, tỏi tùy biến).',
+      'Linh hồn của mắm Nam Ô chính là cá cơm than được đánh bắt vào tháng 3 âm lịch, khi cá tích nhiều độ đạm và béo nhất. Cá mang về phải tươi rói, tuyệt đối không rửa bằng nước ngọt để tránh làm cá nhanh ươn và mất đi hương vị biển nguyên bản. Cá chỉ được làm sạch nhẹ nhàng hoặc rửa bằng nước biển sạch để giữ trọn độ tinh khiết.',
   },
   {
-    title: 'Rửa & xếp hũ',
+    title: 'Phối trộn muối Cà Ná',
     description:
-      'Rửa cá kỹ để loại bỏ đất cát và tạp chất — có thể ngâm nhanh rồi rửa sạch nhiều lần, sau đó để ráo hoàn toàn. Xếp cá vào hũ theo lớp: một lớp cá, một lớp muối; đảm bảo muối phủ đều bề mặt để quá trình thẩm thấu diễn ra đều. Dùng vật nén hoặc đá sạch để nén cá, giảm không gian chứa khí, hạn chế oxy tiếp xúc làm hỏng. Cách xếp, chiều dày từng lớp và lực nén ảnh hưởng lớn đến chất lượng mắm cuối cùng.',
+      'Muối dùng để ướp cá không phải là loại muối thông thường mà là muối hạt to từ Cà Ná (Ninh Thuận). Đặc biệt, muối phải được mua về và cất trữ trong bóng râm từ 6 tháng đến 1 năm để "rút bớt" vị chát (chảy hết nước đắng), giúp mắm sau này có vị mặn dịu, ngọt thanh chứ không bị gắt. Tỷ lệ vàng truyền thống thường là 3 cá : 1 muối, được trộn thật đều tay.',
   },
   {
-    title: 'Phối trộn & niêm phong',
+    title: 'Vào chum sành & Đậy vỉ tre',
     description:
-      'Nếu công thức có gia vị (gạo, men, lá cây, tỏi, ớt), phối trộn chúng theo công thức truyền thống trước khi cho vào hũ. Dùng các dụng cụ sạch để đảm bảo vệ sinh; đóng nắp hoặc đậy vải, niêm phong miệng hũ nếu cần để kiểm soát vi sinh. Ghi ngày bắt đầu ủ trên nắp hoặc nhãn để theo dõi thời gian. Đặt hũ ở nơi có nhiệt độ ổn định, tránh nơi ẩm ướt hoặc quá nóng; điều kiện bảo quản ảnh hưởng tới tốc độ lên men và mùi vị.',
+      'Hỗn hợp cá và muối được đưa vào những chiếc chum sành lớn hoặc thùng gỗ đặc trưng. Người thợ dùng vỉ tre đan kín mặt chum, có thể dùng thêm chổi đót và đá tảng sạch để chèn ép, nén chặt, tạo môi trường kỵ khí hoàn hảo. Việc nén chặt giúp cá chìm hẳn dưới lớp nước bổi, ngăn chặn vi khuẩn có hại phát triển gây hỏng mắm.',
   },
   {
-    title: 'Ủ & theo dõi',
+    title: 'Ủ chượp & Lên men tự nhiên',
     description:
-      'Quá trình ủ diễn ra theo nhiều giai đoạn: giai đoạn sơ khởi vài tuần đến vài tháng (lên men lỏng), sau đó là giai đoạn ổn định mùi và hương. Kiểm tra định kỳ: quan sát màu sắc, mùi, hiện tượng nổi bọt, nấm mốc; loại bỏ lớp bề mặt nếu thấy tạp chất. Tuỳ vùng miền, người thợ có thể thêm muối bổ sung hoặc rút bớt phần nước để điều chỉnh nồng độ. Ghi chép thay đổi theo thời gian giúp xác định thời điểm mắm đạt chất lượng mong muốn (thường vài tháng đến 1 năm).',
+      'Chum mắm được đậy kín và ủ ở nơi khô ráo, thoáng mát, tránh ánh nắng gắt. Quá trình lên men hoàn toàn tự nhiên kéo dài ròng rã từ 12 đến 18 tháng. Trong suốt thời gian này, thịt cá tự phân giải thành các acid amin nhờ enzyme có sẵn trong ruột cá. Khác với một số loại mắm khác, mắm Nam Ô nguyên chất không cho thêm bất kỳ gia vị, chất bảo quản hay men xúc tác nào.',
   },
   {
-    title: 'Lọc & đóng chai',
+    title: 'Rút mắm nhĩ & Lọc tinh chất',
     description:
-      'Khi mắm đạt hương vị mong muốn, thực hiện lọc để tách tinh chất khỏi bã: dùng vải lọc, lắng tự nhiên hoặc bộ lọc thô. Xử lý tiếp (nếu cần) bằng lắng, lọc mịn, hoặc đun nhẹ để tiệt trùng tuỳ quy trình bảo quản. Đóng chai trong điều kiện sạch, dán nhãn ngày sản xuất và hướng dẫn bảo quản. Bảo quản nơi mát mẻ, tránh ánh nắng; quy trình đóng gói đúng giúp kéo dài thời hạn sử dụng và giữ ổn định hương vị.',
+      'Sau hơn một năm, mắm "chín" sẽ có màu đỏ nâu cánh gián và hương thơm lừng đặc trưng. Người thợ sẽ dùng một chiếc phễu tre đan tinh xảo lót vải sạch để lọc từng giọt mắm. Những giọt mắm đầu tiên rỉ ra được gọi là mắm nhĩ - phần tinh túy nhất, chứa độ đạm cao nhất, làm nên danh tiếng của làng nghề Nam Ô hàng trăm năm qua.',
   },
 ]
 
