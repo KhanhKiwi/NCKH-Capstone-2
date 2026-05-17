@@ -58,9 +58,40 @@ export default function LoginPage() {
       return;
     }
 
-    if (activeTab === 'register' && password !== confirmPassword) {
-      setError('Mật khẩu nhập lại không khớp');
-      return;
+    if (activeTab === 'register') {
+      if (!name.trim() || !email.trim() || !username.trim() || !password || !confirmPassword) {
+        setError('Vui lòng điền đầy đủ thông tin.');
+        return;
+      }
+
+      const beforeAt = email.split('@')[0];
+      const afterAt = email.split('@')[1];
+      if (!email.includes('@') || !beforeAt || !/^[a-zA-Z0-9._]+$/.test(beforeAt) || !afterAt || !/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(afterAt)) {
+        setError('Email không đúng định dạng.');
+        return;
+      }
+
+      if (password.length < 8) {
+        setError('Mật khẩu phải có ít nhất 8 ký tự.');
+        return;
+      }
+      if (!/[A-Z]/.test(password)) {
+        setError('Mật khẩu phải có ít nhất 1 chữ hoa (A-Z).');
+        return;
+      }
+      if (!/[0-9]/.test(password)) {
+        setError('Mật khẩu phải có ít nhất 1 chữ số (0-9).');
+        return;
+      }
+      if (!/[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]/.test(password)) {
+        setError('Mật khẩu phải có ít nhất 1 ký tự đặc biệt.');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        setError('Mật khẩu nhập lại không khớp.');
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -81,15 +112,9 @@ export default function LoginPage() {
       } else {
         await authService.register(email, password, name, username);
         console.log('Registration successful');
-        const loginResponse = await authService.login(email, password);
-        authService.saveToken(loginResponse.access_token);
         setError('');
-        setMessage('');
-        if (typeof window !== 'undefined') {
-          window.location.replace('/');
-        } else {
-          navigate('/');
-        }
+        setMessage('Đăng ký thành công! Chào mừng bạn.');
+        setActiveTab('login');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';

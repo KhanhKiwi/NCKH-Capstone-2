@@ -30,7 +30,13 @@ export class AuthService {
     // Check if username already exists
     const existingUsername = await this.usersRepository.findOne({ where: { username } });
     if (existingUsername) {
-      throw new ConflictException('Tên đăng ký đã được sử dụng');
+      throw new ConflictException('Tên đăng ký đã được sử dụng, vui lòng chọn tên khác.');
+    }
+
+    // Check if name already exists
+    const existingName = await this.usersRepository.findOne({ where: { name } });
+    if (existingName) {
+      throw new ConflictException('Tên này đã có người sử dụng, vui lòng chọn tên khác.');
     }
 
     const salt = await bcrypt.genSalt();
