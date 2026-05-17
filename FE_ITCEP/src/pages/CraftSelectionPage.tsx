@@ -41,6 +41,20 @@ function isFishSauceCraftName(name?: string) {
   return n.includes('mam nam o')
 }
 
+function getCraftDifficulty(name?: string) {
+  const n = normalizeText(name || '');
+  if (n.includes('chieu') || n.includes('ban thach') || n.includes('dinh yen')) {
+    return { level: 1, label: 'Dễ', color: 'bg-emerald-500/80 text-white border-emerald-400' };
+  }
+  if (isPotteryCraftName(name)) {
+    return { level: 2, label: 'Trung bình', color: 'bg-amber-500/80 text-white border-amber-400' };
+  }
+  if (isFishSauceCraftName(name)) {
+    return { level: 3, label: 'Khó', color: 'bg-red-500/80 text-white border-red-400' };
+  }
+  return null;
+}
+
 function composeText(value?: string) {
   try {
     if (!value) return '';
@@ -226,7 +240,9 @@ export default function CraftSelectionPage() {
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 pb-20">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {crafts.map((craft, idx) => (
+          {crafts.map((craft, idx) => {
+            const difficulty = getCraftDifficulty(craft.name);
+            return (
             <div
               key={craft.id}
               onClick={() => handleCraftClick(craft)}
@@ -247,6 +263,15 @@ export default function CraftSelectionPage() {
                 )}
 
                 <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
+
+                {/* Difficulty Badge */}
+                {difficulty && (
+                  <div className="absolute top-4 left-4 z-20">
+                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl backdrop-blur-md shadow-lg border border-white/20 transition-all duration-300 group-hover:scale-105 ${difficulty.color}`}>
+                      <span className="text-xs font-bold tracking-wider">{`Cấp ${difficulty.level} • ${difficulty.label}`}</span>
+                    </div>
+                  </div>
+                )}
 
                 <div className="absolute left-5 bottom-5 right-5 p-4 rounded-xl bg-white/60 backdrop-blur-sm border border-white/30">
                   <h3 className="text-lg md:text-xl font-semibold text-[#27221b] truncate">{composeText(craft.name)}</h3>
@@ -284,7 +309,7 @@ export default function CraftSelectionPage() {
                 )}
               </div>
             </div>
-          ))}
+          )})}
         </div>
       </div>
 
