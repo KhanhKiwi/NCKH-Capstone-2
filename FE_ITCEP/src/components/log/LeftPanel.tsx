@@ -4,7 +4,7 @@ import './LeftPanel.css';
 
 export default function LeftPanel() {
   return (
-    <div className="w-[60%] relative overflow-hidden flex items-center justify-center p-16">
+    <div className="hidden md:flex md:w-[60%] relative overflow-hidden items-center justify-center p-16">
       <div className="relative w-full h-full">
         {/* Header Text */}
         <div className="absolute top-4 left-8 z-50 bg-white/50 backdrop-blur-md rounded-2xl p-4 shadow-lg border-2 border-amber-100">
