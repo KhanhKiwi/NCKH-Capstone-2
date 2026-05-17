@@ -15,7 +15,7 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
             Thử Thách Ủ Chượp Nam Ô
           </h1>
           <p className="text-lg md:text-xl text-[#b87333] font-medium italic">
-            "Sự kiên nhẫn làm nên những giọt nước mắm tuyệt hảo"
+            "12 tháng thăng trầm, thử tài nghệ nhân mắm"
           </p>
         </div>
 
@@ -28,60 +28,51 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
               <span className="text-3xl">📜</span> Nhiệm Vụ Của Bạn
             </h2>
             <p className="text-[#d4c4a8] text-lg max-w-2xl mx-auto leading-relaxed">
-              Vào vai một nghệ nhân Nam Ô thực thụ. Bạn phải niêm phong lu mắm thật kín, sau đó <strong>bảo vệ 3 lu mắm</strong> khỏi thời tiết khắc nghiệt và côn trùng trong suốt 12 tháng ủ ròng rã!
+              Bạn sẽ trải qua mô phỏng <strong>12 tháng</strong> ủ mắm truyền thống. Mỗi tháng mang đến một tình huống thời tiết hoặc môi trường khác nhau. Quyết định của bạn sẽ định đoạt chất lượng mẻ mắm cuối cùng!
             </p>
           </section>
 
           {/* Gameplay Split */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
-            {/* Phase 1: Rhythm */}
+            {/* Mechanics */}
             <div className="bg-[#2a1f17]/90 border border-[#8b7355]/30 rounded-2xl p-5 shadow-inner">
               <h3 className="text-xl font-bold text-[#e8c39e] mb-4 flex items-center gap-2">
-                <span>🔨</span> Giai Đoạn 1: Đóng Lu
+                <span>⚙️</span> Cách Chơi
               </h3>
-              <p className="text-[#d4c4a8] mb-4 text-sm leading-relaxed">
-                Canh nhịp thở, dùng búa gõ niêm phong thật chắc chắn để mắm không bị hỏng!
-              </p>
-              <div className="bg-[#3d2b1f] rounded-xl p-4 border border-white/5">
-                <p className="text-[#e8c39e] font-semibold mb-2">Điều khiển:</p>
+              <ul className="text-[#d4c4a8] text-sm leading-relaxed space-y-3 ml-2">
+                <li>• Mỗi tháng sẽ có <strong>1 tình huống</strong> xảy ra (Mùa hè nóng bức, Mùa thu mát mẻ...).</li>
+                <li>• Có 3 phương án giải quyết (Ví dụ: Đặt lu chỗ mát, Giữ nguyên, Thêm nước).</li>
+                <li>• Mỗi phương án sẽ làm tăng/giảm <strong>Nhiệt Độ</strong>, <strong>Độ Ẩm</strong>, và <strong>Chất Lượng</strong> của mẻ mắm.</li>
+              </ul>
+              <div className="mt-4 bg-[#3d2b1f] rounded-xl p-4 border border-white/5">
+                <p className="text-[#e8c39e] font-semibold mb-2">Điều khiển (Bàn phím):</p>
                 <div className="flex items-center gap-3 text-sm text-[#d4c4a8]">
-                  <kbd className="px-2 py-1 bg-[#2a1f17] border border-[#8b7355]/50 rounded font-mono shadow-sm">SPACE</kbd>
-                  <span>hoặc</span>
-                  <kbd className="px-2 py-1 bg-[#2a1f17] border border-[#8b7355]/50 rounded font-mono shadow-sm">→</kbd>
-                  <span className="ml-1">Gõ trúng vùng xanh</span>
+                  <kbd className="px-2 py-1 bg-[#2a1f17] border border-[#8b7355]/50 rounded font-mono shadow-sm">A</kbd>
+                  <kbd className="px-2 py-1 bg-[#2a1f17] border border-[#8b7355]/50 rounded font-mono shadow-sm">S</kbd>
+                  <kbd className="px-2 py-1 bg-[#2a1f17] border border-[#8b7355]/50 rounded font-mono shadow-sm">D</kbd>
+                  <span className="ml-1">để chọn phương án</span>
                 </div>
               </div>
             </div>
 
-            {/* Phase 2: Defense */}
+            {/* Metrics */}
             <div className="bg-[#2a1f17]/90 border border-[#8b7355]/30 rounded-2xl p-5 shadow-inner">
               <h3 className="text-xl font-bold text-[#e8c39e] mb-4 flex items-center gap-2">
-                <span>🛡️</span> Giai Đoạn 2: Bảo Quản
+                <span>📊</span> Chỉ Số Cần Nhớ
               </h3>
-              <p className="text-[#d4c4a8] mb-4 text-sm leading-relaxed">
-                Luân chuyển giữa 3 lu mắm để phản ứng nhanh với các sự kiện bất ngờ.
-              </p>
-              
-              <div className="space-y-3">
-                <div className="bg-[#3d2b1f] rounded-xl p-3 border border-white/5 flex items-center gap-4">
-                  <p className="text-[#e8c39e] font-semibold text-sm whitespace-nowrap">Chọn Lu:</p>
-                  <div className="flex gap-2">
-                    <kbd className="px-2 py-1 bg-[#2a1f17] border border-[#8b7355]/50 rounded font-mono text-sm text-[#d4c4a8]">A</kbd>
-                    <kbd className="px-2 py-1 bg-[#2a1f17] border border-[#8b7355]/50 rounded font-mono text-sm text-[#d4c4a8]">S</kbd>
-                    <kbd className="px-2 py-1 bg-[#2a1f17] border border-[#8b7355]/50 rounded font-mono text-sm text-[#d4c4a8]">D</kbd>
-                  </div>
+              <div className="space-y-4">
+                <div className="bg-[#3d2b1f] rounded-xl p-3 border border-white/5 flex flex-col gap-1">
+                  <p className="text-[#e8c39e] font-semibold text-sm">🌡️ Nhiệt độ tối ưu:</p>
+                  <p className="text-[#d4c4a8] text-sm">28°C - 32°C</p>
                 </div>
-
-                <div className="bg-[#3d2b1f] rounded-xl p-3 border border-white/5">
-                  <p className="text-[#e8c39e] font-semibold text-sm mb-2">Hành Động Khẩn Cấp:</p>
-                  <div className="grid grid-cols-2 gap-2 text-sm text-[#d4c4a8]">
-                    <div><kbd className="px-1.5 py-0.5 bg-[#2a1f17] rounded mr-1 border border-[#8b7355]/50">K</kbd> Xả khí</div>
-                    <div><kbd className="px-1.5 py-0.5 bg-[#2a1f17] rounded mr-1 border border-[#8b7355]/50">L</kbd> Lau nước</div>
-                    <div><kbd className="px-1.5 py-0.5 bg-[#2a1f17] rounded mr-1 border border-[#8b7355]/50">I</kbd> Hạ nhiệt</div>
-                    <div><kbd className="px-1.5 py-0.5 bg-[#2a1f17] rounded mr-1 border border-[#8b7355]/50">H</kbd> Đuổi ruồi</div>
-                    <div className="col-span-2 text-[#f87171] mt-1"><kbd className="px-1.5 py-0.5 bg-[#2a1f17] rounded mr-1 border border-[#ef4444]/50">J</kbd> Diệt khuẩn (cực kỳ nguy hiểm)</div>
-                  </div>
+                <div className="bg-[#3d2b1f] rounded-xl p-3 border border-white/5 flex flex-col gap-1">
+                  <p className="text-[#e8c39e] font-semibold text-sm">💧 Độ ẩm tối ưu:</p>
+                  <p className="text-[#d4c4a8] text-sm">70% - 85%</p>
+                </div>
+                <div className="bg-[#3d2b1f] rounded-xl p-3 border border-[#8b7355]/30 flex flex-col gap-1 shadow-md">
+                  <p className="text-amber-400 font-bold text-sm">⭐ Chất Lượng (Quan trọng nhất):</p>
+                  <p className="text-[#d4c4a8] text-sm italic">Bắt đầu ở mức 50%. Hãy đưa ra quyết định thông minh để cộng thêm điểm Chất Lượng!</p>
                 </div>
               </div>
             </div>
@@ -90,22 +81,18 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
 
           {/* Conditions & Tips */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-gradient-to-r from-emerald-900/40 to-transparent border-l-4 border-emerald-500 p-4 rounded-r-xl">
+            <div className="bg-gradient-to-r from-emerald-900/40 to-transparent border-l-4 border-emerald-500 p-4 rounded-r-xl flex flex-col justify-center">
               <h4 className="font-bold text-emerald-400 mb-2 flex items-center gap-2">🏆 Điều Kiện Thắng</h4>
-              <ul className="text-sm text-emerald-100/80 space-y-1 ml-2">
-                <li>• Đóng thành công 5 niêm phong</li>
-                <li>• Sinh tồn đủ 12 tháng (72 giây)</li>
-                <li>• Chất lượng mắm cuối cùng ≥ 30%</li>
-              </ul>
+              <p className="text-sm text-emerald-100/80 ml-2">
+                Kết thúc tháng 12, chất lượng mắm đạt <strong>≥ 75%</strong>.
+              </p>
             </div>
             
-            <div className="bg-gradient-to-r from-rose-900/40 to-transparent border-l-4 border-rose-500 p-4 rounded-r-xl">
-              <h4 className="font-bold text-rose-400 mb-2 flex items-center gap-2">💀 Cảnh Báo Mất Điểm</h4>
-              <ul className="text-sm text-rose-100/80 space-y-1 ml-2">
-                <li>• Bấm sai phím: <strong>-8% chất lượng</strong></li>
-                <li>• Bỏ lỡ sự kiện: <strong>Giảm chất lượng liên tục</strong></li>
-                <li>• Nhiễm khuẩn: <strong>Phá hủy mắm rất nhanh</strong></li>
-              </ul>
+            <div className="bg-gradient-to-r from-rose-900/40 to-transparent border-l-4 border-rose-500 p-4 rounded-r-xl flex flex-col justify-center">
+              <h4 className="font-bold text-rose-400 mb-2 flex items-center gap-2">💀 Cảnh Báo Thua</h4>
+              <p className="text-sm text-rose-100/80 ml-2">
+                Ra quyết định sai lầm khiến chất lượng cuối cùng <strong>dưới 75%</strong>.
+              </p>
             </div>
           </div>
 
