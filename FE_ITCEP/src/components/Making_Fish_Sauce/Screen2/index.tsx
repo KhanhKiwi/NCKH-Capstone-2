@@ -97,6 +97,14 @@ export default function Screen2({ challengeMode = false, onChallengeComplete }: 
   const completionEventRef = useRef(false);
   const failureEventRef = useRef(false);
 
+  const NAM_O_LEVEL_2_AI_CONTEXT = {
+    village_name: 'Nam Ô',
+    craft_name: 'Nước mắm truyền thống',
+    phase_name: 'Rửa cá',
+    cultural_context:
+      'Nam Ô nổi tiếng với nghề làm nước mắm truyền thống, trong đó cá tươi cần được làm sạch kỹ trước khi ướp muối và ủ chượp.',
+  };
+
   // ========== AUTO TRANSITIONS ==========
   useEffect(() => {
     if (currentStage === 0 && debrisRemoved === totalDebris) {
@@ -205,7 +213,15 @@ export default function Screen2({ challengeMode = false, onChallengeComplete }: 
     if (gameStatus === 'completed' && !completionEventRef.current) {
       completionEventRef.current = true;
       const event = quality >= 90 ? 'excellent' : 'win_fast';
-      triggerEvent({ event, level: 2, step: currentStage + 1 }).catch(() => {});
+      triggerEvent({
+        event,
+        level: 2,
+        step: currentStage + 1,
+        ...NAM_O_LEVEL_2_AI_CONTEXT,
+        step_name: 'Hoàn thành công đoạn rửa cá',
+        learning_goal:
+          'Người chơi đã hoàn thành bước làm sạch cá để chuẩn bị cho công đoạn muối và ủ chượp nước mắm Nam Ô.',
+      }).catch(() => {});
     }
 
     if (gameStatus === 'failed' && !failureEventRef.current) {
@@ -215,6 +231,13 @@ export default function Screen2({ challengeMode = false, onChallengeComplete }: 
         level: 2,
         step: currentStage + 1,
         fail_count: Math.max(wrongActionCountRef.current, 1),
+        ...NAM_O_LEVEL_2_AI_CONTEXT,
+        step_name:
+          timeRemaining <= 0 ? 'Chưa hoàn thành rửa cá trong thời gian cho phép' : 'Chất lượng rửa cá chưa đạt yêu cầu',
+        learning_goal:
+          timeRemaining <= 0
+            ? 'Người chơi cần thao tác nhanh và chính xác hơn để kịp làm sạch nguyên liệu.'
+            : 'Người chơi cần hạn chế thao tác sai vì chất lượng nguyên liệu ảnh hưởng đến quá trình làm nước mắm.',
       }).catch(() => {});
     }
   }, [currentStage, gameStatus, quality, triggerEvent]);
@@ -236,18 +259,27 @@ export default function Screen2({ challengeMode = false, onChallengeComplete }: 
       feedbackType = 'error';
       qualityChange = -5;
       wrongActionCountRef.current += 1;
-      triggerEvent({
-        event: 'wrong_action',
-        level: 2,
-        step: currentStage + 1,
-        fail_count: wrongActionCountRef.current,
-      }).catch(() => {});
       if (wrongActionCountRef.current >= 3) {
         triggerEvent({
           event: 'fail_many',
           level: 2,
           step: currentStage + 1,
           fail_count: wrongActionCountRef.current,
+          ...NAM_O_LEVEL_2_AI_CONTEXT,
+          step_name: 'Liên tục loại nhầm cá đạt yêu cầu',
+          learning_goal:
+            'Hãy quan sát kỹ trước khi loại cá; giữ lại cá đạt yêu cầu giúp công đoạn rửa cá chuẩn bị tốt hơn cho quá trình làm nước mắm.',
+        }).catch(() => {});
+      } else {
+        triggerEvent({
+          event: 'wrong_action',
+          level: 2,
+          step: currentStage + 1,
+          fail_count: wrongActionCountRef.current,
+          ...NAM_O_LEVEL_2_AI_CONTEXT,
+          step_name: 'Chọn nhầm cá đạt yêu cầu',
+          learning_goal:
+            'Người chơi cần loại bỏ cá không phù hợp và giữ lại cá đạt yêu cầu để nguyên liệu rửa cá không bị hao hụt.',
         }).catch(() => {});
       }
     }

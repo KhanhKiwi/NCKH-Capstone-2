@@ -50,6 +50,20 @@ export default function Screen1({ challengeMode = false, onChallengeComplete }: 
   const completionEventRef = useRef(false);
   const failureEventRef = useRef(false);
 
+  const NAM_O_LEVEL_1_AI_CONTEXT = {
+    village_name: 'Nam Ô',
+    craft_name: 'Nước mắm truyền thống',
+    phase_name: 'Chọn cá',
+    cultural_context:
+      'Nam Ô nổi tiếng với nghề làm nước mắm truyền thống, trong đó cá cơm tươi là nguyên liệu quan trọng tạo nên mùi thơm và vị đậm.',
+  };
+
+  const getWrongFishStepName = (type?: string) => {
+    if (type === 'spoiled') return 'Chọn nhầm cá không còn tươi';
+    if (type === 'wrong') return 'Chọn nhầm cá không phù hợp';
+    return 'Chọn nhầm cá không đạt yêu cầu';
+  };
+
   // Generate initial fish
   useEffect(() => {
     const initialFish: Fish[] = [];
@@ -118,12 +132,33 @@ export default function Screen1({ challengeMode = false, onChallengeComplete }: 
     if (gameStatus === 'won' && !completionEventRef.current) {
       completionEventRef.current = true;
       const event = wrongCount === 0 && quality >= 95 ? 'excellent' : 'win_fast';
-      triggerEvent({ event, level: 1, step: 1 }).catch(() => {});
+      triggerEvent({
+        event,
+        level: 1,
+        step: 1,
+        ...NAM_O_LEVEL_1_AI_CONTEXT,
+        step_name: 'Hoàn thành chọn cá tươi',
+        learning_goal: 'Người chơi đã chọn đủ cá tươi để chuẩn bị cho công đoạn làm nước mắm Nam Ô.',
+      }).catch(() => {});
     }
 
     if (gameStatus === 'lost' && !failureEventRef.current) {
       failureEventRef.current = true;
-      triggerEvent({ event: 'fail_many', level: 1, step: 1, fail_count: Math.max(wrongCount, 1) }).catch(() => {});
+      triggerEvent({
+        event: 'fail_many',
+        level: 1,
+        step: 1,
+        fail_count: Math.max(wrongCount, 1),
+        ...NAM_O_LEVEL_1_AI_CONTEXT,
+        step_name:
+          lossReason === 'timeout'
+            ? 'Chưa bắt đủ cá trong thời gian cho phép'
+            : 'Chọn sai quá nhiều cá trong bước chọn nguyên liệu',
+        learning_goal:
+          lossReason === 'timeout'
+            ? 'Người chơi cần nhận diện và chọn cá tươi nhanh hơn để kịp hoàn thành bước đầu tiên.'
+            : 'Người chơi cần tránh chọn cá hỏng hoặc không phù hợp vì chất lượng nguyên liệu ảnh hưởng trực tiếp đến hương vị nước mắm.',
+      }).catch(() => {});
     }
   }, [gameStatus, quality, triggerEvent, wrongCount]);
 
@@ -176,9 +211,31 @@ export default function Screen1({ challengeMode = false, onChallengeComplete }: 
       // Wrong/spoiled fish: increase wrong count
       const newWrongCount = wrongCount + 1;
       setWrongCount(newWrongCount);
-      triggerEvent({ event: 'wrong_action', level: 1, step: 1, fail_count: newWrongCount }).catch(() => {});
       if (newWrongCount >= 2) {
-        triggerEvent({ event: 'fail_many', level: 1, step: 1, fail_count: newWrongCount }).catch(() => {});
+        triggerEvent({
+          event: 'fail_many',
+          level: 1,
+          step: 1,
+          fail_count: newWrongCount,
+          ...NAM_O_LEVEL_1_AI_CONTEXT,
+          step_name:
+            fishData.type === 'spoiled'
+              ? 'Liên tục chọn nhầm cá không còn tươi'
+              : 'Liên tục chọn nhầm cá không phù hợp',
+          learning_goal:
+            'Hãy quan sát kỹ loại cá trước khi chọn; cá tươi là nền tảng tạo nên nước mắm Nam Ô thơm và đậm vị.',
+        }).catch(() => {});
+      } else {
+        triggerEvent({
+          event: 'wrong_action',
+          level: 1,
+          step: 1,
+          fail_count: newWrongCount,
+          ...NAM_O_LEVEL_1_AI_CONTEXT,
+          step_name: getWrongFishStepName(fishData.type),
+          learning_goal:
+            'Người chơi cần phân biệt cá tươi với cá hỏng hoặc cá không phù hợp để nguyên liệu nước mắm đạt chất lượng.',
+        }).catch(() => {});
       }
       
       // Check lose condition: 3 wrong fish = lose

@@ -15,6 +15,14 @@ export default function CloseJarFermentGamePage({ challengeMode = false, onCompl
   const [isFinishing, setIsFinishing] = useState(false);
   const resultEventRef = useRef(false);
 
+  const NAM_O_LEVEL_4_AI_CONTEXT = {
+    village_name: 'Nam Ô',
+    craft_name: 'Nước mắm truyền thống',
+    phase_name: 'Ủ chượp truyền thống',
+    cultural_context:
+      'Nam Ô nổi tiếng với nghề làm nước mắm truyền thống, trong đó quá trình ủ chượp cần môi trường ổn định để tạo nên hương vị đặc trưng.',
+  };
+
   const handleGameEnd = async (passed: boolean, quality: number) => {
     setIsFinishing(true);
     console.log('[Screen4] Game ended:', { passed, quality });
@@ -22,10 +30,26 @@ export default function CloseJarFermentGamePage({ challengeMode = false, onCompl
       resultEventRef.current = true;
       if (passed && quality >= 75) {
         const event = quality >= 90 ? 'excellent' : 'win_fast';
-        triggerEvent({ event, level: 4, step: 1 }).catch(() => {});
+        triggerEvent({
+          event,
+          level: 4,
+          step: 1,
+          ...NAM_O_LEVEL_4_AI_CONTEXT,
+          step_name: 'Hoàn thiện và bảo quản chum ủ',
+          learning_goal:
+            'Người chơi đã giữ ổn định điều kiện ủ chượp để hỗn hợp tiếp tục lên men đúng cách.',
+        }).catch(() => {});
       } else {
-        triggerEvent({ event: 'wrong_action', level: 4, step: 1, fail_count: 1 }).catch(() => {});
-        triggerEvent({ event: 'fail_many', level: 4, step: 1, fail_count: 1 }).catch(() => {});
+        triggerEvent({
+          event: 'fail_many',
+          level: 4,
+          step: 1,
+          fail_count: 1,
+          ...NAM_O_LEVEL_4_AI_CONTEXT,
+          step_name: 'Quá trình ủ chượp chưa thành công',
+          learning_goal:
+            'Hãy giữ môi trường ủ ổn định để hỗn hợp chượp có thể lên men đúng chuẩn và đạt chất lượng tốt hơn.',
+        }).catch(() => {});
       }
     }
     
