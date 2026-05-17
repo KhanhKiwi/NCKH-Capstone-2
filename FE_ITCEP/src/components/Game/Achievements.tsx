@@ -17,22 +17,23 @@ export function Achievements({ inline = false }: AchievementsProps) {
     async function loadWins() {
       try {
         let userId: number | undefined;
-        try {
-          const profile = await authService.getProfile();
-          userId = Number(profile?.user_id ?? profile?.id ?? profile?.userId);
-        } catch (e) {
-          userId = undefined;
+        const token = authService.getToken();
+
+        if (token) {
+          try {
+            const profile = await authService.getProfile();
+            userId = Number(profile?.user_id ?? profile?.id ?? profile?.userId);
+          } catch (e) {
+            userId = undefined;
+          }
         }
 
-        if (!userId) {
+        if (!userId && token) {
           try {
-            const token = localStorage.getItem('access_token');
-            if (token) {
-              const parts = token.split('.');
-              if (parts.length >= 2) {
-                const payload = JSON.parse(atob(parts[1]));
-                userId = Number(payload?.user_id ?? payload?.sub ?? payload?.id);
-              }
+            const parts = token.split('.');
+            if (parts.length >= 2) {
+              const payload = JSON.parse(atob(parts[1]));
+              userId = Number(payload?.user_id ?? payload?.sub ?? payload?.id);
             }
           } catch (e) {
             userId = undefined;
