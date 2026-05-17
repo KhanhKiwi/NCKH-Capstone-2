@@ -1,4 +1,5 @@
 import { Mail, Lock, User, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface AuthPanelProps {
   activeTab: 'login' | 'register';
@@ -41,6 +42,8 @@ export default function AuthPanel({
   error = '',
   message = '',
 }: AuthPanelProps) {
+  const navigate = useNavigate();
+
   return (
     <div className="w-[40%] flex items-center justify-center p-8">
       <div className="relative w-full max-w-md">
@@ -208,6 +211,14 @@ export default function AuthPanel({
                   : isForgotPassword ? 'Gửi yêu cầu' : activeTab === 'login' ? 'Tiếp tục hành trình' : 'Bắt đầu khám phá'}
               </span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="w-full text-center text-sm text-gray-500 hover:text-amber-600 transition-colors mt-3"
+            >
+              Quay về trang chủ
             </button>
             
             {isForgotPassword && (
