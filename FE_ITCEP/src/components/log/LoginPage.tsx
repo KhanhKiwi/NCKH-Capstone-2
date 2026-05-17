@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import LeftPanel from './LeftPanel';
 import AuthPanel from './AuthPanel';
 import { authService } from '../../api/services/authService';
@@ -133,6 +134,15 @@ export default function LoginPage() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-gradient-to-br from-amber-50 via-green-50 to-yellow-50">
+      {/* Back to Home Button */}
+      <button 
+        onClick={() => navigate('/')}
+        className="absolute top-6 left-6 md:top-8 md:left-8 z-50 flex items-center gap-2 px-5 py-2.5 bg-white/80 backdrop-blur-md border border-amber-200 rounded-full text-amber-800 font-semibold shadow-sm hover:bg-amber-100 hover:shadow-md hover:-translate-x-1 transition-all duration-300"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        Về trang chủ
+      </button>
+
       {/* Journey Line Background */}
       <svg className="absolute inset-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
         <path
