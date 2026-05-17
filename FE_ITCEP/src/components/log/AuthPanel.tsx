@@ -45,7 +45,7 @@ export default function AuthPanel({
   const navigate = useNavigate();
 
   return (
-    <div className="w-[40%] flex items-center justify-center p-8">
+    <div className="w-full md:w-[40%] flex items-center justify-center p-8 py-12 my-auto">
       <div className="relative w-full max-w-md">
         {/* Journey Line Decoration */}
         <svg className="absolute -left-16 top-0 w-32 h-full" xmlns="http://www.w3.org/2000/svg">
