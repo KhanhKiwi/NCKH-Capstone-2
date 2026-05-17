@@ -132,7 +132,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-gradient-to-br from-amber-50 via-green-50 to-yellow-50">
+    <div className="relative w-full min-h-screen overflow-y-auto bg-gradient-to-br from-amber-50 via-green-50 to-yellow-50">
 
 
       {/* Journey Line Background */}
@@ -153,7 +153,7 @@ export default function LoginPage() {
         />
       </svg>
 
-      <div className="relative flex h-full">
+      <div className="relative flex flex-col md:flex-row min-h-screen">
         <LeftPanel />
         <AuthPanel
           activeTab={activeTab}
