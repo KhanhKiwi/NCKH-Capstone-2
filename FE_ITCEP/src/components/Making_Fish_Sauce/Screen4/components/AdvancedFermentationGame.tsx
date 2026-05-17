@@ -171,27 +171,19 @@ export function AdvancedFermentationGame({ onGameEnd, challengeMode = false }: A
     const handleKeyPress = (e: KeyboardEvent) => {
       if (gameFinished || !showDecision) return;
 
-      switch (e.key) {
-        case 'a':
-        case 'A':
-          handleDecision('a');
-          break;
-        case 's':
-        case 'S':
-          handleDecision('b');
-          break;
-        case 'd':
-        case 'D':
-          handleDecision('c');
-          break;
-        default:
-          break;
+      const key = e.key.toLowerCase();
+      if (key === 'a') {
+        handleDecision('a');
+      } else if (key === 's') {
+        handleDecision('b');
+      } else if (key === 'd') {
+        handleDecision('c');
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [gameFinished, showDecision]);
+  }, [gameFinished, showDecision, month, temperature, humidity, quality, microbes, fermentationLevel, history, decisions]);
 
   const handleDecision = (optionId: string) => {
     if (gameFinished || month > 12 || !showDecision) return;
