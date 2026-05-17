@@ -8,6 +8,14 @@ export function PlayerInfo() {
 
   useEffect(() => {
     let mounted = true;
+    const token = authService.getToken();
+    if (!token) {
+      if (mounted) setUser(null);
+      return () => {
+        mounted = false;
+      };
+    }
+
     authService
       .getProfile()
       .then((p) => {

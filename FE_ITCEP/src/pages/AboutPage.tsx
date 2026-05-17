@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '../components/Footer/Footer';
-import Callout from '../components/UI/Callout';
+import Callout from '../components/ui/Callout';
 import VillageCard from '../components/AboutPage/VillageCard';
 import { useEffect, useState } from 'react';
 import useRevealOnScroll from '../hooks/useRevealOnScroll';

@@ -3,6 +3,9 @@ import React from 'react'
 type Props = {
   name: string
   image?: string
+  province?: string
+  tags?: string[]
+  to?: string
 }
 
 export default function VillageCard({ name, image }: Props) {
