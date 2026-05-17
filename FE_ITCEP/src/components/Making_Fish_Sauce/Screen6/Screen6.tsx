@@ -25,17 +25,57 @@ export default function Screen6({ challengeMode = false, onComplete }: Screen6Pr
   const [gamePhase, setGamePhase] = useState<GamePhase>(challengeMode ? 'sequence' : 'intro');
   const [finalScore, setFinalScore] = useState(0);
 
+  const NAM_O_LEVEL_6_AI_CONTEXT = {
+    village_name: 'Nam Ô',
+    craft_name: 'Nước mắm truyền thống',
+    phase_name: 'Hoàn thiện sản phẩm',
+    cultural_context:
+      'Nam Ô nổi tiếng với nghề làm nước mắm truyền thống, trong đó công đoạn hoàn thiện giúp đánh giá hương vị, độ ổn định và chất lượng thành phẩm.',
+  };
+
   const triggerSequenceAI = (score: number) => {
     if (completionEventRef.current) return;
     completionEventRef.current = true;
     if (score >= 90) {
-      triggerEvent({ event: 'excellent', level: 6, step: 1 }).catch(() => {});
+      triggerEvent({
+        event: 'excellent',
+        level: 6,
+        step: 1,
+        ...NAM_O_LEVEL_6_AI_CONTEXT,
+        step_name: 'Đánh giá thành phẩm xuất sắc',
+        learning_goal:
+          'Người chơi đã hoàn thiện nước mắm với chất lượng rất cao và thể hiện sự kiểm soát tốt trong giai đoạn cuối.',
+      }).catch(() => {});
     } else if (score >= 80) {
-      triggerEvent({ event: 'high_score', level: 6, step: 1 }).catch(() => {});
+      triggerEvent({
+        event: 'high_score',
+        level: 6,
+        step: 1,
+        ...NAM_O_LEVEL_6_AI_CONTEXT,
+        step_name: 'Đánh giá thành phẩm tốt',
+        learning_goal: 'Người chơi đã hoàn thành công đoạn cuối với chất lượng tốt và sản phẩm ổn định.',
+      }).catch(() => {});
     } else if (score >= 60) {
-      triggerEvent({ event: 'almost_success', level: 6, step: 1 }).catch(() => {});
+      triggerEvent({
+        event: 'almost_success',
+        level: 6,
+        step: 1,
+        ...NAM_O_LEVEL_6_AI_CONTEXT,
+        step_name: 'Thành phẩm gần đạt yêu cầu',
+        learning_goal:
+          'Người chơi đã tiến gần đến tiêu chuẩn thành phẩm và chỉ cần cải thiện một vài chi tiết cuối.',
+      }).catch(() => {});
     } else {
-      triggerEvent({ event: 'fail_many', level: 6, step: 1, fail_count: 1 }).catch(() => {});
+      triggerEvent({
+        event: 'fail_many',
+        level: 6,
+        step: 1,
+        fail_count: 1,
+        ...NAM_O_LEVEL_6_AI_CONTEXT,
+        step_name: 'Thành phẩm chưa đạt yêu cầu',
+        learning_goal:
+          'Cần luyện thêm để kiểm soát nhịp thao tác và hoàn thiện quá trình đánh giá thành phẩm tốt hơn.',
+      }).catch(() => {});
     }
   };
 

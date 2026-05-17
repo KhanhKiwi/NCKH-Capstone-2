@@ -58,6 +58,14 @@ export default function Screen3({ challengeMode = false, onChallengeComplete }: 
   const failureEventRef = useRef(false);
   const [showSaltParticles, setShowSaltParticles] = useState(false);
 
+  const NAM_O_LEVEL_3_AI_CONTEXT = {
+    village_name: 'Nam Ô',
+    craft_name: 'Nước mắm truyền thống',
+    phase_name: 'Pha muối và ướp cá',
+    cultural_context:
+      'Nam Ô nổi tiếng với nghề làm nước mắm truyền thống, trong đó tỷ lệ muối, độ đều khi trộn và quá trình ủ chượp quyết định hương vị thành phẩm.',
+  };
+
   const getAIStep = () => {
     const stepMap = {
       adding: 1,
@@ -69,12 +77,67 @@ export default function Screen3({ challengeMode = false, onChallengeComplete }: 
     return stepMap[currentStep];
   };
 
+  const getSaltStepName = (step: string, repeated = false) => {
+    if (step === 'adding') return repeated ? 'Sai tỷ lệ muối nhiều lần' : 'Đổ muối sai tỷ lệ';
+    if (step === 'mixing') return repeated ? 'Trộn muối sai nhịp nhiều lần' : 'Trộn muối chưa đúng nhịp';
+    if (step === 'transferring') return repeated ? 'Chuyển hỗn hợp sai nhiều lần' : 'Chuyển hỗn hợp chưa đúng cách';
+    if (step === 'pressing') return repeated ? 'Nén chưa đúng lực nhiều lần' : 'Nén chưa đủ lực';
+    if (step === 'sealing') return repeated ? 'Đậy nắp chưa kín nhiều lần' : 'Phủ và đậy nắp chưa kín';
+    return repeated ? 'Sai thao tác pha muối nhiều lần' : 'Sai thao tác trong công đoạn pha muối';
+  };
+
+  const getSaltLearningGoal = (step: string, repeated = false) => {
+    if (step === 'adding') {
+      return repeated
+        ? 'Hãy kiểm tra lại tỷ lệ muối trước khi tiếp tục để hỗn hợp cá và muối đạt độ ổn định.'
+        : 'Điều chỉnh tỷ lệ muối phù hợp để tạo điều kiện bảo quản và lên men cá đúng cách.';
+    }
+    if (step === 'mixing') {
+      return repeated
+        ? 'Hãy giữ nhịp trộn đều tay để muối thấm đều và hỗn hợp đạt độ đồng nhất.'
+        : 'Trộn đều và đúng nhịp giúp muối phân bố đồng đều trong hỗn hợp.';
+    }
+    if (step === 'transferring') {
+      return repeated
+        ? 'Hãy chuyển hỗn hợp cẩn thận để không làm rơi hoặc làm lệch quy trình chuẩn bị ủ chượp.'
+        : 'Chuyển hỗn hợp cẩn thận để giữ chất lượng nguyên liệu trước khi cho vào chum.';
+    }
+    if (step === 'pressing') {
+      return repeated
+        ? 'Nén đúng lực giúp hỗn hợp ổn định và tạo môi trường thuận lợi cho quá trình ủ chượp.'
+        : 'Nén chặt đúng lực giúp tạo môi trường ổn định cho quá trình lên men.';
+    }
+    if (step === 'sealing') {
+      return repeated
+        ? 'Hãy đậy kín để bảo vệ hỗn hợp và giúp quá trình ủ chượp diễn ra ổn định.'
+        : 'Đậy kín giúp bảo vệ hỗn hợp và hỗ trợ quá trình ủ chượp ổn định hơn.';
+    }
+    return 'Người chơi cần thực hiện đúng từng bước để hỗn hợp cá muối sẵn sàng cho giai đoạn lên men.';
+  };
+
   const triggerWrongAction = (step = getAIStep()) => {
     wrongActionCountRef.current += 1;
     const failCount = wrongActionCountRef.current;
-    triggerEvent({ event: 'wrong_action', level: 3, step, fail_count: failCount }).catch(() => {});
     if (failCount >= 3) {
-      triggerEvent({ event: 'fail_many', level: 3, step, fail_count: failCount }).catch(() => {});
+      triggerEvent({
+        event: 'fail_many',
+        level: 3,
+        step,
+        fail_count: failCount,
+        ...NAM_O_LEVEL_3_AI_CONTEXT,
+        step_name: getSaltStepName(currentStep, true),
+        learning_goal: getSaltLearningGoal(currentStep, true),
+      }).catch(() => {});
+    } else {
+      triggerEvent({
+        event: 'wrong_action',
+        level: 3,
+        step,
+        fail_count: failCount,
+        ...NAM_O_LEVEL_3_AI_CONTEXT,
+        step_name: getSaltStepName(currentStep, false),
+        learning_goal: getSaltLearningGoal(currentStep, false),
+      }).catch(() => {});
     }
   };
 
@@ -167,7 +230,15 @@ export default function Screen3({ challengeMode = false, onChallengeComplete }: 
     if (gameStatus === 'completed' && !completionEventRef.current) {
       completionEventRef.current = true;
       const event = quality >= 90 ? 'excellent' : 'win_fast';
-      triggerEvent({ event, level: 3, step: getAIStep() }).catch(() => {});
+      triggerEvent({
+        event,
+        level: 3,
+        step: getAIStep(),
+        ...NAM_O_LEVEL_3_AI_CONTEXT,
+        step_name: 'Hoàn thành công đoạn pha muối và ướp cá',
+        learning_goal:
+          'Người chơi đã hoàn thành bước chuẩn bị cá và muối để hỗn hợp sẵn sàng cho quá trình ủ chượp nước mắm Nam Ô.',
+      }).catch(() => {});
     }
 
     if (gameStatus === 'failed' && !failureEventRef.current) {
@@ -177,6 +248,15 @@ export default function Screen3({ challengeMode = false, onChallengeComplete }: 
         level: 3,
         step: getAIStep(),
         fail_count: Math.max(wrongActionCountRef.current, 1),
+        ...NAM_O_LEVEL_3_AI_CONTEXT,
+        step_name:
+          lossReason === 'timeout'
+            ? 'Chưa hoàn thành pha muối trong thời gian cho phép'
+            : 'Công đoạn pha muối và ướp cá chưa đạt yêu cầu',
+        learning_goal:
+          lossReason === 'timeout'
+            ? 'Người chơi cần thao tác đúng trình tự và nhanh hơn để kịp hoàn thành bước pha muối.'
+            : 'Cần giữ đúng tỷ lệ muối, trộn đều, nén và đậy kín để hỗn hợp ổn định trước khi ủ chượp.',
       }).catch(() => {});
     }
   }, [gameStatus, quality, triggerEvent]);

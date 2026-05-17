@@ -27,12 +27,69 @@ export default function Screen5({ challengeMode = false, onComplete }: { challen
   const completionEventRef = useRef(false);
   const failureEventRef = useRef(false);
 
+  const NAM_O_LEVEL_5_AI_CONTEXT = {
+    village_name: 'Nam Ô',
+    craft_name: 'Nước mắm truyền thống',
+    phase_name: 'Rút lọc nước mắm',
+    cultural_context:
+      'Nam Ô nổi tiếng với nghề làm nước mắm truyền thống, trong đó công đoạn rút lọc và tinh chỉnh quyết định độ trong, hương thơm và chất lượng thành phẩm.',
+  };
+
+  const getFinalExtractionStepName = (phase: string, repeated = false) => {
+    if (phase === 'prep') return repeated ? 'Chuẩn bị rút lọc sai nhiều lần' : 'Chuẩn bị rút lọc chưa đúng';
+    if (phase === 'filtration') return repeated ? 'Lọc nước mắm sai nhiều lần' : 'Lọc nước mắm chưa đạt';
+    if (phase === 'blend') return repeated ? 'Pha trộn sai nhiều lần' : 'Pha trộn chưa cân bằng';
+    if (phase === 'evaluation') return repeated ? 'Đánh giá thành phẩm sai nhiều lần' : 'Đánh giá thành phẩm chưa đạt';
+    return repeated ? 'Sai thao tác rút lọc nhiều lần' : 'Sai thao tác trong công đoạn rút lọc';
+  };
+
+  const getFinalExtractionLearningGoal = (phase: string, repeated = false) => {
+    if (phase === 'prep') {
+      return repeated
+        ? 'Hãy chuẩn bị kỹ trước khi rút lọc để hạn chế ảnh hưởng đến chất lượng nước mắm.'
+        : 'Chuẩn bị đúng giúp quá trình rút lọc diễn ra ổn định và ít hao hụt chất lượng.';
+    }
+    if (phase === 'filtration') {
+      return repeated
+        ? 'Hãy lọc cẩn thận để nước mắm đạt độ trong và giữ được hương thơm đặc trưng.'
+        : 'Lọc đúng giúp loại bỏ cặn và giữ cho nước mắm trong, thơm hơn.';
+    }
+    if (phase === 'blend') {
+      return repeated
+        ? 'Hãy cân bằng các yếu tố hương vị để nước mắm đạt độ hài hòa hơn.'
+        : 'Pha trộn đúng giúp cân bằng vị mặn, hậu vị, màu sắc và mùi thơm.';
+    }
+    if (phase === 'evaluation') {
+      return repeated
+        ? 'Hãy quan sát kỹ tiêu chí đánh giá để nhận biết nước mắm đạt chất lượng.'
+        : 'Đánh giá đúng giúp nhận biết thành phẩm nước mắm có đạt yêu cầu hay chưa.';
+    }
+    return 'Người chơi cần thực hiện đúng từng bước để nước mắm đạt độ trong, hương thơm và chất lượng tốt.';
+  };
+
   const triggerWrongAction = () => {
     wrongActionCountRef.current += 1;
     const fail_count = wrongActionCountRef.current;
-    triggerEvent({ event: 'wrong_action', level: 5, step: 1, fail_count }).catch(() => {});
     if (fail_count >= 2) {
-      triggerEvent({ event: 'fail_many', level: 5, step: 1, fail_count }).catch(() => {});
+      triggerEvent({
+        event: 'fail_many',
+        level: 5,
+        step: 1,
+        fail_count,
+        ...NAM_O_LEVEL_5_AI_CONTEXT,
+        step_name: getFinalExtractionStepName(currentPhase, true),
+        learning_goal: getFinalExtractionLearningGoal(currentPhase, true),
+      }).catch(() => {});
+    } else {
+      triggerEvent({
+        event: 'wrong_action',
+        level: 5,
+        step: 1,
+        fail_count,
+        ...NAM_O_LEVEL_5_AI_CONTEXT,
+        step_name: getFinalExtractionStepName(currentPhase, false),
+        learning_goal: getFinalExtractionLearningGoal(currentPhase, false),
+      }).catch(() => {});
     }
   };
 
@@ -41,9 +98,27 @@ export default function Screen5({ challengeMode = false, onComplete }: { challen
     failureEventRef.current = true;
     const fail_count = Math.max(1, wrongActionCountRef.current);
     if (fail_count >= 2) {
-      triggerEvent({ event: 'fail_many', level: 5, step: 1, fail_count }).catch(() => {});
+      triggerEvent({
+        event: 'fail_many',
+        level: 5,
+        step: 1,
+        fail_count,
+        ...NAM_O_LEVEL_5_AI_CONTEXT,
+        step_name: failureReason ? `Rút lọc chưa thành công: ${failureReason}` : getFinalExtractionStepName(currentPhase, true),
+        learning_goal:
+          'Cần giữ chất lượng trong từng bước rút lọc, pha trộn và đánh giá để nước mắm đạt chuẩn thành phẩm.',
+      }).catch(() => {});
     } else {
-      triggerEvent({ event: 'wrong_action', level: 5, step: 1, fail_count }).catch(() => {});
+      triggerEvent({
+        event: 'wrong_action',
+        level: 5,
+        step: 1,
+        fail_count,
+        ...NAM_O_LEVEL_5_AI_CONTEXT,
+        step_name: failureReason ? `Rút lọc chưa thành công: ${failureReason}` : getFinalExtractionStepName(currentPhase, false),
+        learning_goal:
+          'Cần giữ chất lượng trong từng bước rút lọc, pha trộn và đánh giá để nước mắm đạt chuẩn thành phẩm.',
+      }).catch(() => {});
     }
   };
 
@@ -51,9 +126,24 @@ export default function Screen5({ challengeMode = false, onComplete }: { challen
     if (completionEventRef.current) return;
     completionEventRef.current = true;
     if (finalQuality >= 90) {
-      triggerEvent({ event: 'excellent', level: 5, step: 1 }).catch(() => {});
+      triggerEvent({
+        event: 'excellent',
+        level: 5,
+        step: 1,
+        ...NAM_O_LEVEL_5_AI_CONTEXT,
+        step_name: 'Đánh giá thành phẩm xuất sắc',
+        learning_goal:
+          'Người chơi đã hoàn thiện nước mắm với chất lượng cao, thể hiện sự cân bằng giữa độ trong, hương thơm và hậu vị.',
+      }).catch(() => {});
     } else if (finalQuality >= 80) {
-      triggerEvent({ event: 'high_score', level: 5, step: 1 }).catch(() => {});
+      triggerEvent({
+        event: 'high_score',
+        level: 5,
+        step: 1,
+        ...NAM_O_LEVEL_5_AI_CONTEXT,
+        step_name: 'Đánh giá thành phẩm tốt',
+        learning_goal: 'Người chơi đã hoàn thành công đoạn rút lọc và tinh chỉnh nước mắm với chất lượng tốt.',
+      }).catch(() => {});
     }
   };
 
