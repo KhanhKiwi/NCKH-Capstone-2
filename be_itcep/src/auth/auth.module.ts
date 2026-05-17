@@ -12,6 +12,7 @@ import { GoogleStrategy } from './google.strategy';
 import { MailService } from '../common/mail/mail.service';
 import { ProgressModule } from '../modules/progress/progress.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { RedisModule } from '../common/redis/redis.module';
 
 @Module({
   imports: [
@@ -19,11 +20,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     ProgressModule,
     PassportModule,
     ConfigModule,
+    RedisModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET') || 'secretKey',
-        signOptions: { expiresIn: '1d' },
+        signOptions: { expiresIn: '15m' },
       }),
       inject: [ConfigService],
     }),

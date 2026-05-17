@@ -3,7 +3,9 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiTags, ApiBody, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiBody, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { RefreshDto } from './dto/refresh.dto';
+import { GetUser } from './get-user.decorator';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -39,6 +41,23 @@ export class AuthController {
   })
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
+  }
+
+  @Post('/refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiBody({ type: RefreshDto })
+  refresh(@Body() refreshDto: RefreshDto) {
+    return this.authService.refresh(refreshDto.refresh_token);
+  }
+
+  @Post('/logout')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Logout and revoke refresh token' })
+  logout(@GetUser('userId') userId: number) {
+    return this.authService.logout(userId);
   }
 
   @Post('forgot-password')

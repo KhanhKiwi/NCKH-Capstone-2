@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, ConflictException, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, NotFoundException, Logger, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -11,6 +11,8 @@ import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
 import { MailService } from '../common/mail/mail.service';
 import { ProgressService } from '../modules/progress/progress.service';
+import { REDIS_CLIENT } from '../common/redis/redis.constants';
+import Redis from 'ioredis';
 
 @Injectable()
 export class AuthService {
@@ -24,6 +26,7 @@ export class AuthService {
     private readonly progressService: ProgressService,
     private jwtService: JwtService,
     private mailService: MailService,
+    @Inject(REDIS_CLIENT) private readonly redisClient: Redis,
   ) {}
 
   private readonly logger = new Logger('AuthService');
@@ -115,10 +118,7 @@ export class AuthService {
     });
 
     if (user && user.password && (await bcrypt.compare(password, user.password))) {
-      const payload = { email: user.email, sub: user.user_id };
-      return {
-        access_token: this.jwtService.sign(payload),
-      };
+      return this.generateTokensAndSave(user);
     }
     throw new UnauthorizedException('Thông tin đăng nhập không chính xác');
   }
@@ -184,10 +184,58 @@ export class AuthService {
       await this.usersRepository.save(user);
     }
 
+    return this.generateTokensAndSave(user);
+  }
+
+  private async generateTokensAndSave(user: User) {
     const payload = { email: user.email, sub: user.user_id };
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    
+    // Default 7 days
+    const refreshExpiry = parseInt(process.env.JWT_REFRESH_EXPIRY || '604800', 10);
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: refreshExpiry });
+    
+    await this.redisClient.set(
+      `refresh_token:${user.user_id}`,
+      refreshToken,
+      'EX',
+      refreshExpiry
+    );
+
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: accessToken,
+      refresh_token: refreshToken,
     };
+  }
+
+  async refresh(refreshToken: string) {
+    try {
+      const payload = this.jwtService.verify(refreshToken);
+      const userId = payload.sub;
+      
+      const storedToken = await this.redisClient.get(`refresh_token:${userId}`);
+      if (!storedToken || storedToken !== refreshToken) {
+        throw new UnauthorizedException('Refresh token không hợp lệ hoặc đã hết hạn');
+      }
+
+      const user = await this.usersRepository.findOne({ where: { user_id: userId } });
+      if (!user) {
+        throw new UnauthorizedException('Người dùng không tồn tại');
+      }
+
+      return this.generateTokensAndSave(user);
+    } catch (e) {
+      throw new UnauthorizedException('Refresh token không hợp lệ hoặc đã hết hạn');
+    }
+  }
+
+  async logout(userId: number) {
+    await this.redisClient.del(`refresh_token:${userId}`);
+    return { message: 'Đăng xuất thành công' };
+  }
+
+  async revokeToken(userId: number) {
+    await this.redisClient.del(`refresh_token:${userId}`);
   }
 
   async forgotPassword(email: string) {
