@@ -27,11 +27,17 @@ export default function LoginPage() {
     }
   }, [location, navigate]);
 
-  // Clear error/message when switching tabs or forgot-password state
+  // Clear error/message when forgot-password state changes
   useEffect(() => {
     setError('');
     setMessage('');
-  }, [activeTab, isForgotPassword]);
+  }, [isForgotPassword]);
+
+  const handleTabSwitch = (tab: 'login' | 'register') => {
+    setActiveTab(tab);
+    setError('');
+    setMessage('');
+  };
 
   // Controlled setters that also clear errors when user types
   const handleSetEmail = (v: string) => { setEmail(v); setError(''); setMessage(''); };
@@ -149,7 +155,7 @@ export default function LoginPage() {
         <LeftPanel />
         <AuthPanel
           activeTab={activeTab}
-          setActiveTab={setActiveTab}
+          setActiveTab={handleTabSwitch}
           isForgotPassword={isForgotPassword}
           setIsForgotPassword={setIsForgotPassword}
           email={email}
