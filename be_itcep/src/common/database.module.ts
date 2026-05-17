@@ -51,7 +51,7 @@ import { Feedback } from '../modules/feedback/entities/feedback.entity';
           AnalyticsEvent,
         ],
 
-        synchronize: false, // Đặt thành false trong production để tránh mất dữ liệu
+        synchronize: true, // Đặt thành false trong production để tránh mất dữ liệu
         logging: ['error', 'warn'],
       }),
     }),
