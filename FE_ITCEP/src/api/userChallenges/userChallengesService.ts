@@ -40,7 +40,7 @@ export const userChallengesService = {
       const res = await api.post('/user-challenges', dto)
       return res.data
     } catch (e) {
-      console.error('[userChallengesService] saveChallenge failed', e?.response ?? e)
+      console.error('[userChallengesService] saveChallenge failed', (e as any)?.response ?? e)
       throw e
     }
   },
@@ -50,7 +50,7 @@ export const userChallengesService = {
       const res = await api.get(`/user-challenges/craft/${craftId}/leaderboard`)
       return res.data
     } catch (e) {
-      console.error('[userChallengesService] getLeaderboard failed', e?.response ?? e)
+      console.error('[userChallengesService] getLeaderboard failed', (e as any)?.response ?? e)
       return []
     }
   },
