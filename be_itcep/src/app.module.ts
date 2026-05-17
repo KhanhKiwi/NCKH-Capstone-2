@@ -15,10 +15,12 @@ import { UsersModule } from './modules/users/users.module';
 import { DatabaseModule } from './common/database.module';
 import { FeedbackModule } from './modules/feedback/feedback.module';
 import { UserChallengesModule } from './modules/user-challenges/user-challenges.module';
+import { RedisModule } from './common/redis/redis.module';
 
 @Module({
-  imports: [DatabaseModule,UsersModule, AuthModule, LevelsModule, StepsModule, CraftsModule, VillagesModule, MediaModule, FeedbackModule, ProgressModule, LogsModule, AnalyticsModule, UserChallengesModule],
+  imports: [DatabaseModule, RedisModule, UsersModule, AuthModule, LevelsModule, StepsModule, CraftsModule, VillagesModule, MediaModule, FeedbackModule, ProgressModule, LogsModule, AnalyticsModule, UserChallengesModule],
   
 
 })
 export class AppModule {}
+

@@ -64,7 +64,7 @@ export const progressService = {
       console.debug('[progressService] saveProgress response', res.status, res.data)
       return res.data
     } catch (e) {
-      console.error('[progressService] saveProgress failed', e?.response ?? e)
+      console.error('[progressService] saveProgress failed', (e as any)?.response ?? e)
       // rethrow so callers can observe failure and we can see network error in console
       throw e
     }

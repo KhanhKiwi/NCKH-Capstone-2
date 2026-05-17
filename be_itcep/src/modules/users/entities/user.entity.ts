@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, Up
 import { UserProgress } from '../../progress/entities/user-progress.entity';
 import { PlayerSession } from '../../sessions/entities/player-session.entity';
 
-@Entity('Users')
+@Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
   user_id: number;
@@ -16,7 +16,7 @@ export class User {
   @Column({ type: 'varchar', length: 255, nullable: true })
   password: string | null;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true, unique: true })
   name: string | null;
 
   @Column({ type: 'text', nullable: true })
